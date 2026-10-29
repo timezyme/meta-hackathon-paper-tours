@@ -1,10 +1,12 @@
 # AmuseMe
 
+**Development in progress. This project is unfinished.**
+
 AmuseMe turns PDFs into portable text, equations, tables and images. Readers can compare the result with its source, inspect processing issues and download the normalized document.
 
-## Submitted work
+## Work in progress
 
-This submission contains Meta-only processing changes made after a separately frozen October 28 integration. Muse Spark reads rendered pages, checks transcriptions, organizes headings and describes figures. The host validates structured responses, crops figure regions and records their source. Saved responses support recovery without repeating completed model calls.
+This development checkpoint contains Meta-only processing changes made after a separately frozen October 28 integration. Muse Spark reads rendered pages, checks transcriptions, organizes headings and describes figures. The host validates structured responses, crops figure regions and records their source. Saved responses support recovery without repeating completed model calls.
 
 The separate foundation is a mixed-origin snapshot containing earlier document-processing code **and event-era adaptations**. It is not a pre-event revision, and its contents are excluded from the new-work claim. [NEW-WORK.md](NEW-WORK.md) lists changed and new files; [changes.json](changes.json) records readable additions and line operations without copied context or deleted source.
 
@@ -28,4 +30,4 @@ One six-page document completed in 235.749 seconds with 14 accepted Meta calls. 
 
 In Chrome, the reader survived a restart and the downloaded ZIP's five artifact hashes matched the saved output. These observations concern one document, not a general accuracy guarantee. Original project code is licensed under [AGPL-3.0-only](LICENSING.md); third-party terms remain intact.
 
-[Watch or download the 2:10 demonstration](https://github.com/timezyme/meta-hackathon-paper-tours/releases/download/meta-only-2026-10-28/amuseme-meta-walkthrough.mp4). It uses captured app screens and discloses the separate foundation at the start. [Verification](VERIFICATION.md) records the tested scope.
+[Verification](VERIFICATION.md) records the limited test scope. The premature demo has been withdrawn.
