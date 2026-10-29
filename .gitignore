@@ -1,0 +1,5 @@
+foundation.zip
+.env*
+build/
+data/
+node_modules/
