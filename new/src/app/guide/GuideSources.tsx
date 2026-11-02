@@ -46,12 +46,12 @@ function EvidenceControls({ pages, page, original, onPage, onView }: {
 }) {
   return <div className="guide-evidence-controls">
     <div className="reader-view-switch" role="group" aria-label="Evidence view">
-      <button type="button" aria-pressed={!original} onClick={() => onView(false)}>Source text</button>
-      <button type="button" aria-pressed={original} onClick={() => onView(true)}>Original</button>
+      <button type="button" aria-pressed={!original} onClick={() => onView(false)}>Highlighted text</button>
+      <button type="button" aria-pressed={original} onClick={() => onView(true)}>Original page</button>
     </div>
-    <nav className="guide-source-pages" aria-label="Pages containing this source">{pages.map((number) =>
+    {pages.length > 1 && <nav className="guide-source-pages" aria-label="Pages containing this source">{pages.map((number) =>
       <button type="button" key={number} aria-current={number === page ? "page" : undefined} onClick={() => onPage(number)}>Page {number}</button>)}
-    </nav>
+    </nav>}
   </div>
 }
 
@@ -89,11 +89,16 @@ export function GuideEvidence({ canonical, source, requestedPage, original, onPa
     if (!original && selected.current !== null) focusSourceQuote(selected.current)
   }, [original])
   return <section className="guide-evidence" aria-label="Evidence from the uploaded document">
-    <p className="guide-note">The highlighted words come from the saved source text. Check the original PDF for extraction errors.</p>
     <EvidenceControls pages={pages} page={page} original={original} onPage={onPage} onView={onView} />
+    <figure className="guide-exact-quote"><figcaption className="guide-kicker">Exact quote · page {page}</figcaption>
+      <blockquote>“<QuoteText quote={source.quote} />”</blockquote></figure>
     {original ? <>
-      <blockquote className="guide-exact-quote">“<QuoteText quote={source.quote} />”</blockquote>
+      <p className="guide-note">This is page {page} exactly as uploaded, with no AI changes. Look for the quoted words above.</p>
       <OriginalPreview documentId={canonical.scope.documentId} page={page} />
-    </> : <SourceTextPage canonical={canonical} source={source} page={page} selected={selected} />}
+    </> : <>
+      <p className="guide-note">Highlighted below in the page’s saved text. <button type="button" className="reader-text-link"
+        onClick={() => onView(true)}>Compare with the original page →</button></p>
+      <SourceTextPage canonical={canonical} source={source} page={page} selected={selected} />
+    </>}
   </section>
 }

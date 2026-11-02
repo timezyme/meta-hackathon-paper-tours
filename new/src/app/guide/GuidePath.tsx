@@ -3,6 +3,7 @@ import type { CanonicalDocument, ReadingGuide, SourceQuote } from "../../domain/
 import { SourceLinks } from "./GuideSources.tsx"
 import { countLabel } from "../text.ts"
 import { QuoteText } from "./QuoteText.tsx"
+import { citedBlockCount } from "../map/graph.ts"
 
 type OnSource = (source: SourceQuote) => void
 const strengthLabel = { strong: "Strong support", partial: "Partial support", limited: "Limited support" } as const
@@ -112,6 +113,7 @@ export function GuideOverview({ canonical, guide, onSource, onWalk }: {
 
 type CompleteProps = {
   readonly guide: ReadingGuide
+  readonly downloads: { readonly zip: string; readonly text: string }
   readonly claims: boolean
   readonly onOther: () => void
   readonly onMap: () => void
@@ -119,16 +121,17 @@ type CompleteProps = {
   readonly onRead: () => void
 }
 
-function CompletedHero({ claims, total }: { readonly claims: boolean; readonly total: number }) {
+function CompletedHero({ claims, total, passages }: { readonly claims: boolean; readonly total: number; readonly passages: number }) {
   return <div className="guide-done-hero"><span className="guide-done-check" aria-hidden="true">✓</span>
     <p className="guide-kicker">You reached the end</p>
     <h1 id="guide-screen-title" tabIndex={-1}>{claims ? "You went through every claim." : "You finished the walk-through."}</h1>
-    <p>{claims ? `All ${total} claims, their supporting evidence, and their limits.` : `All ${total} steps, from the question to the conclusion.`}</p>
+    <p>{claims ? `All ${total} claims, their supporting evidence, and their limits.` : `All ${total} steps, from the question to the conclusion.`}
+      {" "}The guide rests on {countLabel(passages, "quoted passage")} you can open in the document.</p>
     <GuideRail total={total} at={total + 1} />
   </div>
 }
 
-function AnotherWayIn({ guide, claims, onOther, onMap, onRead }: Omit<CompleteProps, "onChoices">) {
+function AnotherWayIn({ guide, claims, onOther, onMap, onRead }: Omit<CompleteProps, "onChoices" | "downloads">) {
   return <section className="guide-done-card guide-another"><p className="guide-kicker">Another way in</p>
     <h2>{claims ? "Walk me through it" : "Claims and limits"}</h2>
     <p>{claims ? `${guide.steps.length} short steps through the document.` : `${guide.claims.length} claims, with their support and limits.`}</p>
@@ -138,16 +141,25 @@ function AnotherWayIn({ guide, claims, onOther, onMap, onRead }: Omit<CompletePr
   </section>
 }
 
-export function GuideComplete({ onChoices, ...props }: CompleteProps) {
+function KeepIt({ downloads }: Pick<CompleteProps, "downloads">) {
+  return <section className="guide-done-card guide-keep"><p className="guide-kicker">Keep it</p>
+    <h2>Take the clean document with you</h2>
+    <p>The ZIP holds the clean text, its images and document.json with this guide and every citation. The text file is ready for notes or an agent.</p>
+    <div className="guide-keep-actions"><a className="button" href={downloads.zip} download>↓ Download ZIP</a>
+      <a className="reader-text-link" href={downloads.text} download>Download text only</a></div>
+  </section>
+}
+
+export function GuideComplete({ onChoices, downloads, ...props }: CompleteProps) {
   const { guide, claims } = props
   const total = claims ? guide.claims.length : guide.steps.length
   const covered = claims ? guide.claims.map((item) => item.claim.text) : guide.steps.map((step) => step.title)
   return <section className="guide-complete" aria-labelledby="guide-screen-title">
-    <CompletedHero claims={claims} total={total} />
+    <CompletedHero claims={claims} total={total} passages={citedBlockCount(guide)} />
     <div className="guide-done-grid">
-      <section className="guide-done-card"><h2>What you covered</h2><ol>{covered.map((title, index) => <li key={index}>{title}</li>)}</ol>
+      <div className="guide-done-side"><section className="guide-done-card"><h2>What you covered</h2><ol>{covered.map((title, index) => <li key={index}>{title}</li>)}</ol>
         <p className="guide-note">The guide is AI-written. Check the source for anything you rely on.</p>
-      </section>
+      </section><KeepIt downloads={downloads} /></div>
       <AnotherWayIn {...props} />
     </div>
     <button type="button" className="reader-text-link" onClick={onChoices}>← Choose how to read</button>

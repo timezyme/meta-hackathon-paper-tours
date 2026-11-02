@@ -30,6 +30,7 @@ export const cropBox = (box: typeof Region.Type): PixelBox => ({
   width: Math.ceil(box.x + box.width) - Math.floor(box.x), height: Math.ceil(box.y + box.height) - Math.floor(box.y),
 })
 export const pageBlockId = (pageNumber: number, index: number) => BlockId.make(`page-${pageNumber}-block-${index + 1}`)
+export const pageFigureId = (pageNumber: number, blockIndex: number) => FigureId.make(`figure-page-${pageNumber}-block-${blockIndex + 1}`)
 type ExtractedBlock = PageExtractionResponse["blocks"][number]
 const outsidePage = (page: Page, region: typeof Region.Type) => {
   const box = cropBox(region)
@@ -104,7 +105,7 @@ export const convertPageExtraction = (
   const figures = response.figures.map((proposal): Figure => {
     const source = blockAt(proposal.blockIndex)
     const captions = proposal.captionBlockIndices.map(blockAt)
-    const id = FigureId.make(`figure-page-${page.pageNumber}-block-${proposal.blockIndex + 1}`)
+    const id = pageFigureId(page.pageNumber, proposal.blockIndex)
     const box = proposal.box === null ? null : cropBox(proposal.box)
     const artifact = assets.get(proposal.blockIndex)
     const reason = "A verified figure region image is unavailable; the figure and caption are retained."

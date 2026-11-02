@@ -69,11 +69,13 @@ describe("goal selection and saved-guide reading", () => {
     const route = guideRouteFromLocation("/documents/example?mode=walk&n=99")
     expect(boundedGuideStep(route, appGuide)).toBe(3)
     expect(visibleGuideSources(appGuide, route)).toEqual(appGuide.steps[2]!.explanation.sources)
-    const complete = renderToStaticMarkup(createElement(GuideComplete, { guide: appGuide, claims: false, onOther: ignore, onMap: ignore, onChoices: ignore, onRead: ignore }))
+    const complete = renderToStaticMarkup(createElement(GuideComplete, { guide: appGuide, claims: false, downloads: { zip: "/zip", text: "/text" }, onOther: ignore, onMap: ignore, onChoices: ignore, onRead: ignore }))
     expect(complete).toContain("You finished the walk-through")
     expect(complete).toContain("Start claims and limits")
     expect(complete).toContain("Read the full document")
     expect(complete).toContain("Choose how to read")
+    expect(complete).toContain('href="/zip"')
+    expect(complete).toMatch(/rests on \d+ quoted passage/u)
   })
 })
 
@@ -116,6 +118,9 @@ describe("evidence from immutable source blocks", () => {
     expect(displayQuote("-1 is negative")).toBe("-1 is negative")
     expect(displayQuote("2.5 times faster")).toBe("2.5 times faster")
     expect(displayQuote("- ")).toBe("- ")
+    expect(displayQuote("<tr><td>Offices of Physicians</td><td>81.0%</td></tr><tr><td>Total &amp; other</td><td>41.7</td></tr>")).toBe("Offices of Physicians · 81.0% / Total & other · 41.7")
+    expect(displayQuote("Physicians</td><td>81.0%")).toBe("Physicians · 81.0%")
+    expect(displayQuote("a <b> b")).toBe("a <b> b")
     const quote = "- A modular API"
     const html = renderToStaticMarkup(createElement(GuideEvidence, { canonical: { ...guidedCanonical, sourceBlocks: guidedCanonical.sourceBlocks.map((block) => block.id === "block-2" ? { ...block, content: `Intro\n${quote}` } : block) }, source: { sourceBlockId: guidedCanonical.sourceBlocks[1]!.id, quote }, requestedPage: 2, original: false, onPage: ignore, onView: ignore }))
     expect(html).toContain(`<mark>${quote}</mark>`)
@@ -126,6 +131,12 @@ describe("evidence from immutable source blocks", () => {
     expect(math).not.toContain("$\\epsilon$")
     expect(renderToStaticMarkup(createElement(QuoteText, { quote: "- A modular *API*" }))).toBe("A modular *API*")
     expect(renderToStaticMarkup(createElement(QuoteText, { quote: "costs $ 5 and $ 10" }))).toBe("costs $ 5 and $ 10")
+    const prices = "revenue grew from $1.2 trillion in 2002 to $3.1 trillion in 2022"
+    expect(renderToStaticMarkup(createElement(QuoteText, { quote: prices }))).toBe(prices)
+    expect(renderToStaticMarkup(createElement(QuoteText, { quote: "$5,$10 and $20" }))).toBe("$5,$10 and $20")
+    const mixed = renderToStaticMarkup(createElement(QuoteText, { quote: "costs $2 per $x$ unit" }))
+    expect(mixed).toContain("katex")
+    expect(mixed).toContain("costs $2 per")
   })
 })
 

@@ -1,13 +1,15 @@
 import type { DocumentRecord } from "../documents.ts"
-import { formatBytes, runSummary } from "../documents.ts"
+import { activeRun, formatBytes, runSummary } from "../documents.ts"
 import { OriginalPreview } from "../reader/OriginalPreview.tsx"
+import { ProcessingProgress } from "./ProcessingProgress.tsx"
 
 export function PaperStatus({ record, onOriginal }: { readonly record: DocumentRecord; readonly onOriginal?: () => void }) {
   const unpublished = record.currentRevisionId === null
   const summary = runSummary(record.latestRun)
   return <aside className="guide-paper-status" aria-label={unpublished ? "Your document and processing status" : "Original document preview"}>
     {unpublished && <div className="guide-file"><h2>{record.document.originalFilename}</h2>
-      <div className={`guide-live-status${summary.failed ? " failed" : ""}`} role="status"><strong>{summary.title}</strong><p>{summary.description}</p></div>
+      {activeRun(record.latestRun) ? <ProcessingProgress record={record} />
+        : <div className={`guide-live-status${summary.failed ? " failed" : ""}`} role="status"><strong>{summary.title}</strong><p>{summary.description}</p></div>}
     </div>}
     <figure className="guide-cover">
       <div className="guide-paper-preview"><OriginalPreview documentId={record.document.id} page={1} /></div>

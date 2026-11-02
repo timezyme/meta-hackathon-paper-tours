@@ -4,6 +4,7 @@ import type { DocumentRecord } from "../documents.ts"
 import { activeRun } from "../documents.ts"
 import { focusReadingPage, navigate, subscribeGuideKeys } from "../client/browser.ts"
 import { ReaderDrawer } from "../reader/Panels.tsx"
+import { outputUrl } from "../client/outputs.ts"
 import { GoalChoices } from "./GoalChoices.tsx"
 import { PaperStatus } from "./PaperStatus.tsx"
 import { GuideComplete, GuideOverview, GuidePath } from "./GuidePath.tsx"
@@ -68,6 +69,8 @@ export function GuideWorkspace({ record, canonical, route, page }: Props) {
   }
   const closeEvidence = () => go({ ...route, source: null, view: "text" })
   const finishedClaims = mode === "done-claims"
+  const identity = { documentId, revisionId: canonical.scope.revisionId }
+  const downloads = { zip: outputUrl(identity, "zip"), text: outputUrl(identity, "text") }
   const pathMode = mode === "walk" || mode === "claims" ? mode : null
   useEffect(() => {
     if (previousScreen.current === screen) return
@@ -88,7 +91,7 @@ export function GuideWorkspace({ record, canonical, route, page }: Props) {
       {mode === "map" && map !== null && <PaperMapView canonical={canonical} map={map} selected={route.node}
         onSelect={(node) => go({ ...route, node, source: null, view: "text" })} onSource={showSource} />}
       {pathMode !== null && <GuidePath canonical={canonical} guide={guide} mode={pathMode} number={number} onSource={showSource} onTurn={turn} />}
-      {(mode === "done-walk" || finishedClaims) && <GuideComplete guide={guide} claims={finishedClaims}
+      {(mode === "done-walk" || finishedClaims) && <GuideComplete guide={guide} claims={finishedClaims} downloads={downloads}
         onOther={() => open(finishedClaims ? "walk" : "claims")} onMap={() => open("map")}
         onChoices={() => choose(returnGoal[mode])} onRead={() => open("read")} />}
     </>}

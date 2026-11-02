@@ -13,7 +13,8 @@ Meta Muse Spark 1.3 performs every model step, each through its own Mastra agent
 | Stage | What Muse Spark does |
 |---|---|
 | Page extraction | Transcribes each rendered page into ordered text, equations, tables, code and figure regions |
-| Page checking | Compares the extraction with the page image, repairs transcription errors and joins paragraphs split across pages |
+| Figure crop review | Checks each figure crop against the page image and corrects it if needed. A crop it can't confirm is kept with a visible warning |
+| Page checking | Compares the extraction with the page image, repairs transcription errors, marks running headers and footers, and joins paragraphs split across pages, even across a running header |
 | Document structure | Restores the heading hierarchy |
 | Figure descriptions | Describes each cropped figure using its image and the surrounding text |
 | Reading guide | Writes the overview, walkthrough and claims, citing exact source quotations |
@@ -34,7 +35,7 @@ cd ../amuseme-app
 git init
 ```
 
-Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Use Node 24 and exactly Python 3.14.5 (`uv venv --python 3.14.5`); PDF rendering checks the exact Python and PyMuPDF versions. Processing new uploads requires a Meta API key and a configured spending allowance. Saved documents stay readable and downloadable without them.
+Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Use Node 24 and exactly Python 3.14.5 (`uv venv --python 3.14.5`); PDF rendering checks the exact Python and PyMuPDF versions. Processing new uploads requires a Meta API key and a configured spending allowance. Each call is priced at its worst case before it is sent and refused if that would exceed its stage's reservation; under the default $30 cap, a document of about 40 pages with five figures fits. Saved documents stay readable and downloadable without them.
 
 ## What has been verified
 

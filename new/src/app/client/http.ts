@@ -6,6 +6,7 @@ export class DocumentFailure extends Schema.TaggedError<DocumentFailure>()("Docu
   kind: Schema.Literals(["transport", "rejected", "invalid-response", "unauthenticated"]),
   message: Schema.String,
   status: Schema.optional(Schema.Number),
+  code: Schema.optional(Schema.String),
   cause: Schema.optional(Schema.Defect()),
 }) {}
 
@@ -43,7 +44,7 @@ export const makeHttp = (messages: HttpMessages) => {
       Effect.mapError(invalid(messages.unexpectedError, response.status)),
     )
     const message = messages.rejected?.(response.status, error.message) ?? error.message
-    return yield* new DocumentFailure({ kind: "rejected", message, status: response.status })
+    return yield* new DocumentFailure({ kind: "rejected", message, status: response.status, code: error.code })
   })
   const decodeJson = Effect.fnUntraced(function* <A>(response: HttpClientResponse.HttpClientResponse, schema: Schema.Decoder<A>) {
     const json = yield* response.json.pipe(Effect.mapError(invalid(messages.unreadable)))

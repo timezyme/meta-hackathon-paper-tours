@@ -77,7 +77,7 @@ describe("signed-in document library", () => {
 
   it("shows pending uploads with real progress access before a publication exists", () => {
     const page = renderToStaticMarkup(createElement(PaperLibrary, { records: [pending], controls }))
-    expect(page).toContain("Queued")
+    expect(page).toContain("Waiting for Muse to start")
     expect(page).toContain("View progress")
     expect(page).toContain("Available when processing has stopped.")
     expect(page).not.toContain("Open reading guide")

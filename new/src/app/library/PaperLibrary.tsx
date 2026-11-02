@@ -3,6 +3,7 @@ import type { OutputRevisionId } from "../../domain/index.ts"
 import { originalUrl, outputUrl, previewUrl } from "../client/outputs.ts"
 import { activeRun, formatBytes, formatExpiry, runSummary, type DocumentRecord } from "../documents.ts"
 import { guideLocation } from "../guide/navigation.ts"
+import { ProcessingProgress } from "../guide/ProcessingProgress.tsx"
 import { DeleteDocumentControl } from "../reader/DeleteDocument.tsx"
 import { RetryDocumentControl } from "../reader/RetryDocument.tsx"
 import { countLabel } from "../text.ts"
@@ -47,7 +48,7 @@ function RunNotice({ record, controls }: Props) {
     <p><strong>{summary.title}.</strong> {summary.description}{record.currentRevisionId !== null && " Your saved copy is still available."}</p>
     {controls.retryEnabled && <RetryDocumentControl record={record} onRefresh={controls.onRefresh} onUnauthenticated={controls.onUnauthenticated} />}
   </div>
-  if (activeRun(record.latestRun)) return <p className="library-run-notice"><strong>{summary.title}.</strong> {summary.description}</p>
+  if (activeRun(record.latestRun)) return <ProcessingProgress record={record} compact />
   if (record.latestRun.state._tag === "succeeded-with-issues") {
     return <p className="library-run-notice failed">This document has reported issues. You can review them in the reader.</p>
   }
@@ -70,11 +71,12 @@ function GuideByline({ guide }: { readonly guide: NonNullable<PaperPreview["guid
   return <> <span aria-hidden="true">/</span> {countLabel(guide.steps, "step")} <span aria-hidden="true">/</span> {countLabel(guide.claims, "claim")}</>
 }
 
-function FeatureActions({ mainPath, readPath, guided }: { readonly mainPath: string; readonly readPath: string; readonly guided: boolean }) {
+function FeatureActions({ mainPath, readPath, quotePath }: { readonly mainPath: string; readonly readPath: string; readonly quotePath: string | null }) {
   return <div className="library-feature-actions">
     <InternalLink className="button primary" href={mainPath}>
-      {guided ? "Open reading guide" : "Open document"} <span aria-hidden="true">→</span></InternalLink>
-    {guided && <InternalLink className="library-secondary-link" href={readPath}>Read full document</InternalLink>}
+      {quotePath !== null ? "Open reading guide" : "Open document"} <span aria-hidden="true">→</span></InternalLink>
+    {quotePath !== null && <InternalLink className="library-secondary-link" href={quotePath}>See a cited passage in the document</InternalLink>}
+    {quotePath !== null && <InternalLink className="library-secondary-link" href={readPath}>Read full document</InternalLink>}
   </div>
 }
 
@@ -95,7 +97,8 @@ export function FeaturedPaperContent({ record, controls, content, error }: Featu
         Read the clean copy alongside the original PDF. This document has no saved guide.</p>}
       {content === null && error === null && <p className="library-note" role="status">Loading reading details…</p>}
       {error !== null && <p className="library-note" role="status">Reading details are unavailable. {error}</p>}
-      <FeatureActions mainPath={mainPath} readPath={readPath} guided={Boolean(guide)} />
+      <FeatureActions mainPath={mainPath} readPath={readPath}
+        quotePath={guide ? guideLocation(id, { mode: "walk", goal: "walk", n: 1, source: 1 }) : null} />
       <RunNotice record={record} controls={controls} />
       <PaperDetails record={record} controls={controls} />
     </div>

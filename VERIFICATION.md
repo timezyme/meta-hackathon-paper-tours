@@ -1,5 +1,70 @@
 # Verification and limits
 
+## Four more document types — November 2, 2026
+
+The user authorized processing four short, openly licensed documents that are not research papers, so the guide could be checked on other kinds of writing.
+
+| Type | Document | License | Pages |
+|---|---|---|---|
+| Biomedical | Longman et al., research letter on flood-related PTSD, *Aust N Z J Psychiatry* 57(12), 2023 (PMC10666513) | CC BY 4.0 | 3 |
+| Legal | *Doe v. Dynamic Physical Therapy, LLC*, 607 U.S. 11 (2025), per curiam, Reporter's preliminary print | US government work | 4 |
+| Class handout | US EPA, *Half-Life: Teacher Answer Key* (EPA 402-B-19-055) | US government work | 2 |
+| Business | SBA Office of Advocacy, *Critical Condition: The Poor Prognosis for Private Practices* (Sept. 2026) | US government work | 4 |
+
+Uploaded PDF SHA-256: letter `33f884da08c5e286838e171e8839b24aa39ade567f29cf8f1bdeece132b23107`; SBA brief `ab40c8cb94aa12e271bb6df09be4b1f27871665dd8db92cd26a50926f4d36c43`.
+
+Two sources needed a lossless copy before upload, because the renderer refuses PDFs that are encrypted or that MuPDF must repair:
+
+- The court opinion carries a permissions-only lock (no password). The copy removes the lock: `3cdcbc7b…` → `06d6fb0f0ec462fedb5b25680898b46d7034b16c4482b3e7fa6dc844206608f2`.
+- The EPA handout has a damaged accessibility tag tree that MuPDF repairs while drawing. The copy drops the tag tree: `505659da…` → `c0869999c0319aff79c899ed3f01459ec733f580c1f532fab32c094d630788f9`.
+
+For both, every page renders pixel-identical to the original at 150 dpi and the extracted text is identical.
+
+### What failed first, and what changed
+
+Before Muse review existed, three of the four runs stopped on a rejected model answer, and none was retryable:
+
+- **Page check (letter, twice; court opinion once).** Muse proposed joining a sentence that continues onto the next page, but the gap held a running header ("Cite as: 607 U. S. …", a journal running title) that extraction had classified as a paragraph. Joins may only cross recognized page furniture, so the whole page answer was rejected.
+- **Headings (SBA brief).** Muse correctly marked the two-line cover title "CRITICAL / CONDITION" as the document title, but the validator accepted only one-line headings. This was a validator bug: a block already extracted as a heading may now span lines, which are joined with a space. Promoting a multi-line paragraph is still rejected.
+
+Muse review was then added: a reviewer Mastra agent per stage receives the original evidence, the rejected answer and the exact problems, returns a corrected answer, and falls back to a safe default after two rounds (see `docs/step-rules/muse-review.md`). With it, the letter and the court opinion each had one page-check answer rejected and corrected in one review round; the handout and the SBA brief needed none. The five failed attempts were removed from the library through the application's own delete, which keeps their ledger rows.
+
+### Second round: crop review, page furniture and per-call pricing
+
+An accuracy review of the first runs found no wrong numbers or invented facts, but it did find the EPA chart crop cut off with body text inside, and two sentences split across pages by running heads. Three changes followed:
+
+- **Figure crop review.** A Mastra agent sees the page image and the proposed crop, and confirms or corrects it for up to two rounds. If it can't confirm, the crop is kept with a visible warning.
+- **Page furniture.** Page check may now mark a running header or footer as furniture, so a sentence can be joined across it.
+- **Per-call pricing.** Each call is priced before dispatch. The price is the counted input tokens plus a 65,536-token framing reserve at $1.25 per million, plus the full 16,384 output tokens at $4.25 per million. The call is refused if that worst case exceeds the stage's reservation. Reservations dropped from $1.50–$2.50 to $0.20–$0.50 per call, so a 15-page document with 5 figures reserves at most $14.50 of its $30 cap.
+
+The handout, the court opinion and the letter were then processed again.
+
+| Document | Pages | First run: calls / reserved | Second run: calls / reserved | Second run tokens (in / out) |
+|---|---|---|---|---|
+| EPA handout | 2 | 7 / $12.50 | 8 / $2.90 | 37,760 / 25,663 |
+| Court opinion | 4 | 11 / $20.50 | 10 / $3.40 | 53,194 / 36,475 |
+| Research letter | 3 | 9 / $16.50 | 9 / $3.10 | 65,987 / 51,437 |
+| SBA brief (not re-run) | 4 | 12 / $22.00 | — | 64,148 / 29,726 |
+
+"Reserved" is the ledger's worst-case hold, not a bill; Meta calls do not report a final charge. At published rates the second-run tokens cost roughly $0.16, $0.22 and $0.30. The cumulative ledger stands at $280.90 of the $360.564373 ceiling. Processing was disabled again afterwards.
+
+Second accuracy review of the re-runs. All 75 guide quotes appear exactly once in the cited block and match the PDF; no wrong numbers, names or invented facts.
+
+- **Fixed:** the EPA chart crop now frames the whole chart and nothing else (crop review: confirmed). The court opinion's dispositive sentence is joined across pages 2–3. The EPA guide no longer overstates industrial uses, and no longer quotes a question prompt as evidence.
+- **Still present:**
+  - The letter's results sentence stays split across pages 1–2. The gap holds Table 1 and its notes, not just furniture, so page check correctly refuses the join.
+  - One "Per Curiam" running head on page 2 of the opinion, and the "Page Proof Pending Publication" watermark on its cover, remain as body paragraphs.
+- **Source errors and minor wording issues:**
+  - The letter's Table 1 repeats 299/235 in its "Yes" row. That is an error in the source, and the guide does not flag it.
+  - The letter's two table header rows are in reverse order. All 40 data cells match.
+  - The EPA figure description says the axis runs to "over 400" (it ends at 400), and one EPA claim is rated "limited" where "strong" fits.
+
+The superseded first runs remain in the library until the owner removes them.
+
+### Reconstruction checks
+
+The submission was regenerated from application commit `b9b5404` with Python 3.14.5 and Node 24.19.0. Reconstruction from this repository reproduced all 455 selected files: 104 changed, 65 new and 286 preserved. All 369 files outside `prototype/` match the commit by bytes and executable mode; the 86 inherited prototype files keep their exact foundation bytes and modes. In the reconstructed tree, after `git init` and a clean `pnpm install --frozen-lockfile --strict-peer-dependencies`, the 8 submission unit tests, `pnpm check`, `pnpm test` (71 files, 738 tests) and `pnpm build` all passed.
+
 ## Two additional papers — November 2, 2026
 
 The user authorized up to $60 for two more short, openly licensed papers: one with a data table and one with plotted figures. Both were uploaded to the local application through its upload API, using the ordinary signed-in session, and processed by the same Meta-only pipeline.

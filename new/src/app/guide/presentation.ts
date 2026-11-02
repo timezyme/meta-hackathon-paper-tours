@@ -46,7 +46,12 @@ export const quotedParts = (content: string, quote: string): QuotedParts | null 
   if (quote.length === 0 || start === -1 || content.indexOf(quote, start + 1) !== -1) return null
   return { before: content.slice(0, start), quote, after: content.slice(start + quote.length) }
 }
+const entities: Readonly<Record<string, string>> = { amp: "&", lt: "<", gt: ">", quot: "\"", "#39": "'", nbsp: " " }
+const tableText = (quote: string): string => /<\/?t[rdh](?:\s[^>]*)?>/iu.test(quote)
+  ? quote.replace(/<\/t[dh]>\s*(?=<t[dh][\s>])/giu, " · ").replace(/<\/tr>\s*/giu, " / ").replace(/<[^>]*>/gu, " ")
+    .replace(/&(amp|lt|gt|quot|#39|nbsp);/gu, (_, name: string) => entities[name] ?? "").replace(/\s+/gu, " ").replace(/(?:\s*[/·]\s*)+$/u, "").trim()
+  : quote
 export const displayQuote = (quote: string): string => {
-  const stripped = quote.replace(/^\s*(?:[-*•]|\d{1,3}[.)])\s+/u, "")
+  const stripped = tableText(quote).replace(/^\s*(?:[-*•]|\d{1,3}[.)])\s+/u, "")
   return stripped.length === 0 ? quote : stripped
 }

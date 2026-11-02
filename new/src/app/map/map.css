@@ -4,7 +4,7 @@
 .map-disclosure { max-width: 40ch; margin: 0; color: var(--muted); font-size: .8125rem; line-height: 1.55; }
 .map-legend { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .75rem; line-height: 1.5; }
 .map-legend li { display: inline-flex; align-items: center; gap: 8px; }
-.map-legend svg { width: 28px; height: 8px; overflow: visible; }
+.map-legend svg { width: 32px; height: 10px; overflow: visible; }
 .map-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); align-items: start; gap: 20px; }
 .map-graph { min-width: 0; padding: 22px 18px 18px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); overflow-x: auto; }
 .map-stage { width: 100%; }
@@ -12,14 +12,14 @@
 .map-ruler { position: absolute; width: 1rem; height: 0; visibility: hidden; pointer-events: none; }
 .map-column-label { position: absolute; top: 0; margin: 0; color: var(--muted); font: 600 .6875rem/1.5 Geist, system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
 .map-edges { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.map-edge { fill: none; stroke: var(--muted); stroke-width: 1.25; opacity: .62; transition: opacity .15s, stroke-width .15s; }
-.map-edge-next { stroke: var(--input-border); stroke-dasharray: 3 4; opacity: .8; }
+.map-edge { fill: none; stroke: var(--muted); stroke-width: 1.25; transition: opacity .15s, stroke-width .15s; }
+.map-edge-next { stroke: var(--input-border); stroke-width: 1.5; stroke-dasharray: 3 4; }
 .map-edge-supports { stroke: var(--green); }
-.map-edge-supports.map-strength-strong { stroke-width: 3.25; opacity: 1; }
-.map-edge-supports.map-strength-partial { stroke-width: 2; opacity: .85; }
-.map-edge-supports.map-strength-limited { stroke-width: 1.25; opacity: .75; }
-.map-edge-limits { stroke: var(--amber); stroke-width: 1.5; opacity: .8; }
-.map-canvas.has-active .map-edge { opacity: .12; }
+.map-edge-supports.map-strength-strong { stroke-width: 3.5; }
+.map-edge-supports.map-strength-partial { stroke-width: 2.25; }
+.map-edge-supports.map-strength-limited { stroke-width: 1.25; }
+.map-edge-limits { stroke: var(--amber); stroke-width: 1.75; }
+.map-canvas.has-active .map-edge { opacity: .16; }
 .map-canvas.has-active .map-edge.is-active { opacity: 1; }
 .map-canvas.has-active .map-edge-cites.is-active { stroke: var(--ink); }
 .map-node { position: absolute; display: flex; flex-direction: column; gap: 4px; padding: 9px 12px; overflow: hidden; color: var(--ink); text-align: left; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; transition: border-color .15s, box-shadow .15s; }

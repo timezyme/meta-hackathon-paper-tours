@@ -42,6 +42,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/app/reader/Panels.tsx`
 - `src/app/reader/ReaderWorkspace.tsx`
 - `src/app/reader/RetryDocument.tsx`
+- `src/app/reader/math.ts`
 - `src/app/reader/presentation.ts`
 - `src/app/reader/reader.css`
 - `src/app/shell.css`
@@ -82,6 +83,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/storage/outputs.ts`
 - `src/storage/service.ts`
 - `tests/app/client/reader.test.ts`
+- `tests/app/documents.test.ts`
 - `tests/app/navigation.test.ts`
 - `tests/app/reader.test.ts`
 - `tests/foundation/app-shell.test.ts`
@@ -124,6 +126,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/app/guide/GuideSources.tsx`
 - `src/app/guide/GuideWorkspace.tsx`
 - `src/app/guide/PaperStatus.tsx`
+- `src/app/guide/ProcessingProgress.tsx`
 - `src/app/guide/QuoteText.tsx`
 - `src/app/guide/guide.css`
 - `src/app/guide/navigation.ts`
@@ -145,8 +148,10 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/app/reader/OriginalPreview.tsx`
 - `src/app/text.ts`
 - `src/app/useRoutePresentation.ts`
+- `src/domain/furniture.ts`
 - `src/domain/guide.ts`
 - `src/paper/extraction/page.ts`
+- `src/paper/figures/crop.ts`
 - `src/paper/guide/evidence.ts`
 - `src/paper/guide/index.ts`
 - `src/paper/guide/prompt.ts`
@@ -164,8 +169,10 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/fixtures/code-repair.ts`
 - `tests/fixtures/guide.ts`
 - `tests/paper/code-repair.test.ts`
+- `tests/paper/furniture.test.ts`
 - `tests/paper/guide.test.ts`
 - `tests/paper/meta-document-extraction.test.ts`
+- `tests/processing/cost-model.test.ts`
 - `tests/processing/meta-document.test.ts`
 - `tests/storage/code-repair.test.ts`
 - `tests/submission/test_prepare.py`
