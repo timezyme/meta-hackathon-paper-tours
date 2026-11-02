@@ -37,6 +37,10 @@ git init
 
 Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Use Node 24 and exactly Python 3.14.5 (`uv venv --python 3.14.5`); PDF rendering checks the exact Python and PyMuPDF versions. Processing new uploads requires a Meta API key and a configured spending allowance. Each call is priced at its worst case before it is sent and refused if that would exceed its stage's reservation; under the default $30 cap, a document of about 40 pages with five figures fits. Saved documents stay readable and downloadable without them.
 
+## Try it as a judge
+
+A judge copy can run on Modal. It is not deployed yet, so there is no URL. Judges sign in with an email only, no password. The example documents are shared and read-only. Each judge can upload 3 documents. These settings are off for local runs. The deploy steps are in [docs/runbooks/modal-deploy.md](new/docs/runbooks/modal-deploy.md).
+
 ## What has been verified
 
 Seven documents of five types went from upload through guide to download: three research papers (one with a scanned page, one table-heavy, one figure-heavy), a psychiatry research letter, a US Supreme Court opinion, an EPA class handout and an SBA economics brief. Independent reviews checked every guide quote, table and figure description against the source pages and found no invented facts or wrong numbers; the faults they did find are listed. The application passes type, lint and architecture checks, its full test suite and a production build.

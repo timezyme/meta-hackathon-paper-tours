@@ -1,5 +1,11 @@
 # Verification and limits
 
+## Judge access and Modal deployment — November 2, 2026
+
+The application gained email-only judge sign-in, shared read-only examples, a per-user upload cap, HTTPS-origin support behind a proxy, and a Modal deployment (`deploy/modal/`). The deployment has not been run, so no hosted URL is verified.
+
+The submission was regenerated from application commit `15a0856` with Python 3.14.5 and Node 24.19.0. Reconstruction from this repository reproduced all 463 selected files: 121 changed, 73 new and 269 preserved. All 377 files outside `prototype/` match the commit by bytes and executable mode; the 86 inherited prototype files keep their exact foundation bytes and modes. In the reconstructed tree, after `git init`, a clean `pnpm install --frozen-lockfile --strict-peer-dependencies` and a fresh `uv` environment from `python/requirements.txt` (PyMuPDF 1.28.2), these passed: the 8 submission unit tests, the 5 offline deployment tests (`python3 -I -m unittest discover -s tests/deploy`), `pnpm check`, `pnpm test` (74 files, 751 tests) and `pnpm build`.
+
 ## Four more document types — November 2, 2026
 
 The user authorized processing four short, openly licensed documents that are not research papers, so the guide could be checked on other kinds of writing.

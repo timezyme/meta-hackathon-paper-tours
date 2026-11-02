@@ -33,6 +33,8 @@
 .library-file-actions { display: flex; gap: 4px 20px; flex-wrap: wrap; }
 .library-detail-body .reader-delete { margin-top: 0; }
 .library-run-notice, .library-note, .library-empty { color: var(--muted); font-size: .875rem; line-height: 1.6; margin: 12px 0 0; overflow-wrap: anywhere; }
+.upload-allowance { font-weight: 600; font-size: .875rem; margin: 8px 0 0; }
+.library-examples { margin-top: 32px; }
 .library-run-notice p { margin: 0; }
 .library-run-notice.failed { color: var(--amber); }
 .library-empty { margin: 24px 0; }

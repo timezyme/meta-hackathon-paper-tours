@@ -1,10 +1,10 @@
 {
   "files": [
     {
-      "bytes": 756,
+      "bytes": 1189,
       "executable": false,
       "path": ".env.example",
-      "sha256": "3e1dffca5ca1f1aeaa826e0964f799cf3868718c810b13ebcb4994546b40a4c5"
+      "sha256": "78fd66b5283ddc2adc3132f547fb8701b1045bbe0cb7d179598cfa1884a124c7"
     },
     {
       "bytes": 715,
@@ -37,10 +37,10 @@
       "sha256": "9b98a68cc03c40fe6a76f684e30783d0f0563a8ed092fe179cd9eb730f4f454f"
     },
     {
-      "bytes": 8678,
+      "bytes": 9489,
       "executable": false,
       "path": "README.md",
-      "sha256": "1d0c40d99877721d001285525dd95092f7e930a428bc4ff117a03796d6c09962"
+      "sha256": "1cb575dd6674c9dbe01e0855c73ab5eedf6b59ef858745b67e5e807acf2080d5"
     },
     {
       "bytes": 1500,
@@ -97,6 +97,18 @@
       "sha256": "0d4e0545b08e3ea58b4f6afa6401e06d806a18b74caa97bf0803100395b3df07"
     },
     {
+      "bytes": 10299,
+      "executable": false,
+      "path": "deploy/modal/app.py",
+      "sha256": "e0c9edc9b4b9e823afeb7c58c6dc30c55831ad74429546394225fe759b417b6c"
+    },
+    {
+      "bytes": 8017,
+      "executable": false,
+      "path": "deploy/modal/seed_examples.py",
+      "sha256": "487d976a0307d43cbdfd67cd28ae1d86d9601a79e5485318b851bdf75b059192"
+    },
+    {
       "bytes": 3224,
       "executable": false,
       "path": "docs/decisions/0001-http-access.md",
@@ -145,10 +157,10 @@
       "sha256": "29fb316c163db5f63d140004c931d93e4b96693e3ab2fd9e1bbd692e6a3eaeda"
     },
     {
-      "bytes": 20240,
+      "bytes": 20733,
       "executable": false,
       "path": "docs/runbooks/application-operations.md",
-      "sha256": "c18df57e2974f41bc8aa47703078faa1173b61148b403677ff90c7892229421f"
+      "sha256": "a78166ac57192f115619fb8c5f57f1fde49afc9bc06ccfbfe7256283ec9e898e"
     },
     {
       "bytes": 8224,
@@ -169,22 +181,28 @@
       "sha256": "177e1dfa676d7af1d46f9a6e7f77a83f8aaded5e1e13b1f349a9de521dc0fbb8"
     },
     {
+      "bytes": 5065,
+      "executable": false,
+      "path": "docs/runbooks/modal-deploy.md",
+      "sha256": "3fc9f4921836d7b76a7f8973126c9e113d8c04383430e1813cb137e6f9f7d574"
+    },
+    {
       "bytes": 3861,
       "executable": false,
       "path": "docs/step-rules/app-shell.md",
       "sha256": "717e749521251595154b72f99c1d8873f33082f8a39d46857676403801ca3f74"
     },
     {
-      "bytes": 6283,
+      "bytes": 6495,
       "executable": false,
       "path": "docs/step-rules/application-ui.md",
-      "sha256": "771c1c5384eb48203416aa7d4157f1a83ec2fcb633cf0fa6757330b6631fe889"
+      "sha256": "fc0f9d0b2ee0e94d9962c5eb8254ea8eefa8396424d6c8439f9aaa218de9e0f4"
     },
     {
-      "bytes": 4055,
+      "bytes": 5557,
       "executable": false,
       "path": "docs/step-rules/authentication.md",
-      "sha256": "7253c1c7aae3140ed4ed0db1f513581471a9174e6cb6bef44dc2a21a3a347347"
+      "sha256": "e4abcc0637b2f6d395e867e7ab246cb87c9cba3edee33a008dcfb76dc07ab338"
     },
     {
       "bytes": 1496,
@@ -235,16 +253,16 @@
       "sha256": "563865620f06511dc029b74b546d61d8e813f43da5740f34c2d0f6c56d74405f"
     },
     {
-      "bytes": 4722,
+      "bytes": 5504,
       "executable": false,
       "path": "docs/step-rules/document-storage.md",
-      "sha256": "b6cbc81b89be1d18895fe1b8e962c23a34e921a368e8d7de3346cc49c5ff3974"
+      "sha256": "8ec58f76e2958ea5cd5d2d516543ec300293da0b1b5412d67d252a86a16c54cd"
     },
     {
-      "bytes": 3129,
+      "bytes": 3512,
       "executable": false,
       "path": "docs/step-rules/document-ui.md",
-      "sha256": "4ff976d8a4da543c2e67c575ff86bbc27d89e89a0344761a8f5db2d86f8f6321"
+      "sha256": "6e1c5d98977afda4dece6900c70c015224fe5d32fa2f7ebdd868d7398452d94f"
     },
     {
       "bytes": 7303,
@@ -271,10 +289,10 @@
       "sha256": "7d667703af00270f987c6c7333602bb5fc83683c02db09117d07c18f67eaaa94"
     },
     {
-      "bytes": 6073,
+      "bytes": 6635,
       "executable": false,
       "path": "docs/step-rules/http-access.md",
-      "sha256": "391b40963357958f29c627a242d70d3d792b3e504633331d0efc93b3b16cbc86"
+      "sha256": "c332a1d52a4755a209bc69df28093809e92de6cd3638670d1bb695ce3b32d228"
     },
     {
       "bytes": 5072,
@@ -319,10 +337,10 @@
       "sha256": "592eb5ae3e8e0f0b1ec9436c296a58b7db4a08f6f34b4dca9c151d9aa3e4233e"
     },
     {
-      "bytes": 1338,
+      "bytes": 1571,
       "executable": false,
       "path": "docs/step-rules/output-http.md",
-      "sha256": "78026592fad51454ba3246b93894405c089f8a75deb83833ea6204abc4865927"
+      "sha256": "b0d1f610c9c14620a3df82a01c55f8ecb46e6636e98c79973ffd9f60aae2ce0b"
     },
     {
       "bytes": 3074,
@@ -1117,10 +1135,10 @@
       "sha256": "5d287851d00945d6e7cfb8d0dcd8de97fa04332e99ff48714fd8b89a958659e5"
     },
     {
-      "bytes": 11164,
+      "bytes": 13468,
       "executable": false,
       "path": "src/app/App.tsx",
-      "sha256": "6bc5ab9c53f8b53e6739e2485d83aa180b5f465ab062ab40f7fa56127a502c00"
+      "sha256": "6926f65d258e5601c74497f4dad29462dabaaa36a967b163801aa07fdf931a19"
     },
     {
       "bytes": 695,
@@ -1129,10 +1147,10 @@
       "sha256": "2b3be7c8a3b52fc11118d6b84b9cfbff60a4a3f594684a1bc9901753fe10e792"
     },
     {
-      "bytes": 18381,
+      "bytes": 19077,
       "executable": false,
       "path": "src/app/DocumentWorkspace.tsx",
-      "sha256": "ed0c4d3d2a8cfd979425a17c54e2a4b34f2e26603cafacf20f30fe497615d5cd"
+      "sha256": "4ccee35cf95d604b4939280b56712a9c21990fadd391574689df6e785e4289ef"
     },
     {
       "bytes": 4486,
@@ -1171,10 +1189,10 @@
       "sha256": "fe78f6fdd3e0f0fb113062500074ba7098db0a3ce443c05ab49049f82681ed85"
     },
     {
-      "bytes": 3908,
+      "bytes": 5583,
       "executable": false,
       "path": "src/app/client/auth.ts",
-      "sha256": "96a26f05d6538c1cf621b1e7b96de4620a7441d4e40dfd7fcacf75cd232a98d1"
+      "sha256": "1d22138b663dd8dc80190f5df3de988208feb54806858a368f8256cb37078f0e"
     },
     {
       "bytes": 5626,
@@ -1279,16 +1297,16 @@
       "sha256": "8730fef5d16f243f22562cbb95b3d8180961c6fc5bf75aacbd85559e479dc84c"
     },
     {
-      "bytes": 9253,
+      "bytes": 9988,
       "executable": false,
       "path": "src/app/library/PaperLibrary.tsx",
-      "sha256": "a690f97f1fe3ffb6eaa5569a913fa0b25a4c6be0fe6576a8ba80fb9ea4eb048e"
+      "sha256": "0371d7b539ea63759f47472f18e2927e3298454070599b07d27366f68fe6990d"
     },
     {
-      "bytes": 9645,
+      "bytes": 9762,
       "executable": false,
       "path": "src/app/library/library.css",
-      "sha256": "70c2182b23cd679e9ec8950eb489172ce2f58e705fae1a28424d5e5d7e527423"
+      "sha256": "87a03c5320286001f4972495ca464cf131967d8bb1c4e4f0d5e877497f410e96"
     },
     {
       "bytes": 1799,
@@ -1399,10 +1417,10 @@
       "sha256": "91bf8175ddf1a89f8250fa6f3841feed753b9f102cc09e2ad5426af5f8a6090b"
     },
     {
-      "bytes": 17627,
+      "bytes": 17884,
       "executable": false,
       "path": "src/app/reader/ReaderWorkspace.tsx",
-      "sha256": "1b4b04fd09ebefd659a13702f509c5beea015f1fedec1663bd6fa0c424dc6ec3"
+      "sha256": "07759c333a8676b283de599d35c971674ca1a5c82e83b7ddd71a23e85f1aecb2"
     },
     {
       "bytes": 5928,
@@ -1453,16 +1471,22 @@
       "sha256": "7dfc3f09f693eddd2dc3a87f44499b522060ae76493a6f58e074b9753eca5410"
     },
     {
-      "bytes": 1835,
+      "bytes": 2294,
       "executable": false,
       "path": "src/auth/index.ts",
-      "sha256": "38d63cf9f7a6f22c35c4b8337040568df6e4ed964438c94e8900dcc1bbfd2206"
+      "sha256": "141a89baed2da5a2f8354d3ec753de9bce7777c1a80a899df3030f256013ee9a"
     },
     {
-      "bytes": 3932,
+      "bytes": 4116,
       "executable": false,
       "path": "src/auth/instance.ts",
-      "sha256": "0c0be1d2435aacd9eea6af349f4f9fa5cbce40398b5a93c701b94c668c1f1592"
+      "sha256": "65c28b6ced5255b7da661348c59f6e89c5ec5f291fa60393ce3b31435ee5ee74"
+    },
+    {
+      "bytes": 2663,
+      "executable": false,
+      "path": "src/auth/judge.ts",
+      "sha256": "5368fdf476029c84ed20fb8d81bc573ce0b95fd2b69e83debaa5b2bcf4a02dc7"
     },
     {
       "bytes": 1320,
@@ -1477,16 +1501,16 @@
       "sha256": "ad5414e1034a44527c84676dec58d1f840408a1588b6f3ca136de1c69d5ba8d3"
     },
     {
-      "bytes": 736,
+      "bytes": 845,
       "executable": false,
       "path": "src/auth/service.ts",
-      "sha256": "560d84c429596af6f8ae52896df46477358c779af627954a8aa8e7d80b6b3c35"
+      "sha256": "875a749faea2d29be3cd75c833ccc536646132a8dad481bfa6cbfcb501b0346f"
     },
     {
-      "bytes": 6053,
+      "bytes": 6580,
       "executable": false,
       "path": "src/domain/api.ts",
-      "sha256": "42991e3cea02a43111e78e87e5de270e5801f8c108bf80a960a56f865b6db147"
+      "sha256": "2b7904e8563de5408defe8b83176f4970bc8987b757ccfaa4640e57ff0c1dc5c"
     },
     {
       "bytes": 1497,
@@ -1879,34 +1903,34 @@
       "sha256": "381680836f04ee3ff6a621dea0bb6fd167b98c3d594adab3e0594187e4742c2b"
     },
     {
-      "bytes": 5086,
+      "bytes": 5225,
       "executable": false,
       "path": "src/server/access.ts",
-      "sha256": "28d3cb2f2ec179b0110f33e0a2a631846efc83de45a1eab90664de13cf72ac09"
+      "sha256": "f69ff74a444ab768d5b526ffc2bdb92f776802ea10f85e2dd40a230c1de69927"
     },
     {
-      "bytes": 2640,
+      "bytes": 3882,
       "executable": false,
       "path": "src/server/config.ts",
-      "sha256": "b5cd4247956e8f537fd386d82e68a8175d8065ae2c6d513a37002b88482834e0"
+      "sha256": "07d75f0ee2c635743f0ba84c6ed4635ee2eaaa8e58a8bf4c89237df4c898b147"
     },
     {
-      "bytes": 11304,
+      "bytes": 11939,
       "executable": false,
       "path": "src/server/documents.ts",
-      "sha256": "5f6e2ab68a561df04f2163c9fbdd8cb3e56c042b1e32e9e0da9d0ecb2f087627"
+      "sha256": "887de4a894a4e8c6c9654a63eca076d0aba4c0aeffe14ca934786d1c90fef37e"
     },
     {
-      "bytes": 4252,
+      "bytes": 4854,
       "executable": false,
       "path": "src/server/http.ts",
-      "sha256": "048f8cf1559fd7a2ffd26116a3c56455ee596d02f03a9214c5a5b0d0df8435c3"
+      "sha256": "8f8d5769b48630ecec90ad6eccea01df486e106b7799dd71596a56f41cfe91df"
     },
     {
-      "bytes": 10504,
+      "bytes": 10627,
       "executable": false,
       "path": "src/server/lifecycle.ts",
-      "sha256": "0536861fa0edd964225e316307a50125c28489e2e304f01b07538649a4be3b89"
+      "sha256": "ca8cad74fcceb33340df7bf01b55b93e2f9028cebbf7476697bd9f86f1a42a1d"
     },
     {
       "bytes": 577,
@@ -1921,10 +1945,10 @@
       "sha256": "2d61ca603d63145418f9124989d78a8a2693166e5ab75ce73514e65ca17c31d1"
     },
     {
-      "bytes": 7169,
+      "bytes": 7319,
       "executable": false,
       "path": "src/server/outputs.ts",
-      "sha256": "a26a0f8f6eb981f3f51ac7eb49f19c622ddf3f6f91777dc26bdba96d807caa89"
+      "sha256": "56e0adea0f0ef152873f1721b321c2eefeaae7a0656de83f0db0cf0bf73f472b"
     },
     {
       "bytes": 4453,
@@ -1969,10 +1993,10 @@
       "sha256": "83c66fcda0b8217a050f01d1afeb5471db81a6ad3477b41ff630d9b464e61283"
     },
     {
-      "bytes": 27075,
+      "bytes": 28917,
       "executable": false,
       "path": "src/storage/documents.ts",
-      "sha256": "b564731253f2e86355bf623d5682a201cbadacffca469f33b7f475b4b7ab4f7e"
+      "sha256": "accc7b1beea742261886380eb319097607c127c7fcddd9268a3a6bb21a446e6f"
     },
     {
       "bytes": 5744,
@@ -1999,10 +2023,10 @@
       "sha256": "437a5b52312031be8d567e16db6a468cba898b078b012eb816e4e74f938d41e2"
     },
     {
-      "bytes": 3280,
+      "bytes": 3932,
       "executable": false,
       "path": "src/storage/service.ts",
-      "sha256": "5eb9ffe7af8705fed049d481fd02b048e1f95a29e8600f1150f6d6c0d17b727e"
+      "sha256": "6b6bde7bcedc2ce420c2a9fe2bc9b75991b8304723d27bee07a96b3db79d497f"
     },
     {
       "bytes": 6887,
@@ -2077,6 +2101,12 @@
       "sha256": "075e024111b76fc03a2b93fb34b50b4cbe747d4ee5b83e81ec8c530241855e94"
     },
     {
+      "bytes": 1287,
+      "executable": false,
+      "path": "tests/app/sign-in.test.ts",
+      "sha256": "70001af3caae0fe52f8b14ef8d50da3e42b6c70a165469f079f8d6bafe0b80ba"
+    },
+    {
       "bytes": 541,
       "executable": false,
       "path": "tests/app/text.test.ts",
@@ -2089,10 +2119,22 @@
       "sha256": "d936c8cf26af62fb9b1bec7a62366a5d37b2a2b696a8d662b96c013de00c0ef2"
     },
     {
+      "bytes": 6670,
+      "executable": false,
+      "path": "tests/auth/judge.test.ts",
+      "sha256": "d3d1606a2842fec8ea87d3b5eb2e8a7ffa34001653aad9bd3a0b09cb010fd0c3"
+    },
+    {
       "bytes": 11307,
       "executable": false,
       "path": "tests/demo/prepare.test.ts",
       "sha256": "925ae3d97399efb09a2500b8c3352cee11a5cd95b74f0fbf16b6b54a1bad20da"
+    },
+    {
+      "bytes": 8613,
+      "executable": false,
+      "path": "tests/deploy/test_modal_deploy.py",
+      "sha256": "ccd8be93f1a2201397ddbad7d2902a919dd82eeda05dfbb487b3abdf54eaf5d8"
     },
     {
       "bytes": 29479,
@@ -2563,10 +2605,10 @@
       "sha256": "a5efd83aa1874844bb483144e2df9597db5fb699d9ad9ca56220bcc4108b582c"
     },
     {
-      "bytes": 2452,
+      "bytes": 2559,
       "executable": false,
       "path": "tests/processing/spark-trial.test.ts",
-      "sha256": "2732383cc46b94b9d665a4f214ac039344949e5200b3a729efa4a2e9c0190743"
+      "sha256": "2f1f275a6481934097ff4b41e4bf761b7936f4fbfda82820d12c87f8afb07067"
     },
     {
       "bytes": 17255,
@@ -2581,16 +2623,16 @@
       "sha256": "d154ed890fcd48ca65086b8d7f47aac4bd29a0402899b50fc09884014ca6c7a3"
     },
     {
-      "bytes": 12266,
+      "bytes": 13128,
       "executable": false,
       "path": "tests/server/access.test.ts",
-      "sha256": "50c65b3c33fb65952ac1fd1e4a977b4dd0f85d402cdd8350b6f5a5183272a0b1"
+      "sha256": "601b6db3327a9b259384cafd75b73c14bc028919bc6b84db957e48fdf109474d"
     },
     {
-      "bytes": 7830,
+      "bytes": 9946,
       "executable": false,
       "path": "tests/server/config.test.ts",
-      "sha256": "f45ff12afc14b94e3080b83341a8326c19f3de41ff93cbe05fe9c007f006b77b"
+      "sha256": "a6c486c671f3e7ecb876d62c749e11398dad0ce6d219f3e65452cc93b8003057"
     },
     {
       "bytes": 6475,
@@ -2611,10 +2653,10 @@
       "sha256": "d497f7617a18d40407e4d3335ce7616af4ccbd0d27c90f45dec19f5c90ff0592"
     },
     {
-      "bytes": 5362,
+      "bytes": 5469,
       "executable": false,
       "path": "tests/server/lifecycle-cancellation.test.ts",
-      "sha256": "d45b6616a0aadc627ea75cf071ce068864e59eb5f90ec7a3b250039163eb2786"
+      "sha256": "cf79e7143c319d96d56624c9255feaf1ee8d0e512c45bb8d99cd3f77a070f38a"
     },
     {
       "bytes": 2201,
@@ -2629,16 +2671,16 @@
       "sha256": "3a7e7173decd0219146787bddcde240058b4aaf4ce8a1e6e1e22df34d43c7b08"
     },
     {
-      "bytes": 13371,
+      "bytes": 13692,
       "executable": false,
       "path": "tests/server/observability.test.ts",
-      "sha256": "8041ae30d92a47cc304351e6a34f286805b11ab205ef029c11b6d29ecd117b2a"
+      "sha256": "a8e815f0b3bda0823aab5193f1d710de3de51ae61976fc2c0a2bae825a71a512"
     },
     {
-      "bytes": 5806,
+      "bytes": 7648,
       "executable": false,
       "path": "tests/server/outputs.test.ts",
-      "sha256": "7c6b4dc3e841491e06d643e7a2287e3e4e3cba9b9e30f9de235f3d0a0c4428ed"
+      "sha256": "312f0fd7b788beea8b20503c2775748626d8466d138d786446d06ee4c68aff09"
     },
     {
       "bytes": 8579,
@@ -2651,6 +2693,12 @@
       "executable": false,
       "path": "tests/server/retention.test.ts",
       "sha256": "c7731f0e9f73b507ed7a07733ebcd71cf1ec0d655981fe7cd138b5ca7a990534"
+    },
+    {
+      "bytes": 7398,
+      "executable": false,
+      "path": "tests/server/shared-examples.test.ts",
+      "sha256": "d5e566fc7d787a4d0a4a58dd8b5d4adc3ea65164f8357e8921ce0a112b0758b4"
     },
     {
       "bytes": 4732,
@@ -2733,7 +2781,10 @@
   ],
   "foundationManifestSha256": "c1f8472f6ab529c5a274584f28ef73559f5a4df30e13a2a0c298b10d23959563",
   "newFiles": [
+    "deploy/modal/app.py",
+    "deploy/modal/seed_examples.py",
     "docs/demo/meta-only-script.md",
+    "docs/runbooks/modal-deploy.md",
     "docs/step-rules/muse-review.md",
     "docs/step-rules/paper-map.md",
     "docs/step-rules/reading-guide.md",
@@ -2770,6 +2821,7 @@
     "src/app/reader/OriginalPreview.tsx",
     "src/app/text.ts",
     "src/app/useRoutePresentation.ts",
+    "src/auth/judge.ts",
     "src/domain/furniture.ts",
     "src/domain/guide.ts",
     "src/paper/extraction/page.ts",
@@ -2787,7 +2839,10 @@
     "tests/app/library.test.ts",
     "tests/app/map-fixture.ts",
     "tests/app/map.test.ts",
+    "tests/app/sign-in.test.ts",
     "tests/app/text.test.ts",
+    "tests/auth/judge.test.ts",
+    "tests/deploy/test_modal_deploy.py",
     "tests/fixtures/code-repair.ts",
     "tests/fixtures/guide.ts",
     "tests/paper/code-repair.test.ts",
@@ -2796,6 +2851,7 @@
     "tests/paper/meta-document-extraction.test.ts",
     "tests/processing/cost-model.test.ts",
     "tests/processing/meta-document.test.ts",
+    "tests/server/shared-examples.test.ts",
     "tests/storage/code-repair.test.ts",
     "tests/submission/test_prepare.py"
   ]

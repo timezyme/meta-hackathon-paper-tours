@@ -13,6 +13,7 @@ import { usePaperPreview, type PaperPreview } from "./usePaperPreview.ts"
 
 type Controls = {
   readonly retryEnabled: boolean
+  readonly readOnly?: boolean
   readonly onDeleted: () => void
   readonly onRefresh: () => void
   readonly onUnauthenticated: () => void
@@ -38,7 +39,7 @@ function PaperDetails({ record, controls }: Props) {
       <div><dt>File size</dt><dd>{formatBytes(record.document.byteCount)}</dd></div>
       <div><dt>Available until</dt><dd>{formatExpiry(record.document.expiresAt)}</dd></div></dl>
     <FileActions record={record} />
-    <DeleteDocumentControl record={record} onDeleted={controls.onDeleted} onUnauthenticated={controls.onUnauthenticated} />
+    {controls.readOnly !== true && <DeleteDocumentControl record={record} onDeleted={controls.onDeleted} onUnauthenticated={controls.onUnauthenticated} />}
   </div></details>
 }
 
@@ -46,7 +47,7 @@ function RunNotice({ record, controls }: Props) {
   const summary = runSummary(record.latestRun)
   if (summary.failed) return <div className="library-run-notice failed">
     <p><strong>{summary.title}.</strong> {summary.description}{record.currentRevisionId !== null && " Your saved copy is still available."}</p>
-    {controls.retryEnabled && <RetryDocumentControl record={record} onRefresh={controls.onRefresh} onUnauthenticated={controls.onUnauthenticated} />}
+    {controls.retryEnabled && controls.readOnly !== true && <RetryDocumentControl record={record} onRefresh={controls.onRefresh} onUnauthenticated={controls.onUnauthenticated} />}
   </div>
   if (activeRun(record.latestRun)) return <ProcessingProgress record={record} compact />
   if (record.latestRun.state._tag === "succeeded-with-issues") {
@@ -135,6 +136,16 @@ function LibraryRow({ record, controls }: Props) {
   const revisionId = record.currentRevisionId
   if (revisionId === null) return <PaperRow record={record} controls={controls} />
   return <PublishedPaperRow key={revisionId} record={record} revisionId={revisionId} controls={controls} />
+}
+
+export function ExampleLibrary({ records, controls }: { readonly records: ReadonlyArray<DocumentRecord>; readonly controls: Controls }) {
+  if (records.length === 0) return null
+  const readOnly = { ...controls, readOnly: true }
+  return <section className="library-remaining library-examples" aria-labelledby="library-examples-title">
+    <h2 id="library-examples-title">Examples</h2>
+    <p className="library-note">Documents already processed by AmuseMe. Everyone can read them; only their owner can change them.</p>
+    {records.map((record) => <LibraryRow key={record.document.id} record={record} controls={readOnly} />)}
+  </section>
 }
 
 export function PaperLibrary({ records, controls }: { readonly records: ReadonlyArray<DocumentRecord>; readonly controls: Controls }) {

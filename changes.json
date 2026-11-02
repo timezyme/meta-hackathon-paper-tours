@@ -4,7 +4,15 @@
     "operations": [
       [
         "copy",
-        15
+        3
+      ],
+      [
+        "add",
+        "# 127.0.0.1 locally; 0.0.0.0 only behind an HTTPS proxy with an https:// AMUSEME_ORIGIN.\nAMUSEME_HOST=127.0.0.1\n"
+      ],
+      [
+        "copy",
+        12
       ],
       [
         "skip",
@@ -29,6 +37,10 @@
       [
         "skip",
         2
+      ],
+      [
+        "add",
+        "\n# Judge access (off when unset). Email-only sign-in creates user-role accounts.\nAMUSEME_JUDGE_SIGN_IN=false\nAMUSEME_JUDGE_ACCESS_CODE=\n# User ID whose documents everyone signed in can read but not change.\nAMUSEME_EXAMPLES_OWNER_ID=\n# Lifetime uploads per non-admin user; unset means unlimited.\nAMUSEME_UPLOADS_PER_USER=\n"
       ]
     ]
   },
@@ -178,7 +190,15 @@
       ],
       [
         "copy",
-        21
+        8
+      ],
+      [
+        "add",
+        "\n## Deploy for judges\n\n`deploy/modal/app.py` deploys one always-on copy to Modal with email-only sign-in, shared read-only examples, 3 uploads per judge and its own $100 budget. Follow [Modal judge deployment](docs/runbooks/modal-deploy.md). These settings are off by default for local runs:\n\n| Setting | Effect |\n|---|---|\n| `AMUSEME_JUDGE_SIGN_IN=true` | Sign in by typing an email; the account is created on first use with role `user`. |\n| `AMUSEME_JUDGE_ACCESS_CODE` | Optional code that email sign-in also requires. |\n| `AMUSEME_EXAMPLES_OWNER_ID` | This user's documents are readable, not changeable, by every signed-in user. |\n| `AMUSEME_UPLOADS_PER_USER` | Lifetime uploads per non-admin user; deleting does not free a slot. |\n| `AMUSEME_HOST` | `127.0.0.1` (default) or `0.0.0.0` inside a container. |\n"
+      ],
+      [
+        "copy",
+        13
       ],
       [
         "skip",
@@ -252,7 +272,7 @@
       ],
       [
         "add",
-        "This runbook describes the current single-host application. It binds **127.0.0.1 only** and accepts a canonical `http://127.0.0.1:<port>` or `http://localhost:<port>` origin with the same port. It is not a public deployment guide. Normal model processing is Meta-only. Historical MinerU service operations remain in the [MinerU/Modal runbook](mineru-modal.md).\n"
+        "This runbook describes the single-host application. By default it binds **127.0.0.1** and accepts a canonical `http://127.0.0.1:<port>` or `http://localhost:<port>` origin with the same port. The judge deployment behind Modal's HTTPS proxy is described in [Modal judge deployment](modal-deploy.md). Normal model processing is Meta-only. Historical MinerU service operations remain in the [MinerU/Modal runbook](mineru-modal.md).\n"
       ],
       [
         "copy",
@@ -268,7 +288,15 @@
       ],
       [
         "copy",
-        12
+        1
+      ],
+      [
+        "add",
+        "| `AMUSEME_HOST` | `127.0.0.1` by default; `0.0.0.0` only behind a TLS-terminating proxy with an `https://` `AMUSEME_ORIGIN`. |\n| `AMUSEME_JUDGE_SIGN_IN`, `AMUSEME_JUDGE_ACCESS_CODE` | Off by default. Enables email-only sign-in (user role only); the optional code is private. |\n| `AMUSEME_EXAMPLES_OWNER_ID`, `AMUSEME_UPLOADS_PER_USER` | Unset by default. Share one owner's documents read-only; cap lifetime uploads per non-admin user. |\n"
+      ],
+      [
+        "copy",
+        11
       ],
       [
         "skip",
@@ -304,7 +332,19 @@
       ],
       [
         "copy",
-        5
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "Any public deployment other than the [Modal judge deployment](modal-deploy.md) needs its own reviewed design for TLS termination, the trusted-proxy boundary, canonical public origin and secure cookies, durable storage/locking, supervision, shutdown and retention monitoring. Changing the bind address or inserting a proxy is not enough. Repeat authentication, ownership, Host/Origin, cancellation, restart and upload-to-download acceptance on the deployed URL before calling it a hosted submission.\n"
+      ],
+      [
+        "copy",
+        3
       ],
       [
         "add",
@@ -444,7 +484,19 @@
       ],
       [
         "copy",
-        3
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "1. `GET /api/session` is decoded with the shared `Session` schema. A 401 means signed out; transport, timeout, invalid-response, and service failures remain visible errors. The sign-in page reads `/auth/sign-in-options`. In password mode it posts only email/password to `/auth/sign-in/email`. In email mode it asks only for an email (and an access code when required), says \"Enter your email to try AmuseMe\", and posts to `/auth/sign-in/judge`; sign-out posts to `/auth/sign-out` and clears the UI only after server confirmation. No browser mutation retries, public registration, password recovery, or model calls exist.\n"
+      ],
+      [
+        "copy",
+        1
       ],
       [
         "skip",
@@ -481,6 +533,27 @@
       [
         "add",
         "\nAfter confirmed upload admission, navigate to its document. While queued/running, show actual saved progress beside goal selection (first on phones): a plain sentence from the saved stage and units (\"Muse is checking page 2 of 4\"), the ordered list of configured stages marked done, in progress or up next, and the time elapsed since the run's saved `startedAt`. No invented timers, estimates of remaining time or percentages; the only duration copy is the fixed note that a short document usually takes about five minutes. A `limit-exceeded` run failure or upload refusal reads as a friendly too-long message that suggests a shorter PDF or excerpt; other failures keep the server's message. Readers may choose a walkthrough or claims while waiting, or open the exact original PDF immediately. Keep the selected goal/page in bounded URL state through publication. Guide buttons become available only after validated saved output arrives. Failures retain original access and expose only server-authorized explicit retries.\n"
+      ]
+    ]
+  },
+  "docs/step-rules/authentication.md": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        5
+      ],
+      [
+        "skip",
+        8
+      ],
+      [
+        "add",
+        "2. The HTTP adapter accepts only `POST /auth/sign-in/email`, `POST /auth/sign-out`, `GET /auth/get-session`, `GET /auth/sign-in-options`, and, only when email-only sign-in is enabled, `POST /auth/sign-in/judge`. It rejects all other paths and methods. `GET /auth/sign-in-options` returns the shared `SignInOptions` (`password` or `email`, and whether an access code is required) without calling Better Auth. Better Auth also disables email signup. The outer gateway independently owns route admission, response security headers, body limits, and CSRF checks for application and Mastra routes.\n3. Email-only sign-in is off by default and enabled only by `AMUSEME_JUDGE_SIGN_IN=true`. It is the `amuseme-judge-sign-in` Better Auth plugin endpoint, so Better Auth's origin/CSRF checks, database rate limiter, session creation and cookies apply. The body is `{ email, accessCode? }`. When `AMUSEME_JUDGE_ACCESS_CODE` is set, a missing or different code returns 401 before any lookup; the comparison does not stop early. The email is trimmed, lowercased and must be a single address of at most 254 characters, otherwise 400. An unknown email creates a user with role `user` and no credential account; a known email signs in only if that user has role `user` and no linked account. Invited password accounts and admins return 403 and never get a session this way. Request role, name and owner fields are ignored. Anyone who knows an email-only address can open that account; this deliberately trades account secrecy for frictionless judge access, so these accounts hold only their own uploads and read-only examples. Password sign-up stays disabled.\n4. Invited users enter through the local `scripts/provision-user.ts` command, which invokes Better Auth's server-only `createUser` API without request headers. Roles are exactly `user` or `admin` and come from that command. No registration, recovery, email, impersonation, or admin-management endpoint is public.\n5. Session checks read the database on every request and decode the result through the shared domain `Session` schema. Cookie caching is disabled. Expiration, sign-out, deleted sessions, and changed roles take effect on the next read. Missing credentials produce `null`. SDK failures produce `AuthError`, never an authenticated or empty successful fallback.\n6. The origin is explicit, has no path or credentials, and uses HTTPS except for HTTP on localhost or an IP loopback address. HTTPS requires Secure cookies. All session cookies are HttpOnly and SameSite=Lax. Trusted origins contain only that origin. Forwarded host, protocol, and client-IP headers have no authority.\n7. Better Auth owns retry-free credential verification and database-backed rate limiting. Password sign-in permits ten attempts per rolling minute; email-only sign-in permits twenty. With no verified client-IP source, Better Auth uses one shared per-path bucket, which survives restart. This intentionally limits all invited users together. No claim of per-account or per-client limits is made.\n8. POST requests require the exact configured Origin, including before the user has a cookie. The adapter buffers at most 16 KiB with a five-second deadline before calling Better Auth. Effect interruption cancels the body reader, with one second allowed for reader cleanup. Oversized bodies return 413, slow bodies return 408, and unreadable bodies return 400. Better Auth and Kysely Promise APIs are the SDK boundary. Local operations are uninterruptible until their Promise settles because these APIs do not cancel SQLite queries or password hashing. Scope cleanup cannot close the database while an admitted SDK operation is still running. The server owns bounded shutdown. There are no model calls, telemetry events, or application retries.\n9. The database file has mode 0600 and its dedicated parent directory has mode 0700. Session tokens, passwords, and secrets never enter application logs or CLI output. Provisioning errors print a fixed message. The CLI requires `AMUSEME_ORIGIN`, `BETTER_AUTH_SECRET`, `AMUSEME_DATA_DIR`, `AMUSEME_INVITE_EMAIL`, `AMUSEME_INVITE_NAME`, `AMUSEME_INVITE_PASSWORD`, and `AMUSEME_INVITE_ROLE`. The database is `auth.sqlite` inside that directory.\n10. Tests use real temporary SQLite files and the actual Better Auth handler. They prove email-only sign-in off by default, normalization, account reuse, bad emails, access codes, refusal of password/admin accounts, its rate limit, invited-user roles, invalid passwords, denied registration and role changes, database revocation and expiry, cookie flags, origin restrictions, limiter persistence, and scoped reopening. The manager separately verifies integrated routes and Chrome behavior.\n"
+      ],
+      [
+        "copy",
+        2
       ]
     ]
   },
@@ -572,6 +645,48 @@
       [
         "add",
         "\n10. Guide evidence resolves quotations only against immutable source blocks. Display the exact quotation highlighted within its actual stored source block, with other source blocks from that page and an Original switch. Source locations supply page choices; page-only locations never acquire invented pixel boxes. Guide text renders as literal text. Read boundaries reject invalid citations or a guide without its matching accepted completed receipt. Bounded URL state restores modes, steps, claims, source selection and view on refresh/history; explicit guide turns focus the new heading without status polls stealing focus. Arrow shortcuts apply only outside interactive controls and open dialogs.\n"
+      ]
+    ]
+  },
+  "docs/step-rules/document-storage.md": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        9
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "6. `AMUSEME_EXAMPLES_OWNER_ID` optionally names one examples owner. `readableOwner(reader, id)` returns the document owner when the reader owns it or the owner is the examples owner, and the same not-found failure otherwise; read routes use that owner. `listExamples` returns the examples owner's active documents to every other reader. Delete, retry, admission and rating writes still use the session user, so a non-owner gets not-found. `AMUSEME_UPLOADS_PER_USER` optionally caps admissions per non-admin owner. The count is every document row the owner ever created, so deleted and expired tombstones still use a slot; the check runs before staging and again inside the admission transaction, and refusal is `forbidden`. Exact idempotent replays still return their original IDs.\n7. Owner-scoped reads check identity before lifecycle. Unknown, other-owner, deleted, and expired documents all return the same not-found failure. List hides inactive documents. Deletion requires a terminal run, commits a concealed tombstone before removing files, and can finish cleanup after restart. Expiry also conceals downloads immediately; cleanup is local and does not claim to erase backups or third-party copies.\n"
+      ],
+      [
+        "copy",
+        5
+      ]
+    ]
+  },
+  "docs/step-rules/document-ui.md": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "1. The dashboard lists the reader's own documents, then a read-only **Examples** section from the list's optional `examples`. Example rows, readers and guides hide delete, retry and rating controls; downloads stay available. When the list carries `upload.allowance`, the upload box shows uploads left and disables choosing once none remain; the server's refusal message is shown as-is. The dashboard decodes the shared document-list response, including server-owned PDF byte/page limits, admission availability, and live/fixture mode. Loading and failed reads never become an empty successful library. English-language scope is stated before upload; language detection is not claimed.\n"
+      ],
+      [
+        "copy",
+        8
       ]
     ]
   },
@@ -711,6 +826,51 @@
       ]
     ]
   },
+  "docs/step-rules/http-access.md": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "Covers: route:GET:/api/session, route:GET:/health, route:GET:/health/ready, route:GET:/auth/get-session, route:GET:/auth/sign-in-options, route:POST:/auth/sign-in/email, route:POST:/auth/sign-in/judge, route:POST:/auth/sign-out\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "2. Public access is an exact method/path allowlist: GET `/`, `/sign-in`, valid `/documents/:documentId` shell paths, validated built app assets, `/health`, `/health/ready`, `/auth/get-session`, `/auth/sign-in-options`; POST `/auth/sign-in/email`, `/auth/sign-in/judge` and `/auth/sign-out`. The auth adapter returns 404 for `/auth/sign-in/judge` unless email-only sign-in is enabled. The shell contains no document content. Better Auth independently checks the selected auth endpoints, origins, cookies, and login limits. HEAD, OPTIONS, alternate encodings, old API prefixes, unknown paths, and unlisted auth endpoints gain no public exemption.\n"
+      ],
+      [
+        "copy",
+        4
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "6. Startup validates the port, required redacted auth secret, canonical origin, private data directory, Python executable path, and queue limit before binding loopback. `AMUSEME_HOST` is `127.0.0.1` (default) or `0.0.0.0` for a container platform. The origin is a loopback HTTP origin whose port equals `AMUSEME_PORT`, or an HTTPS origin served by a TLS-terminating proxy (Modal). For an HTTPS origin, the gateway rewrites an incoming plain-HTTP request to that origin only when its Host equals the configured host; other hosts keep their HTTP URL and fail the origin check. Forwarded headers still have no authority. The listener itself speaks plain HTTP; the proxy must be the only network path to it. The private directory is mode 0700 and SQLite files mode 0600; auth, application, and Mastra databases live there, outside all static roots. `AMUSEME_APP_DIR` can select the local watched build for development; production defaults to `.mastra/output/app`. `AMUSEME_PYTHON_BIN` defaults to the absolute local `data/python/.venv/bin/python` path. `AMUSEME_QUEUE_LIMIT` defaults to 10 and must be between 1 and 1000. Live upload admission requires validated processing configuration and an available provider guard policy; otherwise admission is disabled. No environment flag enables fixture admission. The only Mastra singleton is in `src/mastra/index.ts`; `makeAmuseMe` is pure and inspectable without credentials or I/O.\n"
+      ],
+      [
+        "copy",
+        2
+      ]
+    ]
+  },
   "docs/step-rules/meta-provider.md": {
     "executable": false,
     "operations": [
@@ -778,6 +938,27 @@
       [
         "add",
         "\nMuse review runs inside the step that owns the unit and adds no workflow steps, so snapshots and resume are unchanged; see [Muse review](muse-review.md). Figure crop review runs inside the extraction step after each page's figures are cropped; the extraction checkpoint holds the reviewed crops and their records.\n\nNew execution is Meta-only across every stage, including resumed checkpoints. Reject stale non-Meta configurations before preflight or spending. Meta extraction loops physical pages serially inside the existing extraction stage; its checkpoint retains every page receipt, including reused attempts. Historical published revisions remain readable.\n"
+      ]
+    ]
+  },
+  "docs/step-rules/output-http.md": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        5
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "OutputStore. Reads resolve the owner with `DocumentStore.readableOwner`, so\nshared examples are readable by every signed-in user; a non-owner's rating read\nreturns `null`, and rating writes use the session user and return not-found for\nexamples. Canonical JSON and reports use their shared schemas. Text returns\n"
+      ],
+      [
+        "copy",
+        11
       ]
     ]
   },
@@ -940,15 +1121,15 @@
       ],
       [
         "skip",
-        1
+        2
       ],
       [
         "add",
-        "import type { RefObject } from \"react\"\nimport type { FormEvent } from \"react\"\n"
+        "import type { RefObject } from \"react\"\nimport type { FormEvent } from \"react\"\nimport { readSession, readSignInOptions, runAuth, signIn, signInWithEmail, signOut } from \"./client/auth.ts\"\nimport type { SignInOptions } from \"../domain/index.ts\"\n"
       ],
       [
         "copy",
-        4
+        3
       ],
       [
         "add",
@@ -976,11 +1157,15 @@
       ],
       [
         "skip",
-        6
+        4
+      ],
+      [
+        "add",
+        "export function SignInCard({ options, passwordChosen, onChoosePassword, submission, onSubmit }: {\n  readonly options: SignInOptions | null\n  readonly passwordChosen: boolean\n  readonly onChoosePassword: (chosen: boolean) => void\n  readonly submission: Submission\n  readonly onSubmit: (event: FormEvent<HTMLFormElement>) => void\n}) {\n  const pending = submission.kind === \"pending\"\n  const emailOnly = options?.method === \"email\" && !passwordChosen\n  const describedBy = submission.kind === \"failed\" ? \"signin-error\" : undefined\n  return <section className=\"signin-card\" aria-labelledby=\"signin-title\">\n    <div className=\"intro\">\n      <h1 id=\"signin-title\">{emailOnly ? \"Try AmuseMe\" : \"Open your library\"}</h1>\n      <p>{emailOnly ? \"Enter your email to try AmuseMe. No password needed.\" : \"Sign in to read your documents and their guides.\"}</p>\n    </div>\n    {options === null ? <p className=\"signin-note\" role=\"status\">Loading…</p> : <form onSubmit={onSubmit} aria-busy={submission.kind === \"pending\"}>\n      <div className=\"field\">\n        <label htmlFor=\"email\">Email</label>\n        <input id=\"email\" name=\"email\" type=\"email\" autoComplete={emailOnly ? \"email\" : \"username\"} autoCapitalize=\"none\" spellCheck={false} required maxLength={254}\n          aria-describedby={describedBy} readOnly={pending} />\n      </div>\n      {!emailOnly && <div className=\"field\">\n        <label htmlFor=\"password\">Password</label>\n        <input id=\"password\" name=\"password\" type=\"password\" autoComplete=\"current-password\" required maxLength={128}\n          aria-describedby={describedBy} readOnly={pending} />\n      </div>}\n      {emailOnly && options.accessCode && <div className=\"field\">\n        <label htmlFor=\"access-code\">Access code</label>\n        <input id=\"access-code\" name=\"access-code\" type=\"text\" autoComplete=\"off\" autoCapitalize=\"none\" spellCheck={false} required maxLength={256}\n          aria-describedby={describedBy} readOnly={pending} />\n      </div>}\n      {submission.kind === \"failed\" && <p id=\"signin-error\" className=\"message error\" role=\"alert\">{submission.message}</p>}\n      <button className=\"button primary signin-submit\" type=\"submit\" disabled={pending}>{pending ? \"Signing in…\" : emailOnly ? \"Continue\" : \"Sign in\"}</button>\n      <span className=\"visually-hidden\" role=\"status\">{submission.kind === \"pending\" ? \"Signing in. Please wait.\" : \"\"}</span>\n    </form>}\n    <p className=\"signin-note\">{emailOnly ? \"You can read the example documents and try your own PDFs.\" : \"Access is by invitation.\"}</p>\n    {options?.method === \"email\" && <p className=\"signin-note\">\n      <button className=\"text-button\" type=\"button\" disabled={pending} onClick={() => onChoosePassword(!passwordChosen)}>\n        {passwordChosen ? \"Back to email sign-in\" : \"Sign in with a password\"}\n      </button>\n    </p>}\n  </section>\n"
       ],
       [
         "copy",
-        1
+        3
       ],
       [
         "add",
@@ -988,39 +1173,19 @@
       ],
       [
         "copy",
-        23
-      ],
-      [
-        "skip",
         1
       ],
       [
         "add",
-        "  const pending = submission.kind === \"pending\"\n  const describedBy = submission.kind === \"failed\" ? \"signin-error\" : undefined\n  return <main className=\"signin-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n"
+        "  const [options, setOptions] = useState<SignInOptions | null>(null)\n  const [passwordChosen, setPasswordChosen] = useState(false)\n"
       ],
       [
         "copy",
-        2
-      ],
-      [
-        "skip",
         3
       ],
       [
         "add",
-        "        <h1 id=\"signin-title\">Open your library</h1>\n        <p>Sign in to read your documents and their guides.</p>\n"
-      ],
-      [
-        "copy",
-        4
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "          <input id=\"email\" name=\"email\" type=\"email\" autoComplete=\"username\" autoCapitalize=\"none\" spellCheck={false} required maxLength={254}\n            aria-describedby={describedBy} readOnly={pending} />\n"
+        "  useEffect(() => runAuth(readSignInOptions, setOptions, () => setOptions({ method: \"password\", accessCode: false })), [])\n"
       ],
       [
         "copy",
@@ -1032,7 +1197,19 @@
       ],
       [
         "add",
-        "          <input id=\"password\" name=\"password\" type=\"password\" autoComplete=\"current-password\" required maxLength={128}\n            aria-describedby={describedBy} readOnly={pending} />\n"
+        "    if (inFlight.current || options === null) return\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    const accessCode = fields.get(\"access-code\")\n    if (typeof email !== \"string\") return\n    const program = options.method === \"email\" && !passwordChosen\n      ? signInWithEmail(email.trim(), typeof accessCode === \"string\" ? accessCode.trim() : null)\n      : typeof password === \"string\" ? signIn(email.trim(), password) : null\n    if (program === null) return\n"
       ],
       [
         "copy",
@@ -1044,15 +1221,19 @@
       ],
       [
         "add",
-        "        <button className=\"button primary signin-submit\" type=\"submit\" disabled={pending}>{pending ? \"Signing in…\" : \"Sign in\"}</button>\n"
+        "    cancel.current = runAuth(program, (session) => {\n"
       ],
       [
         "copy",
-        4
+        8
+      ],
+      [
+        "skip",
+        22
       ],
       [
         "add",
-        "    <div className=\"signin-print\" aria-hidden=\"true\">\n      <img src={frontispiece} width=\"360\" height=\"390\" alt=\"\" />\n    </div>\n  </main>\n}\n\nfunction NotFoundPage({ main, adminDenied }: { readonly main: RefObject<HTMLElement | null>; readonly adminDenied: boolean }) {\n  return <main className=\"status-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <InternalLink className=\"back-link\" href=\"/\">Your library</InternalLink>\n    <h1>{adminDenied ? \"Administrator access required\" : \"Page not found.\"}</h1>\n  </main>\n}\n\ntype WorkspaceUnavailableProps = { readonly main: RefObject<HTMLElement | null>; readonly message: string; readonly onRetry: () => void }\n\nfunction WorkspaceUnavailable({ main, message, onRetry }: WorkspaceUnavailableProps) {\n  return <main className=\"status-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <h1>We couldn’t open your workspace.</h1>\n    <p className=\"message error\" role=\"alert\">{message}</p>\n    <button className=\"button\" type=\"button\" onClick={onRetry}>Try again</button>\n"
+        "  const choosePassword = (chosen: boolean) => {\n    if (inFlight.current) return\n    setPasswordChosen(chosen)\n    setSubmission({ kind: \"idle\" })\n  }\n\n  return <main className=\"signin-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <SignInCard options={options} passwordChosen={passwordChosen} onChoosePassword={choosePassword} submission={submission} onSubmit={submit} />\n    <div className=\"signin-print\" aria-hidden=\"true\">\n      <img src={frontispiece} width=\"360\" height=\"390\" alt=\"\" />\n    </div>\n  </main>\n}\n\nfunction NotFoundPage({ main, adminDenied }: { readonly main: RefObject<HTMLElement | null>; readonly adminDenied: boolean }) {\n  return <main className=\"status-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <InternalLink className=\"back-link\" href=\"/\">Your library</InternalLink>\n    <h1>{adminDenied ? \"Administrator access required\" : \"Page not found.\"}</h1>\n  </main>\n}\n\ntype WorkspaceUnavailableProps = { readonly main: RefObject<HTMLElement | null>; readonly message: string; readonly onRetry: () => void }\n\nfunction WorkspaceUnavailable({ main, message, onRetry }: WorkspaceUnavailableProps) {\n  return <main className=\"status-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <h1>We couldn’t open your workspace.</h1>\n    <p className=\"message error\" role=\"alert\">{message}</p>\n    <button className=\"button\" type=\"button\" onClick={onRetry}>Try again</button>\n"
       ],
       [
         "copy",
@@ -1144,7 +1325,7 @@
       ],
       [
         "add",
-        "    {sessionState.kind === \"authenticated\" && (route.kind === \"document\"\n      ? <DocumentPage id={route.documentId} onUnauthenticated={onUnauthenticated} />\n      : missingRoute\n        ? <NotFoundPage main={terminalMain} adminDenied={route.kind === \"admin-denied\"} />\n        : <Dashboard ownerId={sessionState.session.user.id} storedAttempt={uploadAttempt} setAttempt={setUploadAttempt}\n          onUnauthenticated={onUnauthenticated} />)}\n"
+        "    {sessionState.kind === \"authenticated\" && (route.kind === \"document\"\n      ? <DocumentPage id={route.documentId} viewerId={sessionState.session.user.id} onUnauthenticated={onUnauthenticated} />\n      : missingRoute\n        ? <NotFoundPage main={terminalMain} adminDenied={route.kind === \"admin-denied\"} />\n        : <Dashboard ownerId={sessionState.session.user.id} storedAttempt={uploadAttempt} setAttempt={setUploadAttempt}\n          onUnauthenticated={onUnauthenticated} />)}\n"
       ],
       [
         "copy",
@@ -1201,7 +1382,7 @@
       ],
       [
         "add",
-        "import { OriginalPreview } from \"./reader/OriginalPreview.tsx\"\nimport { PageNavigation } from \"./reader/Panels.tsx\"\nimport { pageFromLocation } from \"./reader/presentation.ts\"\nimport { GoalChoices } from \"./guide/GoalChoices.tsx\"\nimport { PaperStatus } from \"./guide/PaperStatus.tsx\"\nimport { ProcessingProgress } from \"./guide/ProcessingProgress.tsx\"\nimport { guideLocation, guideRouteFromLocation, selectedGoal } from \"./guide/navigation.ts\"\nimport { InternalLink } from \"./links.tsx\"\nimport { PaperLibrary } from \"./library/PaperLibrary.tsx\"\nimport { uploadUnavailableMessage } from \"./library/presentation.ts\"\nimport { countLabel } from \"./text.ts\"\nimport \"./guide/guide.css\"\nimport \"./library/library.css\"\n"
+        "import { OriginalPreview } from \"./reader/OriginalPreview.tsx\"\nimport { PageNavigation } from \"./reader/Panels.tsx\"\nimport { pageFromLocation } from \"./reader/presentation.ts\"\nimport { GoalChoices } from \"./guide/GoalChoices.tsx\"\nimport { PaperStatus } from \"./guide/PaperStatus.tsx\"\nimport { ProcessingProgress } from \"./guide/ProcessingProgress.tsx\"\nimport { guideLocation, guideRouteFromLocation, selectedGoal } from \"./guide/navigation.ts\"\nimport { InternalLink } from \"./links.tsx\"\nimport { ExampleLibrary, PaperLibrary } from \"./library/PaperLibrary.tsx\"\nimport { uploadUnavailableMessage } from \"./library/presentation.ts\"\nimport { countLabel } from \"./text.ts\"\nimport \"./guide/guide.css\"\nimport \"./library/library.css\"\n"
       ],
       [
         "copy",
@@ -1225,7 +1406,7 @@
       ],
       [
         "add",
-        "function LibraryMasthead({ count, loading, onRefresh }: { readonly count: number | null; readonly loading: boolean; readonly onRefresh: () => void }) {\n  return <header className=\"library-masthead\"><div><p className=\"library-eyebrow\">Reading room</p><h2>Your library</h2></div>\n    <div className=\"library-index\">{count !== null && <span>{countLabel(count, \"document\")}</span>}\n      <button className=\"library-secondary-link\" type=\"button\" disabled={loading} onClick={onRefresh}>Refresh</button></div></header>\n}\n\ntype DropzoneProps = {\n  readonly policy: UploadPolicy\n  readonly uploading: boolean\n  readonly enabled: boolean\n  readonly primary: boolean\n  readonly onFiles: (files: ReadonlyArray<File>) => void\n}\n\nconst leftDropzone = (event: DragEvent<HTMLElement>): boolean =>\n  !event.currentTarget.contains(event.relatedTarget instanceof Node ? event.relatedTarget : null)\n\nfunction UploadDropzone({ policy, uploading, enabled, primary, onFiles }: DropzoneProps) {\n  const [dragging, setDragging] = useState(false)\n  const input = useRef<HTMLInputElement>(null)\n  const dragOver = (event: DragEvent<HTMLElement>) => {\n    event.preventDefault()\n    event.dataTransfer.dropEffect = enabled ? \"copy\" : \"none\"\n    if (enabled) setDragging(true)\n  }\n  const drop = (event: DragEvent<HTMLElement>) => { event.preventDefault(); setDragging(false); onFiles(Array.from(event.dataTransfer.files)) }\n  const choose = (event: ChangeEvent<HTMLInputElement>) => { onFiles(Array.from(event.currentTarget.files ?? [])); event.currentTarget.value = \"\" }\n  return <div className={`dropzone library-drop${dragging ? \" dragging\" : \"\"}`} role=\"group\" aria-label=\"Document upload\" aria-busy={uploading}\n    onDragOver={dragOver} onDragLeave={(event) => { if (leftDropzone(event)) setDragging(false) }} onDrop={drop}>\n    <div className=\"library-add-copy\"><span className=\"library-add-icon\"><DocumentIcon /></span>\n      <div><h2 id=\"library-upload-title\">{uploading ? \"Uploading your document…\" : \"Add a document\"}</h2>\n        <p id=\"upload-limits\">Drop one English-language PDF here, up to {formatBytes(policy.maxBytes)} and {policy.maxPages} pages.\n          Short documents work best: a four-page PDF takes about five minutes.</p></div></div>\n    <button className={`button${primary ? \" primary\" : \"\"}`} type=\"button\" disabled={!enabled} aria-describedby=\"upload-limits\"\n      onClick={() => input.current?.click()}>Choose a file</button>\n    <input ref={input} className=\"visually-hidden\" aria-hidden=\"true\" tabIndex={-1} type=\"file\" accept=\"application/pdf,.pdf\"\n      disabled={!enabled} onChange={choose} />\n  </div>\n}\n\ntype FailureProps = {\n  readonly attempt: UploadAttempt\n  readonly ready: boolean\n  readonly dismissable: boolean\n  readonly onRetry: () => void\n  readonly onDismiss: () => void\n}\n\nfunction UploadFailure({ attempt, ready, dismissable, onRetry, onDismiss }: FailureProps) {\n  return <section className=\"message error\" role=\"alert\"><p>{attempt.file.name}: {attempt.message}</p>\n    {attempt.state === \"uncertain\" && <p>The upload may already be saved. Check your library. Retrying uses the same submission identifier.</p>}\n    <div className=\"document-actions\"><button className=\"button\" type=\"button\" disabled={!ready} onClick={onRetry}>Retry upload</button>\n      <button className=\"button\" type=\"button\" disabled={!dismissable} onClick={onDismiss}>Choose another file</button></div></section>\n}\n\nconst uploadDisclosure = \"Your page images are sent to Meta for extraction and checking. Document text and figure regions are sent to Meta\"\n  + \" for headings, descriptions, and your reading guide. Local documents and outputs are kept for 7 days. You can delete them after processing stops.\"\nconst tooLongUpload = \"This PDF is longer than AmuseMe can process in one run. Choose a shorter PDF, or save an excerpt of a few pages and upload that.\"\nconst interruptedUpload = \"Upload interrupted. Check your documents, then retry this upload with its original submission identifier if needed.\"\n\ntype DashboardProps = {\n  readonly ownerId: string\n  readonly storedAttempt: UploadAttempt | null\n  readonly setAttempt: Dispatch<SetStateAction<UploadAttempt | null>>\n  readonly onUnauthenticated: () => void\n}\ntype ListResult = { readonly version: number; readonly data: typeof DocumentList.Type | null; readonly error: string | null }\n\nexport function Dashboard({ ownerId, storedAttempt, setAttempt, onUnauthenticated }: DashboardProps) {\n"
+        "function LibraryMasthead({ count, loading, onRefresh }: { readonly count: number | null; readonly loading: boolean; readonly onRefresh: () => void }) {\n  return <header className=\"library-masthead\"><div><p className=\"library-eyebrow\">Reading room</p><h2>Your library</h2></div>\n    <div className=\"library-index\">{count !== null && <span>{countLabel(count, \"document\")}</span>}\n      <button className=\"library-secondary-link\" type=\"button\" disabled={loading} onClick={onRefresh}>Refresh</button></div></header>\n}\n\ntype DropzoneProps = {\n  readonly policy: UploadPolicy\n  readonly uploading: boolean\n  readonly enabled: boolean\n  readonly primary: boolean\n  readonly onFiles: (files: ReadonlyArray<File>) => void\n}\n\nconst leftDropzone = (event: DragEvent<HTMLElement>): boolean =>\n  !event.currentTarget.contains(event.relatedTarget instanceof Node ? event.relatedTarget : null)\n\nfunction UploadDropzone({ policy, uploading, enabled, primary, onFiles }: DropzoneProps) {\n  const [dragging, setDragging] = useState(false)\n  const input = useRef<HTMLInputElement>(null)\n  const dragOver = (event: DragEvent<HTMLElement>) => {\n    event.preventDefault()\n    event.dataTransfer.dropEffect = enabled ? \"copy\" : \"none\"\n    if (enabled) setDragging(true)\n  }\n  const drop = (event: DragEvent<HTMLElement>) => { event.preventDefault(); setDragging(false); onFiles(Array.from(event.dataTransfer.files)) }\n  const choose = (event: ChangeEvent<HTMLInputElement>) => { onFiles(Array.from(event.currentTarget.files ?? [])); event.currentTarget.value = \"\" }\n  return <div className={`dropzone library-drop${dragging ? \" dragging\" : \"\"}`} role=\"group\" aria-label=\"Document upload\" aria-busy={uploading}\n    onDragOver={dragOver} onDragLeave={(event) => { if (leftDropzone(event)) setDragging(false) }} onDrop={drop}>\n    <div className=\"library-add-copy\"><span className=\"library-add-icon\"><DocumentIcon /></span>\n      <div><h2 id=\"library-upload-title\">{uploading ? \"Uploading your document…\" : \"Add a document\"}</h2>\n        <p id=\"upload-limits\">Drop one English-language PDF here, up to {formatBytes(policy.maxBytes)} and {policy.maxPages} pages.\n          Short documents work best: a four-page PDF takes about five minutes.</p>\n        {policy.allowance !== undefined && <p className=\"upload-allowance\" role=\"status\">{allowanceText(policy.allowance)}</p>}</div></div>\n    <button className={`button${primary ? \" primary\" : \"\"}`} type=\"button\" disabled={!enabled} aria-describedby=\"upload-limits\"\n      onClick={() => input.current?.click()}>Choose a file</button>\n    <input ref={input} className=\"visually-hidden\" aria-hidden=\"true\" tabIndex={-1} type=\"file\" accept=\"application/pdf,.pdf\"\n      disabled={!enabled} onChange={choose} />\n  </div>\n}\n\nconst allowanceText = ({ limit, used }: { readonly limit: number; readonly used: number }) => used >= limit\n  ? `You've used your ${countLabel(limit, \"upload\")}.`\n  : `${countLabel(limit - used, \"upload\")} left of ${limit}.`\n\ntype FailureProps = {\n  readonly attempt: UploadAttempt\n  readonly ready: boolean\n  readonly dismissable: boolean\n  readonly onRetry: () => void\n  readonly onDismiss: () => void\n}\n\nfunction UploadFailure({ attempt, ready, dismissable, onRetry, onDismiss }: FailureProps) {\n  return <section className=\"message error\" role=\"alert\"><p>{attempt.file.name}: {attempt.message}</p>\n    {attempt.state === \"uncertain\" && <p>The upload may already be saved. Check your library. Retrying uses the same submission identifier.</p>}\n    <div className=\"document-actions\"><button className=\"button\" type=\"button\" disabled={!ready} onClick={onRetry}>Retry upload</button>\n      <button className=\"button\" type=\"button\" disabled={!dismissable} onClick={onDismiss}>Choose another file</button></div></section>\n}\n\nconst uploadDisclosure = \"Your page images are sent to Meta for extraction and checking. Document text and figure regions are sent to Meta\"\n  + \" for headings, descriptions, and your reading guide. Local documents and outputs are kept for 7 days. You can delete them after processing stops.\"\nconst tooLongUpload = \"This PDF is longer than AmuseMe can process in one run. Choose a shorter PDF, or save an excerpt of a few pages and upload that.\"\nconst interruptedUpload = \"Upload interrupted. Check your documents, then retry this upload with its original submission identifier if needed.\"\n\ntype DashboardProps = {\n  readonly ownerId: string\n  readonly storedAttempt: UploadAttempt | null\n  readonly setAttempt: Dispatch<SetStateAction<UploadAttempt | null>>\n  readonly onUnauthenticated: () => void\n}\ntype ListResult = { readonly version: number; readonly data: typeof DocumentList.Type | null; readonly error: string | null }\n\nexport function Dashboard({ ownerId, storedAttempt, setAttempt, onUnauthenticated }: DashboardProps) {\n"
       ],
       [
         "copy",
@@ -1257,7 +1438,19 @@
       ],
       [
         "copy",
-        13
+        4
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  const allowance = policy?.allowance\n  const chooseEnabled = ready && !uploading && attempt === null && (allowance === undefined || allowance.used < allowance.limit)\n"
+      ],
+      [
+        "copy",
+        8
       ],
       [
         "skip",
@@ -1321,7 +1514,7 @@
       ],
       [
         "add",
-        "  const records = result.data?.documents ?? []\n  const hasPapers = records.length > 0\n  const refresh = () => setVersion((value) => value + 1)\n  const enabledPolicy = policy?.availability._tag === \"enabled\" ? policy : undefined\n  const showLibrary = !loading && result.data !== null && (hasPapers || result.error === null)\n  const controls = { retryEnabled: result.error === null, onDeleted: refresh, onRefresh: refresh, onUnauthenticated }\n  return <main className=\"dashboard-page reading-library\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <LibraryIntro />\n    {enabledPolicy !== undefined && <section className=\"library-upload\" aria-labelledby=\"library-upload-title\">\n      <UploadDropzone policy={enabledPolicy} uploading={uploading} enabled={chooseEnabled} primary onFiles={selectFiles} />\n      {enabledPolicy.mode !== \"fixture\" && <p className=\"upload-disclosure\">{uploadDisclosure}</p>}\n    </section>}\n    {message !== null && attempt === null && <p className=\"message\" role=\"status\">{message}</p>}\n    {uploading && <p className=\"message\" role=\"status\">\n      Uploading {attempt?.file.name ?? \"your PDF\"}. Keep this page open while the server checks and saves it.</p>}\n    {attempt !== null && !uploading && <UploadFailure attempt={attempt} ready={ready} dismissable={!loading && !refreshingFailed}\n      onRetry={() => submit(attempt.file, attempt)} onDismiss={() => { setAttempt(null); setMessage(null) }} />}\n    <LibraryMasthead count={result.data === null ? null : records.length} loading={loading} onRefresh={refresh} />\n    {loading && <p className=\"library-note\" role=\"status\">Loading your documents…</p>}\n    {result.error !== null && <p className=\"message error\" role=\"alert\">{result.error}\n      {\" \"}{result.data !== null && \"The last saved list is shown. Its status may be out of date.\"}\n      {\" \"}<button className=\"text-button\" type=\"button\" onClick={refresh}>Try again</button></p>}\n    {showLibrary && <PaperLibrary records={records} controls={controls} />}\n    {policy?.availability._tag === \"disabled\" && <section className=\"library-upload-unavailable\" aria-label=\"Document upload\"><h2>Uploads paused</h2>\n      <p role=\"status\">{uploadUnavailableMessage(policy.availability, hasPapers)}</p></section>}\n"
+        "  const records = result.data?.documents ?? []\n  const hasPapers = records.length > 0\n  const refresh = () => setVersion((value) => value + 1)\n  const enabledPolicy = policy?.availability._tag === \"enabled\" ? policy : undefined\n  const showLibrary = !loading && result.data !== null && (hasPapers || result.error === null)\n  const controls = { retryEnabled: result.error === null, onDeleted: refresh, onRefresh: refresh, onUnauthenticated }\n  return <main className=\"dashboard-page reading-library\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <LibraryIntro />\n    {enabledPolicy !== undefined && <section className=\"library-upload\" aria-labelledby=\"library-upload-title\">\n      <UploadDropzone policy={enabledPolicy} uploading={uploading} enabled={chooseEnabled} primary onFiles={selectFiles} />\n      {enabledPolicy.mode !== \"fixture\" && <p className=\"upload-disclosure\">{uploadDisclosure}</p>}\n    </section>}\n    {message !== null && attempt === null && <p className=\"message\" role=\"status\">{message}</p>}\n    {uploading && <p className=\"message\" role=\"status\">\n      Uploading {attempt?.file.name ?? \"your PDF\"}. Keep this page open while the server checks and saves it.</p>}\n    {attempt !== null && !uploading && <UploadFailure attempt={attempt} ready={ready} dismissable={!loading && !refreshingFailed}\n      onRetry={() => submit(attempt.file, attempt)} onDismiss={() => { setAttempt(null); setMessage(null) }} />}\n    <LibraryMasthead count={result.data === null ? null : records.length} loading={loading} onRefresh={refresh} />\n    {loading && <p className=\"library-note\" role=\"status\">Loading your documents…</p>}\n    {result.error !== null && <p className=\"message error\" role=\"alert\">{result.error}\n      {\" \"}{result.data !== null && \"The last saved list is shown. Its status may be out of date.\"}\n      {\" \"}<button className=\"text-button\" type=\"button\" onClick={refresh}>Try again</button></p>}\n    {showLibrary && <PaperLibrary records={records} controls={controls} />}\n    {showLibrary && <ExampleLibrary records={result.data?.examples ?? []} controls={controls} />}\n    {policy?.availability._tag === \"disabled\" && <section className=\"library-upload-unavailable\" aria-label=\"Document upload\"><h2>Uploads paused</h2>\n      <p role=\"status\">{uploadUnavailableMessage(policy.availability, hasPapers)}</p></section>}\n"
       ],
       [
         "copy",
@@ -1336,12 +1529,16 @@
         3
       ],
       [
+        "skip",
+        1
+      ],
+      [
         "add",
-        "type LiveProps = {\n  readonly record: DocumentRecord\n  readonly summary: ReturnType<typeof runSummary>\n  readonly pages: ReadonlyArray<{ readonly pageNumber: number }>\n  readonly page: number\n}\n\nconst liveNote = (failed: boolean): string => failed\n  ? \"Your original is still available. No clean copy was published for this run.\"\n  : \"Keep reading. Your clean copy will open on this page when it is ready.\"\n\nfunction LiveDocument({ record, summary, pages, page }: LiveProps) {\n  const id = record.document.id\n  return <section className=\"live-document\" aria-labelledby=\"document-title\">\n    <button type=\"button\" className=\"reader-text-link\" onClick={() => navigate(guideLocation(id, { mode: \"choices\", goal: \"read\" }, page))}>\n      ← Choose how to read</button>\n    <header className=\"live-document-heading\"><div><h1 id=\"document-title\" className=\"document-filename\">{record.document.originalFilename}</h1>\n      <p>{countLabel(record.document.pageCount, \"page\")} · {formatBytes(record.document.byteCount)} · Original PDF</p></div>\n      <PageNavigation pages={pages} page={page} onPage={(number) => navigate(guideLocation(id, { mode: \"read\" }, number))} /></header>\n    {activeRun(record.latestRun) ? <ProcessingProgress record={record} compact />\n      : <div className={`live-progress${summary.failed ? \" failed\" : \"\"}`} role=\"status\">\n        <span className=\"live-status-mark\" aria-hidden=\"true\">{summary.failed ? \"!\" : \"●\"}</span>\n        <div><h2>{summary.title}</h2><p>{summary.description}</p><p>{liveNote(summary.failed)}</p></div></div>}\n    {record.latestRun.configuration.extractionProvider === \"fixture\"\n      && <p className=\"fixture-note\">Test fixture · Document processing is not connected.</p>}\n    <OriginalPreview documentId={id} page={page} />\n    <p className=\"small-note\">Available until {formatExpiry(record.document.expiresAt)}</p>\n  </section>\n}\n\ntype RecordResult = { readonly id: DocumentId; readonly version: number; readonly data: DocumentRecord | null; readonly error: DocumentReadFailure | null }\n\nconst pageTitle = (record: DocumentRecord | null, error: DocumentReadFailure | null): string =>\n  `${record?.document.originalFilename ?? (error?.status === 410 ? \"Document expired\" : \"Document unavailable\")} · AmuseMe`\n\n"
+        "type LiveProps = {\n  readonly record: DocumentRecord\n  readonly summary: ReturnType<typeof runSummary>\n  readonly pages: ReadonlyArray<{ readonly pageNumber: number }>\n  readonly page: number\n}\n\nconst liveNote = (failed: boolean): string => failed\n  ? \"Your original is still available. No clean copy was published for this run.\"\n  : \"Keep reading. Your clean copy will open on this page when it is ready.\"\n\nfunction LiveDocument({ record, summary, pages, page }: LiveProps) {\n  const id = record.document.id\n  return <section className=\"live-document\" aria-labelledby=\"document-title\">\n    <button type=\"button\" className=\"reader-text-link\" onClick={() => navigate(guideLocation(id, { mode: \"choices\", goal: \"read\" }, page))}>\n      ← Choose how to read</button>\n    <header className=\"live-document-heading\"><div><h1 id=\"document-title\" className=\"document-filename\">{record.document.originalFilename}</h1>\n      <p>{countLabel(record.document.pageCount, \"page\")} · {formatBytes(record.document.byteCount)} · Original PDF</p></div>\n      <PageNavigation pages={pages} page={page} onPage={(number) => navigate(guideLocation(id, { mode: \"read\" }, number))} /></header>\n    {activeRun(record.latestRun) ? <ProcessingProgress record={record} compact />\n      : <div className={`live-progress${summary.failed ? \" failed\" : \"\"}`} role=\"status\">\n        <span className=\"live-status-mark\" aria-hidden=\"true\">{summary.failed ? \"!\" : \"●\"}</span>\n        <div><h2>{summary.title}</h2><p>{summary.description}</p><p>{liveNote(summary.failed)}</p></div></div>}\n    {record.latestRun.configuration.extractionProvider === \"fixture\"\n      && <p className=\"fixture-note\">Test fixture · Document processing is not connected.</p>}\n    <OriginalPreview documentId={id} page={page} />\n    <p className=\"small-note\">Available until {formatExpiry(record.document.expiresAt)}</p>\n  </section>\n}\n\ntype RecordResult = { readonly id: DocumentId; readonly version: number; readonly data: DocumentRecord | null; readonly error: DocumentReadFailure | null }\n\nconst pageTitle = (record: DocumentRecord | null, error: DocumentReadFailure | null): string =>\n  `${record?.document.originalFilename ?? (error?.status === 410 ? \"Document expired\" : \"Document unavailable\")} · AmuseMe`\n\nexport function DocumentPage({ id, viewerId, onUnauthenticated }: { readonly id: DocumentId; readonly viewerId: string; readonly onUnauthenticated: () => void }) {\n"
       ],
       [
         "copy",
-        2
+        1
       ],
       [
         "skip",
@@ -1381,7 +1578,7 @@
       ],
       [
         "add",
-        "  const pages = Array.from({ length: record?.document.pageCount ?? 1 }, (_, index) => ({ pageNumber: index + 1 }))\n  const page = pageFromLocation(location, pages)\n  const route = guideRouteFromLocation(location)\n  const previousMode = useRef(route.mode)\n  useEffect(() => {\n    if (!current || ownsOutput) return\n    if (previousMode.current !== route.mode && main.current !== null) focusReadingPage(main.current)\n    previousMode.current = route.mode\n  }, [current, ownsOutput, route.mode, main, previousMode])\n  const refresh = () => setVersion((value) => value + 1)\n  if (ownsOutput && record !== null && record.currentRevisionId !== null) {\n    const revisionId = record.currentRevisionId\n    return <ReaderWorkspace key={`${id}-${revisionId}`} record={record} revisionId={revisionId} onRefresh={refresh} onUnauthenticated={onUnauthenticated} />\n  }\n  const status = record !== null && summary !== null && result.error?.status !== 410 ? { record, summary } : null\n  return <main className=\"dashboard-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <InternalLink className=\"back-link\" href=\"/\"><span aria-hidden=\"true\">←</span> Your library</InternalLink>\n"
+        "  const pages = Array.from({ length: record?.document.pageCount ?? 1 }, (_, index) => ({ pageNumber: index + 1 }))\n  const page = pageFromLocation(location, pages)\n  const route = guideRouteFromLocation(location)\n  const previousMode = useRef(route.mode)\n  useEffect(() => {\n    if (!current || ownsOutput) return\n    if (previousMode.current !== route.mode && main.current !== null) focusReadingPage(main.current)\n    previousMode.current = route.mode\n  }, [current, ownsOutput, route.mode, main, previousMode])\n  const refresh = () => setVersion((value) => value + 1)\n  if (ownsOutput && record !== null && record.currentRevisionId !== null) {\n    const revisionId = record.currentRevisionId\n    return <ReaderWorkspace key={`${id}-${revisionId}`} record={record} revisionId={revisionId} readOnly={record.document.ownerId !== viewerId} onRefresh={refresh} onUnauthenticated={onUnauthenticated} />\n  }\n  const status = record !== null && summary !== null && result.error?.status !== 410 ? { record, summary } : null\n  return <main className=\"dashboard-page\" id=\"main-content\" ref={main} tabIndex={-1}>\n    <InternalLink className=\"back-link\" href=\"/\"><span aria-hidden=\"true\">←</span> Your library</InternalLink>\n"
       ],
       [
         "copy",
@@ -1393,7 +1590,7 @@
       ],
       [
         "add",
-        "    {current && result.error !== null && <><DocumentReadError error={result.error} onRetry={refresh} />\n      {record !== null && result.error.status !== 410 && <p className=\"reader-small\">The last saved status is shown and may be out of date.</p>}</>}\n    {status !== null && route.mode !== \"read\" && <div className=\"guide-choice-layout\">\n      <GoalChoices selected={selectedGoal(route)} processing={activeRun(status.record.latestRun)} ready={false}\n        onSelect={(goal) => navigate(guideLocation(id, { mode: \"choices\", goal }, page))} onOpen={() => navigate(guideLocation(id, { mode: \"read\" }, page))} />\n      <PaperStatus record={status.record} /></div>}\n    {status !== null && route.mode === \"read\" && <LiveDocument record={status.record} summary={status.summary} pages={pages} page={page} />}\n    {record !== null && result.error === null && <RetryDocumentControl record={record} onRefresh={refresh} onUnauthenticated={onUnauthenticated} />}\n"
+        "    {current && result.error !== null && <><DocumentReadError error={result.error} onRetry={refresh} />\n      {record !== null && result.error.status !== 410 && <p className=\"reader-small\">The last saved status is shown and may be out of date.</p>}</>}\n    {status !== null && route.mode !== \"read\" && <div className=\"guide-choice-layout\">\n      <GoalChoices selected={selectedGoal(route)} processing={activeRun(status.record.latestRun)} ready={false}\n        onSelect={(goal) => navigate(guideLocation(id, { mode: \"choices\", goal }, page))} onOpen={() => navigate(guideLocation(id, { mode: \"read\" }, page))} />\n      <PaperStatus record={status.record} /></div>}\n    {status !== null && route.mode === \"read\" && <LiveDocument record={status.record} summary={status.summary} pages={pages} page={page} />}\n    {record !== null && result.error === null && record.document.ownerId === viewerId && <RetryDocumentControl record={record} onRefresh={refresh} onUnauthenticated={onUnauthenticated} />}\n"
       ],
       [
         "copy",
@@ -1437,6 +1634,55 @@
       [
         "add",
         "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 64 64\" role=\"img\" aria-label=\"AmuseMe\">\n  <title>AmuseMe</title>\n  <rect width=\"64\" height=\"64\" rx=\"14\" fill=\"#243629\"/>\n  <path fill=\"#f7f7f4\" fill-rule=\"evenodd\" transform=\"translate(3.2 3.2) scale(1.8)\" d=\"M16 4H21L28 11V28H22V25.8C20.2 27.3 18.1 28 15.5 28C8.7 28 4 23 4 16C4 9 8.8 4 16 4ZM16 10C12.4 10 10 12.4 10 16C10 19.6 12.4 22 16 22C19.6 22 22 19.6 22 16V10H16Z\"/>\n</svg>\n"
+      ]
+    ]
+  },
+  "src/app/client/auth.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { Session, SignInOptions } from \"../../domain/index.ts\"\n"
+      ],
+      [
+        "copy",
+        21
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "export const readSignInOptions = Effect.gen(function* () {\n  const client = HttpClient.withScope(yield* HttpClient.HttpClient)\n  const response = yield* client.get(\"/auth/sign-in-options\").pipe(Effect.mapError(transportFailure))\n  if (response.status !== 200) return yield* new AuthFailure({ kind: \"rejected\", message: \"We couldn’t load the sign-in page. Please reload.\", status: response.status })\n  const json = yield* response.json.pipe(Effect.mapError((cause) => new AuthFailure({ kind: \"invalid-response\", message: \"We couldn’t load the sign-in page. Please reload.\", cause })))\n  return yield* Schema.decodeUnknownEffect(SignInOptions)(json).pipe(Effect.mapError((cause) => new AuthFailure({ kind: \"invalid-response\", message: \"We couldn’t load the sign-in page. Please reload.\", cause })))\n}).pipe(Effect.scoped)\n\nconst emailOnlyMessages: Record<number, string> = {\n  400: \"Enter a valid email address.\",\n  401: \"That access code is not right. Check it and try again.\",\n  403: \"This email already has a password. Sign in with the invited account instead.\",\n}\n\nconst postAuth = Effect.fn(\"postAuth\")(function* (path: string, body: { readonly email: string; readonly password?: string; readonly accessCode?: string } | Record<string, never>) {\n"
+      ],
+      [
+        "copy",
+        8
+      ],
+      [
+        "add",
+        "      : path === \"/auth/sign-in/judge\" && emailOnlyMessages[response.status] !== undefined\n        ? emailOnlyMessages[response.status] ?? \"\"\n"
+      ],
+      [
+        "copy",
+        10
+      ],
+      [
+        "add",
+        "  return session\n})\n\nexport const signInWithEmail = Effect.fn(\"signInWithEmail\")(function* (email: string, accessCode: string | null) {\n  yield* postAuth(\"/auth/sign-in/judge\", accessCode === null ? { email } : { email, accessCode })\n  const session = yield* readSession\n  if (session === null) return yield* new AuthFailure({ kind: \"rejected\", message: \"Your session could not be confirmed. Please try again.\" })\n"
+      ],
+      [
+        "copy",
+        21
       ]
     ]
   },
@@ -2064,7 +2310,7 @@
       ],
       [
         "add",
-        "type CopyState = \"idle\" | \"pending\" | \"done\"\ntype Rating = typeof RatingValue.Type\nconst copyLabels = { idle: \"Copy entire normalized text\", pending: \"Copying…\", done: \"Copied all text ✓\" } as const\nconst shortCopyLabels = { idle: \"Copy all text\", pending: \"Copying…\", done: \"Copied ✓\" } as const\n\nconst guideTitle = (route: GuideRoute, canonical: CanonicalDocument | undefined): string => {\n  switch (route.mode) {\n    case \"walk\": return `Step ${Math.min(route.n, canonical?.guide?.steps.length ?? 1)}`\n    case \"claims\": return `Claim ${Math.min(route.n, canonical?.guide?.claims.length ?? 1)}`\n    case \"overview\": return \"Overview\"\n    case \"map\": return \"Document map\"\n    case \"done-walk\":\n    case \"done-claims\": return \"Guide complete\"\n    case \"choices\": return \"Your reading goal\"\n    case \"read\": return \"Read the document\"\n  }\n}\n\nconst imageSummary = (canonical: CanonicalDocument | undefined): string => {\n  const available = canonical?.figures.filter((figure) => figure.asset._tag === \"available\").length ?? 0\n  return available === 0 ? \"No source images\" : countLabel(available, \"source image\")\n}\n\ntype OutputActionsProps = {\n  readonly identity: OutputIdentity\n  readonly copyState: CopyState\n  readonly rating: Rating | null\n  readonly ratingPending: boolean\n  readonly message: string | null\n  readonly onCopy: () => void\n  readonly onRate: (value: Rating) => void\n}\n\nfunction OutputActions({ identity, copyState, rating, ratingPending, message, onCopy, onRate }: OutputActionsProps) {\n  return <><div className=\"reader-downloads\"><a className=\"button primary\" href={outputUrl(identity, \"zip\")} download>↓ Download ZIP</a>\n    <a className=\"reader-text-link\" href={outputUrl(identity, \"text\")} download>Download text only</a>\n    <a className=\"reader-text-link\" href={originalUrl(identity.documentId)} download>Download original PDF</a>\n    <button className=\"reader-text-link\" type=\"button\" onClick={onCopy} disabled={copyState === \"pending\"}>{copyLabels[copyState]}</button></div>\n    <div className=\"reader-rating\" role=\"group\" aria-label=\"Rate this output\"><span>Was this useful?</span>\n      <button className=\"button\" type=\"button\" aria-pressed={rating === \"up\"} disabled={ratingPending} onClick={() => onRate(\"up\")}>Yes</button>\n      <button className=\"button\" type=\"button\" aria-pressed={rating === \"down\"} disabled={ratingPending} onClick={() => onRate(\"down\")}>\n        Needs work</button></div>\n    {message !== null && <p className=\"reader-small reader-action-status\" role=\"status\">{message}</p>}</>\n}\n\ntype EditionProps = {\n  readonly documentId: string\n  readonly canonical: CanonicalDocument\n  readonly identity: OutputIdentity\n  readonly paperTitle: string\n  readonly titleInPage: boolean\n  readonly page: number\n  readonly copyState: CopyState\n  readonly onCopy: () => void\n}\n\nfunction EditionHead({ documentId, canonical, identity, paperTitle, titleInPage, page, copyState, onCopy }: EditionProps) {\n  const go = (route: Parameters<typeof guideLocation>[1]) => navigate(guideLocation(documentId, route, page))\n  const guided = canonical.guide !== undefined\n  return <header className=\"reader-edition-head\">\n    <div className=\"reader-edition-title\"><p className=\"guide-kicker\">Full document</p>{!titleInPage && <h1>{paperTitle}</h1>}</div>\n    <div className=\"reader-edition-tools\"><nav className=\"guide-reader-links\" aria-label=\"Reading options\">\n      <button type=\"button\" className=\"reader-text-link\" onClick={() => go({ mode: \"choices\", goal: \"read\" })}>Choose how to read</button>\n      {guided && <button type=\"button\" className=\"reader-text-link\" onClick={() => go({ mode: \"overview\" })}>Overview</button>}\n      {guided && <button type=\"button\" className=\"reader-text-link\" onClick={() => go({ mode: \"map\", goal: \"map\" })}>Document map</button>}</nav>\n      <div className=\"live-reader-actions\">\n        <button className=\"button\" type=\"button\" onClick={onCopy} disabled={copyState === \"pending\"}>{shortCopyLabels[copyState]}</button>\n        <a className=\"button\" href={outputUrl(identity, \"zip\")} download>Download ZIP</a></div>\n    </div>\n  </header>\n}\n\ntype PageReaderProps = {\n  readonly canonical: CanonicalDocument\n  readonly identity: OutputIdentity\n  readonly view: \"clean\" | \"original\"\n  readonly page: number\n  readonly readingPage: RefObject<HTMLElement | null>\n  readonly onPage: (number: number) => void\n  readonly onView: (view: \"clean\" | \"original\") => void\n  readonly onPages: () => void\n}\n\nfunction PageText({ canonical, identity, page, onPage, onOriginal }: Pick<PageReaderProps, \"canonical\" | \"identity\" | \"page\" | \"onPage\"> & {\n  readonly onOriginal: () => void\n}) {\n  const blocks = blocksOnPage(canonical, page)\n  const continuations = continuationsOnPage(canonical, page)\n  const continuation = (block: Block) => <p className=\"reader-continuation\" key={block.id}>Text from this page continues a paragraph on\n    {\" \"}<button type=\"button\" onClick={() => onPage(blockPage(block))}>page {blockPage(block)} →</button></p>\n  return <>\n    {continuations.map(continuation)}\n    {blocks.map((block) => <ReaderBlock key={block.id} block={block} canonical={canonical} identity={identity} />)}\n    {blocks.length === 0 && continuations.length === 0 && <p className=\"reader-small\">No text or figures were extracted from this page.\n      {\" \"}<button type=\"button\" className=\"reader-text-link\" onClick={onOriginal}>View the original page.</button></p>}\n  </>\n}\n\nfunction PageReader({ canonical, identity, view, page, readingPage, onPage, onView, onPages }: PageReaderProps) {\n  const nextPage = canonical.pages.find((item) => item.pageNumber > page)\n  const label = `${view === \"clean\" ? \"Normalized document\" : \"Original PDF\"} page ${page}`\n  return <section className=\"reading-surface\" aria-label=\"Document reader\">\n    <div className=\"reading-bar\"><div className=\"reader-view-switch\" role=\"group\" aria-label=\"Reading view\">\n      <button type=\"button\" aria-pressed={view === \"clean\"} onClick={() => onView(\"clean\")}>Clean copy</button>\n      <button type=\"button\" aria-pressed={view === \"original\"} onClick={() => onView(\"original\")}>Original</button></div>\n      <span>Page {page} of {canonical.pages.length}</span><button className=\"reader-edge\" type=\"button\" onClick={onPages}>Pages</button></div>\n    <article className={`paper-content${view === \"original\" ? \" paper-original\" : \"\"}`} ref={readingPage} tabIndex={-1} aria-label={label}>\n      {view === \"original\" ? <OriginalPreview documentId={identity.documentId} page={page} />\n        : <PageText canonical={canonical} identity={identity} page={page} onPage={onPage} onOriginal={() => onView(\"original\")} />}\n    </article>\n    <footer className=\"reading-footer\"><span>END OF PAGE {page}</span>{nextPage === undefined ? <span>End of document</span>\n      : <button type=\"button\" className=\"reader-text-link\" onClick={() => onPage(nextPage.pageNumber)}>\n        Continue to page {nextPage.pageNumber} →</button>}</footer>\n  </section>\n}\n\nconst trustNote = (fullReader: boolean, canonical: CanonicalDocument): string => {\n  if (fullReader) return \"AI can change or miss content. Compare anything you rely on with the original.\"\n  if (canonical.guide === undefined) return \"The original PDF is available in Downloads & details.\"\n  return \"This guide is AI-written. Check the cited passages against the original document.\"\n}\n\ntype WorkspaceProps = {\n  readonly record: DocumentRecord\n  readonly revisionId: OutputRevisionId\n  readonly onRefresh: () => void\n  readonly onUnauthenticated: () => void\n}\ntype Snapshot = { readonly version: number; readonly data: OutputData | null; readonly error: DocumentReadFailure | null }\n\nexport function ReaderWorkspace({ record, revisionId, onRefresh, onUnauthenticated }: WorkspaceProps) {\n"
+        "type CopyState = \"idle\" | \"pending\" | \"done\"\ntype Rating = typeof RatingValue.Type\nconst copyLabels = { idle: \"Copy entire normalized text\", pending: \"Copying…\", done: \"Copied all text ✓\" } as const\nconst shortCopyLabels = { idle: \"Copy all text\", pending: \"Copying…\", done: \"Copied ✓\" } as const\n\nconst guideTitle = (route: GuideRoute, canonical: CanonicalDocument | undefined): string => {\n  switch (route.mode) {\n    case \"walk\": return `Step ${Math.min(route.n, canonical?.guide?.steps.length ?? 1)}`\n    case \"claims\": return `Claim ${Math.min(route.n, canonical?.guide?.claims.length ?? 1)}`\n    case \"overview\": return \"Overview\"\n    case \"map\": return \"Document map\"\n    case \"done-walk\":\n    case \"done-claims\": return \"Guide complete\"\n    case \"choices\": return \"Your reading goal\"\n    case \"read\": return \"Read the document\"\n  }\n}\n\nconst imageSummary = (canonical: CanonicalDocument | undefined): string => {\n  const available = canonical?.figures.filter((figure) => figure.asset._tag === \"available\").length ?? 0\n  return available === 0 ? \"No source images\" : countLabel(available, \"source image\")\n}\n\ntype OutputActionsProps = {\n  readonly identity: OutputIdentity\n  readonly copyState: CopyState\n  readonly rating: Rating | null\n  readonly ratingPending: boolean\n  readonly message: string | null\n  readonly onCopy: () => void\n  readonly onRate: ((value: Rating) => void) | null\n}\n\nfunction OutputActions({ identity, copyState, rating, ratingPending, message, onCopy, onRate }: OutputActionsProps) {\n  return <><div className=\"reader-downloads\"><a className=\"button primary\" href={outputUrl(identity, \"zip\")} download>↓ Download ZIP</a>\n    <a className=\"reader-text-link\" href={outputUrl(identity, \"text\")} download>Download text only</a>\n    <a className=\"reader-text-link\" href={originalUrl(identity.documentId)} download>Download original PDF</a>\n    <button className=\"reader-text-link\" type=\"button\" onClick={onCopy} disabled={copyState === \"pending\"}>{copyLabels[copyState]}</button></div>\n    {onRate !== null && <div className=\"reader-rating\" role=\"group\" aria-label=\"Rate this output\"><span>Was this useful?</span>\n      <button className=\"button\" type=\"button\" aria-pressed={rating === \"up\"} disabled={ratingPending} onClick={() => onRate(\"up\")}>Yes</button>\n      <button className=\"button\" type=\"button\" aria-pressed={rating === \"down\"} disabled={ratingPending} onClick={() => onRate(\"down\")}>\n        Needs work</button></div>}\n    {message !== null && <p className=\"reader-small reader-action-status\" role=\"status\">{message}</p>}</>\n}\n\ntype EditionProps = {\n  readonly documentId: string\n  readonly canonical: CanonicalDocument\n  readonly identity: OutputIdentity\n  readonly paperTitle: string\n  readonly titleInPage: boolean\n  readonly page: number\n  readonly copyState: CopyState\n  readonly onCopy: () => void\n}\n\nfunction EditionHead({ documentId, canonical, identity, paperTitle, titleInPage, page, copyState, onCopy }: EditionProps) {\n  const go = (route: Parameters<typeof guideLocation>[1]) => navigate(guideLocation(documentId, route, page))\n  const guided = canonical.guide !== undefined\n  return <header className=\"reader-edition-head\">\n    <div className=\"reader-edition-title\"><p className=\"guide-kicker\">Full document</p>{!titleInPage && <h1>{paperTitle}</h1>}</div>\n    <div className=\"reader-edition-tools\"><nav className=\"guide-reader-links\" aria-label=\"Reading options\">\n      <button type=\"button\" className=\"reader-text-link\" onClick={() => go({ mode: \"choices\", goal: \"read\" })}>Choose how to read</button>\n      {guided && <button type=\"button\" className=\"reader-text-link\" onClick={() => go({ mode: \"overview\" })}>Overview</button>}\n      {guided && <button type=\"button\" className=\"reader-text-link\" onClick={() => go({ mode: \"map\", goal: \"map\" })}>Document map</button>}</nav>\n      <div className=\"live-reader-actions\">\n        <button className=\"button\" type=\"button\" onClick={onCopy} disabled={copyState === \"pending\"}>{shortCopyLabels[copyState]}</button>\n        <a className=\"button\" href={outputUrl(identity, \"zip\")} download>Download ZIP</a></div>\n    </div>\n  </header>\n}\n\ntype PageReaderProps = {\n  readonly canonical: CanonicalDocument\n  readonly identity: OutputIdentity\n  readonly view: \"clean\" | \"original\"\n  readonly page: number\n  readonly readingPage: RefObject<HTMLElement | null>\n  readonly onPage: (number: number) => void\n  readonly onView: (view: \"clean\" | \"original\") => void\n  readonly onPages: () => void\n}\n\nfunction PageText({ canonical, identity, page, onPage, onOriginal }: Pick<PageReaderProps, \"canonical\" | \"identity\" | \"page\" | \"onPage\"> & {\n  readonly onOriginal: () => void\n}) {\n  const blocks = blocksOnPage(canonical, page)\n  const continuations = continuationsOnPage(canonical, page)\n  const continuation = (block: Block) => <p className=\"reader-continuation\" key={block.id}>Text from this page continues a paragraph on\n    {\" \"}<button type=\"button\" onClick={() => onPage(blockPage(block))}>page {blockPage(block)} →</button></p>\n  return <>\n    {continuations.map(continuation)}\n    {blocks.map((block) => <ReaderBlock key={block.id} block={block} canonical={canonical} identity={identity} />)}\n    {blocks.length === 0 && continuations.length === 0 && <p className=\"reader-small\">No text or figures were extracted from this page.\n      {\" \"}<button type=\"button\" className=\"reader-text-link\" onClick={onOriginal}>View the original page.</button></p>}\n  </>\n}\n\nfunction PageReader({ canonical, identity, view, page, readingPage, onPage, onView, onPages }: PageReaderProps) {\n  const nextPage = canonical.pages.find((item) => item.pageNumber > page)\n  const label = `${view === \"clean\" ? \"Normalized document\" : \"Original PDF\"} page ${page}`\n  return <section className=\"reading-surface\" aria-label=\"Document reader\">\n    <div className=\"reading-bar\"><div className=\"reader-view-switch\" role=\"group\" aria-label=\"Reading view\">\n      <button type=\"button\" aria-pressed={view === \"clean\"} onClick={() => onView(\"clean\")}>Clean copy</button>\n      <button type=\"button\" aria-pressed={view === \"original\"} onClick={() => onView(\"original\")}>Original</button></div>\n      <span>Page {page} of {canonical.pages.length}</span><button className=\"reader-edge\" type=\"button\" onClick={onPages}>Pages</button></div>\n    <article className={`paper-content${view === \"original\" ? \" paper-original\" : \"\"}`} ref={readingPage} tabIndex={-1} aria-label={label}>\n      {view === \"original\" ? <OriginalPreview documentId={identity.documentId} page={page} />\n        : <PageText canonical={canonical} identity={identity} page={page} onPage={onPage} onOriginal={() => onView(\"original\")} />}\n    </article>\n    <footer className=\"reading-footer\"><span>END OF PAGE {page}</span>{nextPage === undefined ? <span>End of document</span>\n      : <button type=\"button\" className=\"reader-text-link\" onClick={() => onPage(nextPage.pageNumber)}>\n        Continue to page {nextPage.pageNumber} →</button>}</footer>\n  </section>\n}\n\nconst trustNote = (fullReader: boolean, canonical: CanonicalDocument): string => {\n  if (fullReader) return \"AI can change or miss content. Compare anything you rely on with the original.\"\n  if (canonical.guide === undefined) return \"The original PDF is available in Downloads & details.\"\n  return \"This guide is AI-written. Check the cited passages against the original document.\"\n}\n\ntype WorkspaceProps = {\n  readonly record: DocumentRecord\n  readonly revisionId: OutputRevisionId\n  readonly readOnly: boolean\n  readonly onRefresh: () => void\n  readonly onUnauthenticated: () => void\n}\ntype Snapshot = { readonly version: number; readonly data: OutputData | null; readonly error: DocumentReadFailure | null }\n\nexport function ReaderWorkspace({ record, revisionId, readOnly, onRefresh, onUnauthenticated }: WorkspaceProps) {\n"
       ],
       [
         "copy",
@@ -2200,7 +2446,7 @@
       ],
       [
         "add",
-        "  const output = data === null ? null : <><ReportPanel report={data.report} canonical={data.canonical} identity={identity} onPage={onPage} imageSummary={imageSummary(data.canonical)}>\n    <OutputActions identity={identity} copyState={copyState} rating={rating} ratingPending={ratingPending} message={message} onCopy={copy} onRate={rate} />\n  </ReportPanel><DeleteDocumentControl record={record} onDeleted={() => navigate(\"/\")} onUnauthenticated={onUnauthenticated} /></>\n"
+        "  const output = data === null ? null : <><ReportPanel report={data.report} canonical={data.canonical} identity={identity} onPage={onPage} imageSummary={imageSummary(data.canonical)}>\n    <OutputActions identity={identity} copyState={copyState} rating={rating} ratingPending={ratingPending} message={message} onCopy={copy} onRate={readOnly ? null : rate} />\n  </ReportPanel>{readOnly\n    ? <p className=\"reader-small\">This is a shared example. You can read and download it, but only its owner can change or delete it.</p>\n    : <DeleteDocumentControl record={record} onDeleted={() => navigate(\"/\")} onUnauthenticated={onUnauthenticated} />}</>\n"
       ],
       [
         "copy",
@@ -2212,7 +2458,7 @@
       ],
       [
         "add",
-        "  const fullReader = route.mode === \"read\"\n  const titleInPage = view === \"clean\" && heading !== undefined && page === data?.canonical.pages[0].pageNumber\n  const issueCount = data?.report.issues.length ?? 0\n  return <main className={`reader-page live-reader${fullReader ? \"\" : \" goal-reader\"}`} id=\"main-content\" ref={main} tabIndex={-1}>\n    <div className=\"reader-toolbar\">\n      <InternalLink className=\"back-link\" href=\"/\">← Your library</InternalLink>\n      {data !== null && <div className=\"reader-utilities\">\n        {issueCount > 0 && <button className=\"reader-text-link reader-issue-link\" type=\"button\" aria-haspopup=\"dialog\" onClick={reviewAll}>\n          Review {countLabel(issueCount, \"issue\")}</button>}\n        <button className=\"button reader-download-trigger\" type=\"button\" aria-haspopup=\"dialog\" onClick={() => setDrawer(\"output\")}>\n          <svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4\" /></svg>Downloads &amp; details</button>\n      </div>}\n    </div>\n    {message !== null && drawer === null && <p className=\"reader-action-status\" role=\"status\">{message}\n      {\" \"}{copyState === \"idle\" && <a className=\"reader-text-link\" href={outputUrl(identity, \"text\")} download>Download text instead</a>}</p>}\n    {(summary.failed || activeRun(record.latestRun)) && <section className=\"reader-run-notice\" aria-label=\"Latest processing run\">\n      {activeRun(record.latestRun) ? <ProcessingProgress record={record} compact /> : <><h2>{summary.title}</h2><p>{summary.description}</p></>}\n      <p>Your saved output remains available below.</p>\n      <RetryDocumentControl record={record} onRefresh={onRefresh} onUnauthenticated={onUnauthenticated} /></section>}\n"
+        "  const fullReader = route.mode === \"read\"\n  const titleInPage = view === \"clean\" && heading !== undefined && page === data?.canonical.pages[0].pageNumber\n  const issueCount = data?.report.issues.length ?? 0\n  return <main className={`reader-page live-reader${fullReader ? \"\" : \" goal-reader\"}`} id=\"main-content\" ref={main} tabIndex={-1}>\n    <div className=\"reader-toolbar\">\n      <InternalLink className=\"back-link\" href=\"/\">← Your library</InternalLink>\n      {data !== null && <div className=\"reader-utilities\">\n        {issueCount > 0 && <button className=\"reader-text-link reader-issue-link\" type=\"button\" aria-haspopup=\"dialog\" onClick={reviewAll}>\n          Review {countLabel(issueCount, \"issue\")}</button>}\n        <button className=\"button reader-download-trigger\" type=\"button\" aria-haspopup=\"dialog\" onClick={() => setDrawer(\"output\")}>\n          <svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4\" /></svg>Downloads &amp; details</button>\n      </div>}\n    </div>\n    {message !== null && drawer === null && <p className=\"reader-action-status\" role=\"status\">{message}\n      {\" \"}{copyState === \"idle\" && <a className=\"reader-text-link\" href={outputUrl(identity, \"text\")} download>Download text instead</a>}</p>}\n    {(summary.failed || activeRun(record.latestRun)) && <section className=\"reader-run-notice\" aria-label=\"Latest processing run\">\n      {activeRun(record.latestRun) ? <ProcessingProgress record={record} compact /> : <><h2>{summary.title}</h2><p>{summary.description}</p></>}\n      <p>Your saved output remains available below.</p>\n      {!readOnly && <RetryDocumentControl record={record} onRefresh={onRefresh} onUnauthenticated={onUnauthenticated} />}</section>}\n"
       ],
       [
         "copy",
@@ -2921,12 +3167,139 @@
       ]
     ]
   },
+  "src/auth/index.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { Session, type SignInOptions } from \"../domain/index.ts\"\n"
+      ],
+      [
+        "copy",
+        6
+      ],
+      [
+        "add",
+        "export type { JudgeSignInOptions } from \"./judge.ts\"\n"
+      ],
+      [
+        "copy",
+        10
+      ],
+      [
+        "add",
+        "  const signInOptions: SignInOptions = { method: options.judgeSignIn === undefined ? \"password\" : \"email\", accessCode: options.judgeSignIn?.accessCode != null }\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    if (request.method === \"GET\" && path === \"/auth/sign-in-options\") return Response.json(signInOptions, { headers: { \"cache-control\": \"no-store\" } })\n    const allowed = (request.method === \"POST\" && (path === \"/auth/sign-in/email\" || path === \"/auth/sign-out\" || (path === \"/auth/sign-in/judge\" && options.judgeSignIn !== undefined)))\n"
+      ],
+      [
+        "copy",
+        12
+      ]
+    ]
+  },
+  "src/auth/instance.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        6
+      ],
+      [
+        "add",
+        "import { judgeSignIn, judgeSignInPath } from \"./judge.ts\"\n"
+      ],
+      [
+        "copy",
+        52
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      customRules: { \"/sign-in/email\": { window: 60, max: 10 }, [judgeSignInPath]: { window: 60, max: 20 } },\n"
+      ],
+      [
+        "copy",
+        11
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    plugins: [admin({ defaultRole: \"user\", adminRoles: [\"admin\"] }), ...(options.judgeSignIn === undefined ? [] : [judgeSignIn(options.judgeSignIn)])],\n"
+      ],
+      [
+        "copy",
+        7
+      ]
+    ]
+  },
+  "src/auth/service.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        2
+      ],
+      [
+        "add",
+        "import type { JudgeSignInOptions } from \"./judge.ts\"\n"
+      ],
+      [
+        "copy",
+        10
+      ],
+      [
+        "add",
+        "  readonly judgeSignIn?: JudgeSignInOptions | undefined\n"
+      ],
+      [
+        "copy",
+        6
+      ]
+    ]
+  },
   "src/domain/api.ts": {
     "executable": false,
     "operations": [
       [
         "copy",
-        38
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { Count, DocumentId, FigureId, IdempotencyKey, NonBlank, OutputRevisionId, PositiveInt, RunId, UserId } from \"./identity.ts\"\n"
+      ],
+      [
+        "copy",
+        34
       ],
       [
         "add",
@@ -2942,11 +3315,23 @@
       ],
       [
         "add",
-        "  availability: Schema.TaggedUnion({ enabled: {}, disabled: UploadUnavailable.fields }),\n"
+        "  availability: Schema.TaggedUnion({ enabled: {}, disabled: UploadUnavailable.fields }),\n  allowance: Schema.optionalKey(Schema.Struct({ limit: PositiveInt, used: Count })),\n"
       ],
       [
         "copy",
-        18
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "export const DocumentList = Schema.Struct({ documents: Schema.Array(DocumentDetail), examples: Schema.optionalKey(Schema.Array(DocumentDetail)), upload: UploadPolicy })\nexport const SignInOptions = Schema.Struct({ method: Schema.Literals([\"password\", \"email\"]), accessCode: Schema.Boolean })\nexport type SignInOptions = typeof SignInOptions.Type\nexport const EmailAddress = Schema.String.check(Schema.isMaxLength(254), Schema.isPattern(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/u))\nexport const normalizeEmail = (value: string) => value.trim().toLowerCase()\n"
+      ],
+      [
+        "copy",
+        15
       ],
       [
         "add",
@@ -5611,6 +5996,100 @@
       ]
     ]
   },
+  "src/server/access.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        11
+      ],
+      [
+        "add",
+        "  { method: \"GET\", path: \"/auth/sign-in-options\", access: \"public\" },\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "add",
+        "  { method: \"POST\", path: \"/auth/sign-in/judge\", access: \"public\" },\n"
+      ],
+      [
+        "copy",
+        67
+      ]
+    ]
+  },
+  "src/server/config.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { Config, Effect, Option, Path, Redacted, Schema } from \"effect\"\nimport { UserId } from \"../domain/index.ts\"\n"
+      ],
+      [
+        "copy",
+        11
+      ],
+      [
+        "skip",
+        4
+      ],
+      [
+        "add",
+        "  return url !== null && url.origin === value && url.username === \"\" && url.password === \"\"\n    && (url.protocol === \"https:\" || url.protocol === \"http:\" && (url.hostname === \"127.0.0.1\" || url.hostname === \"localhost\"))\n    || \"Expected a canonical loopback HTTP origin or an HTTPS origin served through a TLS-terminating proxy\"\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "add",
+        "const optionalSetting = <A>(schema: Schema.Codec<A, string>, name: string) => Config.String(name).pipe(Config.option, Effect.flatMap((value) =>\n  Option.isNone(value) || value.value.trim() === \"\" ? Effect.succeed(undefined) : Schema.decodeUnknownEffect(schema)(value.value.trim())))\nconst optionalText = (name: string) => Config.schema(Schema.Redacted(Schema.String), name).pipe(Config.option, Config.map(Option.filter((value) => Redacted.value(value) !== \"\")))\n"
+      ],
+      [
+        "copy",
+        4
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  const origin = yield* Config.schema(Origin.check(Schema.makeFilter((value) => value.startsWith(\"https:\") || Number(new URL(value).port || \"80\") === port || \"Origin port must match AMUSEME_PORT\")), \"AMUSEME_ORIGIN\").pipe(Config.withDefault(`http://127.0.0.1:${port}`))\n  const host = yield* Config.Literals([\"127.0.0.1\", \"0.0.0.0\"], \"AMUSEME_HOST\").pipe(Config.withDefault(\"127.0.0.1\" as const))\n"
+      ],
+      [
+        "copy",
+        5
+      ],
+      [
+        "add",
+        "  const judgeSignIn = (yield* optionalSetting(Schema.Literals([\"true\", \"false\"]), \"AMUSEME_JUDGE_SIGN_IN\")) === \"true\"\n    ? { accessCode: Option.getOrNull(yield* optionalText(\"AMUSEME_JUDGE_ACCESS_CODE\")) }\n    : undefined\n  const examplesOwnerId = yield* optionalSetting(UserId, \"AMUSEME_EXAMPLES_OWNER_ID\")\n  const uploadsPerUser = yield* optionalSetting(Schema.NumberFromString.check(Schema.isInt(), Schema.isBetween({ minimum: 1, maximum: 1000 })), \"AMUSEME_UPLOADS_PER_USER\")\n"
+      ],
+      [
+        "copy",
+        4
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  return { port, host, origin, secret, dataDirectory, appDirectory, pythonBin, queueLimit, admissionConfiguration, processing, judgeSignIn, examplesOwnerId, uploadsPerUser }\n"
+      ],
+      [
+        "copy",
+        3
+      ]
+    ]
+  },
   "src/server/documents.ts": {
     "executable": false,
     "operations": [
@@ -5640,7 +6119,15 @@
       ],
       [
         "copy",
-        30
+        6
+      ],
+      [
+        "add",
+        "  readonly uploadsPerUser?: number | undefined\n"
+      ],
+      [
+        "copy",
+        24
       ],
       [
         "add",
@@ -5660,15 +6147,63 @@
       ],
       [
         "copy",
-        53
+        4
+      ],
+      [
+        "skip",
+        1
       ],
       [
         "add",
-        "      if (operation === \"preview\") {\n        if (Option.isNone(renderer)) return yield* errorResponse(\"processing-unavailable\", \"Original page previews are unavailable. Download the original PDF instead.\")\n        const render = renderer.value.render\n        const { document, privatePath } = yield* store.originalFile(session.user.id, id)\n        const PageNumber = Schema.NumberFromString.check(Schema.isInt(), Schema.isBetween({ minimum: 1, maximum: document.pageCount }))\n        const pageNumber = yield* Schema.decodeUnknownEffect(PageNumber)(new URL(request.url).searchParams.get(\"page\"))\n          .pipe(Effect.mapError(() => new UploadInputError({ code: \"invalid-input\", message: \"Choose a page in this document.\" })))\n        const tooSlow = () => errorResponse(\"processing-unavailable\", \"The original page preview took too long. Try again or download the original PDF.\")\n        const preview = yield* Effect.gen(function* () {\n          const directory = yield* fs.makeTempDirectoryScoped({ directory: options.temporaryDirectory, prefix: \"preview-\" })\n          yield* fs.chmod(directory, 0o700)\n          const { byteCount, sourceHash, pageCount } = document\n          const pages = yield* render({ privatePath, byteCount, sourceHash, pageCount, outputDirectory: directory, pageNumber })\n          const page = pages[0]\n          if (page === undefined) return yield* errorResponse(\"processing-unavailable\", \"Original page preview unavailable.\")\n          const image = yield* fs.readFile(path.join(directory, page.image.path))\n          yield* store.detail(session.user.id, id)\n          return new Response(image, { headers: { \"content-type\": \"image/png\", \"content-length\": String(image.byteLength) } })\n        }).pipe(Effect.scoped, Effect.timeoutOrElse({ duration: \"20 seconds\", orElse: tooSlow }), previews.withPermitsIfAvailable(1))\n        return Option.isSome(preview) ? preview.value : yield* errorResponse(\"queue-full\", \"Another original page is loading. Try again shortly.\")\n      }\n"
+        "    const uploadLimit = (role: \"user\" | \"admin\") => role === \"admin\" ? undefined : options.uploadsPerUser\n    const admit = Effect.fn(\"DocumentHandler.admit\")(function* (request: Request, ownerId: UserId, limit: number | undefined) {\n"
       ],
       [
         "copy",
-        8
+        12
+      ],
+      [
+        "add",
+        "          ...(limit === undefined ? {} : { uploadLimit: limit }),\n"
+      ],
+      [
+        "copy",
+        16
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "        if (operation === \"upload\") return yield* admit(request, session.user.id, uploadLimit(session.user.role))\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      if (operation === \"list\") {\n        const limit = uploadLimit(session.user.role)\n        const examples = yield* store.listExamples(session.user.id)\n        return yield* jsonResponse(DocumentList, {\n          documents: yield* store.list(session.user.id),\n          ...(examples === null ? {} : { examples }),\n          upload: limit === undefined ? upload : { ...upload, allowance: { limit, used: yield* store.uploadCount(session.user.id) } },\n        })\n      }\n"
+      ],
+      [
+        "copy",
+        15
+      ],
+      [
+        "skip",
+        3
+      ],
+      [
+        "add",
+        "      const owner = yield* store.readableOwner(session.user.id, id)\n      if (operation === \"detail\") return yield* jsonResponse(DocumentDetail, yield* store.detail(owner, id))\n      if (operation === \"status\") return yield* jsonResponse(Run, yield* store.status(owner, id))\n      if (operation === \"preview\") {\n        if (Option.isNone(renderer)) return yield* errorResponse(\"processing-unavailable\", \"Original page previews are unavailable. Download the original PDF instead.\")\n        const render = renderer.value.render\n        const { document, privatePath } = yield* store.originalFile(owner, id)\n        const PageNumber = Schema.NumberFromString.check(Schema.isInt(), Schema.isBetween({ minimum: 1, maximum: document.pageCount }))\n        const pageNumber = yield* Schema.decodeUnknownEffect(PageNumber)(new URL(request.url).searchParams.get(\"page\"))\n          .pipe(Effect.mapError(() => new UploadInputError({ code: \"invalid-input\", message: \"Choose a page in this document.\" })))\n        const tooSlow = () => errorResponse(\"processing-unavailable\", \"The original page preview took too long. Try again or download the original PDF.\")\n        const preview = yield* Effect.gen(function* () {\n          const directory = yield* fs.makeTempDirectoryScoped({ directory: options.temporaryDirectory, prefix: \"preview-\" })\n          yield* fs.chmod(directory, 0o700)\n          const { byteCount, sourceHash, pageCount } = document\n          const pages = yield* render({ privatePath, byteCount, sourceHash, pageCount, outputDirectory: directory, pageNumber })\n          const page = pages[0]\n          if (page === undefined) return yield* errorResponse(\"processing-unavailable\", \"Original page preview unavailable.\")\n          const image = yield* fs.readFile(path.join(directory, page.image.path))\n          yield* store.detail(owner, id)\n          return new Response(image, { headers: { \"content-type\": \"image/png\", \"content-length\": String(image.byteLength) } })\n        }).pipe(Effect.scoped, Effect.timeoutOrElse({ duration: \"20 seconds\", orElse: tooSlow }), previews.withPermitsIfAvailable(1))\n        return Option.isSome(preview) ? preview.value : yield* errorResponse(\"queue-full\", \"Another original page is loading. Try again shortly.\")\n      }\n      const { document, bytes } = yield* store.original(owner, id)\n"
+      ],
+      [
+        "copy",
+        7
       ],
       [
         "add",
@@ -5677,6 +6212,35 @@
       [
         "copy",
         11
+      ]
+    ]
+  },
+  "src/server/http.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        65
+      ],
+      [
+        "add",
+        "export const proxiedRequest = (request: Request, origin: string): Request => {\n  const url = new URL(request.url)\n  const configured = new URL(origin)\n  if (configured.protocol !== \"https:\" || url.protocol !== \"http:\" || url.host !== configured.host) return request\n  const body = request.method === \"GET\" || request.method === \"HEAD\" ? null : request.body\n  return new Request(`${configured.origin}${url.pathname}${url.search}`, { method: request.method, headers: request.headers, body, signal: request.signal, ...(body === null ? {} : { duplex: \"half\" }) } as RequestInit)\n}\n\n"
+      ],
+      [
+        "copy",
+        12
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    dispatchRequest(proxiedRequest(context.req.raw, origin), inner, origin, state).pipe(\n"
+      ],
+      [
+        "copy",
+        6
       ]
     ]
   },
@@ -5693,7 +6257,43 @@
       ],
       [
         "copy",
-        64
+        30
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "export const openListener = Effect.fnUntraced(function* (app: Hono, port: number, state: ServerState, host: \"127.0.0.1\" | \"0.0.0.0\" = \"127.0.0.1\") {\n"
+      ],
+      [
+        "copy",
+        14
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    server.listen(port, host, () => resume(Effect.void))\n"
+      ],
+      [
+        "copy",
+        12
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  const authLayer = makeAuthLayer({ origin: config.origin, secret: config.secret, databasePath: path.join(config.dataDirectory, \"auth.sqlite\"), judgeSignIn: config.judgeSignIn })\n"
+      ],
+      [
+        "copy",
+        5
       ],
       [
         "skip",
@@ -5705,7 +6305,31 @@
       ],
       [
         "copy",
-        84
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    origin: config.origin, temporaryDirectory: path.join(config.dataDirectory, \"uploads\"), admissionConfiguration: config.admissionConfiguration, uploadsPerUser: config.uploadsPerUser,\n"
+      ],
+      [
+        "copy",
+        77
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  const listener = yield* openListener(app, config.port, state, config.host)\n"
+      ],
+      [
+        "copy",
+        2
       ],
       [
         "skip",
@@ -5721,12 +6345,137 @@
       ]
     ]
   },
+  "src/server/outputs.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { DocumentStore, OutputStore, StorageFailure } from \"../storage/index.ts\"\n"
+      ],
+      [
+        "copy",
+        25
+      ],
+      [
+        "add",
+        "    const documents = yield* DocumentStore\n"
+      ],
+      [
+        "copy",
+        9
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      const reader = session.user.id\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "          yield* outputs.rate(reader, id, revision, null)\n"
+      ],
+      [
+        "copy",
+        5
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "        yield* outputs.rate(reader, id, revision, body.success.value)\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      const owner = yield* documents.readableOwner(reader, id)\n      if (operation === \"readRating\") return Response.json({ value: owner === reader ? yield* outputs.rating(owner, id, revision) : null }, { headers })\n"
+      ],
+      [
+        "copy",
+        36
+      ]
+    ]
+  },
   "src/storage/documents.ts": {
     "executable": false,
     "operations": [
       [
         "copy",
-        144
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { AcceptedRun, Document, DocumentDetail, Run, RunState, StageReceipt, UserId, boundaryParseOptions, validateRunTransition, type DocumentId } from \"../domain/index.ts\"\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { Admission, DocumentStore, StorageFailure, documentNotFound, documentRetentionMilliseconds, storageConflict, storageFailure, uploadLimitReached, type DispatchClaim, type StorageOptions } from \"./service.ts\"\n"
+      ],
+      [
+        "copy",
+        5
+      ],
+      [
+        "add",
+        "  examplesOwnerId: Schema.optionalKey(UserId),\n"
+      ],
+      [
+        "copy",
+        39
+      ],
+      [
+        "add",
+        "    ...(options.examplesOwnerId === undefined ? {} : { examplesOwnerId: options.examplesOwnerId }),\n"
+      ],
+      [
+        "copy",
+        79
+      ],
+      [
+        "add",
+        "  const listExamples = Effect.fn(\"DocumentStore.listExamples\")(function* (readerId: UserId) {\n    if (settings.examplesOwnerId === undefined || settings.examplesOwnerId === readerId) return null\n    return yield* list(settings.examplesOwnerId)\n  })\n  const readableOwner = Effect.fn(\"DocumentStore.readableOwner\")(function* (readerId: UserId, documentId: DocumentId) {\n    const now = yield* Clock.currentTimeMillis\n    const owners = settings.examplesOwnerId === undefined ? [readerId] : [readerId, settings.examplesOwnerId]\n    const row = yield* query(\"read-document-owner\", () => db.selectFrom(\"documents\").select(\"owner_id\")\n      .where(\"id\", \"=\", documentId).where(\"owner_id\", \"in\", owners)\n      .where(\"lifecycle\", \"=\", \"active\").where(\"expires_at\", \">\", now).executeTakeFirst())\n    if (row === undefined) return yield* documentNotFound()\n    return yield* decode(UserId, row.owner_id, \"read-document-owner\")\n  })\n  const countUploads = (connection: Kysely<ApplicationDatabase>, ownerId: UserId) => query(\"upload-count\", () => connection.selectFrom(\"documents\")\n    .select((expression) => expression.fn.countAll<number>().as(\"count\")).where(\"owner_id\", \"=\", ownerId).executeTakeFirstOrThrow()).pipe(Effect.map((row) => Number(row.count)))\n"
+      ],
+      [
+        "copy",
+        14
       ],
       [
         "add",
@@ -5734,7 +6483,35 @@
       ],
       [
         "copy",
-        186
+        9
+      ],
+      [
+        "add",
+        "    if (request.uploadLimit !== undefined && (yield* countUploads(db, request.ownerId)) >= request.uploadLimit) return yield* uploadLimitReached(request.uploadLimit)\n"
+      ],
+      [
+        "copy",
+        31
+      ],
+      [
+        "add",
+        "        if (request.uploadLimit !== undefined && (yield* countUploads(connection, request.ownerId)) >= request.uploadLimit) return yield* uploadLimitReached(request.uploadLimit)\n"
+      ],
+      [
+        "copy",
+        138
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    admit, list, listExamples, readableOwner, detail, claimNext,\n    uploadCount: (ownerId) => countUploads(db, ownerId), renewClaim, updateRun, recoverExpiredClaims, delete: removeDocument, reconcile,\n"
+      ],
+      [
+        "copy",
+        7
       ],
       [
         "add",
@@ -6053,7 +6830,31 @@
     "operations": [
       [
         "copy",
-        45
+        19
+      ],
+      [
+        "add",
+        "  uploadLimit: Schema.optionalKey(PositiveInt),\n"
+      ],
+      [
+        "copy",
+        8
+      ],
+      [
+        "add",
+        "  readonly examplesOwnerId?: UserId | undefined\n"
+      ],
+      [
+        "copy",
+        15
+      ],
+      [
+        "add",
+        "  readonly listExamples: (readerId: UserId) => Effect.Effect<ReadonlyArray<typeof DocumentDetail.Type> | null, StorageFailure>\n  readonly readableOwner: (readerId: UserId, documentId: DocumentId) => Effect.Effect<UserId, StorageFailure>\n  readonly uploadCount: (ownerId: UserId) => Effect.Effect<number, StorageFailure>\n"
+      ],
+      [
+        "copy",
+        3
       ],
       [
         "add",
@@ -6061,7 +6862,15 @@
       ],
       [
         "copy",
-        19
+        16
+      ],
+      [
+        "add",
+        "export const uploadLimitReached = (limit: number) => new StorageFailure({\n  code: \"forbidden\", operation: \"admit\", message: `You've used your ${limit} uploads. You can still read the examples and your documents.`, cause: undefined,\n})\n\n"
+      ],
+      [
+        "copy",
+        3
       ]
     ]
   },
@@ -7020,6 +7829,27 @@
       ]
     ]
   },
+  "tests/processing/spark-trial.test.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        10
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  host: \"127.0.0.1\" as const, judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined, admissionConfiguration: { _tag: \"disabled\", reason: \"fixture\" },\n"
+      ],
+      [
+        "copy",
+        18
+      ]
+    ]
+  },
   "tests/processing/validator-repair.test.ts": {
     "executable": false,
     "operations": [
@@ -7234,6 +8064,35 @@
       ]
     ]
   },
+  "tests/server/access.test.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        8
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { createGuardedApp, proxiedRequest } from \"../../src/server/http.ts\"\n"
+      ],
+      [
+        "copy",
+        169
+      ],
+      [
+        "add",
+        "\n  it.effect(\"maps TLS-proxied requests for the configured HTTPS host only\", () => Effect.gen(function* () {\n    const deployed = \"https://amuseme--web.modal.run\"\n    const mapped = proxiedRequest(new Request(\"http://amuseme--web.modal.run/auth/sign-in/judge?x=1\", { method: \"POST\", headers: { origin: deployed }, body: '{\"email\":\"judge@example.test\"}' }), deployed)\n    expect(mapped.url).toBe(`${deployed}/auth/sign-in/judge?x=1`)\n    expect(mapped.headers.get(\"origin\")).toBe(deployed)\n    expect(yield* Effect.promise(() => mapped.text())).toBe('{\"email\":\"judge@example.test\"}')\n    for (const url of [\"http://elsewhere.modal.run/\", \"http://amuseme--web.modal.run:8000/\"]) expect(proxiedRequest(new Request(url), deployed).url).toBe(url)\n    const local = new Request(`${origin}/`)\n    expect(proxiedRequest(local, origin)).toBe(local)\n  }))\n"
+      ],
+      [
+        "copy",
+        1
+      ]
+    ]
+  },
   "tests/server/config.test.ts": {
     "executable": false,
     "operations": [
@@ -7283,11 +8142,23 @@
       ],
       [
         "copy",
-        11
+        3
+      ],
+      [
+        "skip",
+        1
       ],
       [
         "add",
-        "  it.effect(\"enables Meta-only normal uploads without MinerU credentials\", () => Effect.gen(function* () {\n    const values = { BETTER_AUTH_SECRET: \"x\".repeat(40), AMUSEME_PROCESSING_ENABLED: \"true\", META_API_KEY: \"fixture-only\", AMUSEME_BUDGET_ID: \"original-fixture-budget\", AMUSEME_PROCESSING_BUDGET_USD: \"37\" }\n    const configured = yield* config(values)\n    expect(configured.admissionConfiguration._tag).toBe(\"live\")\n    expect(configured.processing?.configuration.extractionProvider).toBe(\"meta\")\n    expect(configured.processing?.configuration.extractionModel?.promptVersion).toBe(\"2\")\n    expect(configured.processing?.pipeline.mineruToken).toBeUndefined()\n    expect(configured.processing?.pipeline.policy.authorizedBudgetMicrousd).toBe(37000000)\n    const blanks = yield* config({ ...values, AMUSEME_MINERU_TOKEN: \"\", AMUSEME_MINERU_URL: \"\" })\n    expect(blanks.processing).toEqual(configured.processing)\n  }))\n\n"
+        "    for (const origin of [\"https://example.test/\", \"https://example.test/path\", \"https://name:password@example.test\", \"ftp://example.test\", \"http://example.test\", \"null\", \"http://127.0.0.1:4183\"]) {\n"
+      ],
+      [
+        "copy",
+        7
+      ],
+      [
+        "add",
+        "  it.effect(\"accepts an HTTPS proxy origin, a container bind address, and judge access settings\", () => Effect.gen(function* () {\n    const local = yield* config({ BETTER_AUTH_SECRET: secret })\n    expect(local).toMatchObject({ host: \"127.0.0.1\", judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined })\n    const deployed = yield* config({\n      BETTER_AUTH_SECRET: secret, AMUSEME_PORT: \"8000\", AMUSEME_HOST: \"0.0.0.0\", AMUSEME_ORIGIN: \"https://amuseme--web.modal.run\",\n      AMUSEME_JUDGE_SIGN_IN: \"true\", AMUSEME_EXAMPLES_OWNER_ID: \"OPChbgeWYpiYv5TKcvPIGFKe3rfY47kn\", AMUSEME_UPLOADS_PER_USER: \"3\",\n    })\n    expect(deployed).toMatchObject({ port: 8000, host: \"0.0.0.0\", origin: \"https://amuseme--web.modal.run\", judgeSignIn: { accessCode: null }, examplesOwnerId: \"OPChbgeWYpiYv5TKcvPIGFKe3rfY47kn\", uploadsPerUser: 3 })\n    const coded = yield* config({ BETTER_AUTH_SECRET: secret, AMUSEME_JUDGE_SIGN_IN: \"true\", AMUSEME_JUDGE_ACCESS_CODE: \"meta-judges\" })\n    expect(coded.judgeSignIn?.accessCode === null ? null : Redacted.value(coded.judgeSignIn?.accessCode ?? Redacted.make(\"\"))).toBe(\"meta-judges\")\n    expect((yield* config({ BETTER_AUTH_SECRET: secret, AMUSEME_JUDGE_SIGN_IN: \"true\", AMUSEME_JUDGE_ACCESS_CODE: \"\" })).judgeSignIn).toEqual({ accessCode: null })\n    expect((yield* config({ BETTER_AUTH_SECRET: secret, AMUSEME_JUDGE_ACCESS_CODE: \"ignored-when-off\" })).judgeSignIn).toBeUndefined()\n    expect(yield* config({ BETTER_AUTH_SECRET: secret, AMUSEME_JUDGE_SIGN_IN: \"\", AMUSEME_EXAMPLES_OWNER_ID: \"\", AMUSEME_UPLOADS_PER_USER: \" \" })).toMatchObject({ judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined })\n    for (const values of [{ AMUSEME_HOST: \"10.0.0.1\" }, { AMUSEME_UPLOADS_PER_USER: \"0\" }, { AMUSEME_UPLOADS_PER_USER: \"1001\" }, { AMUSEME_UPLOADS_PER_USER: \"three\" },\n      { AMUSEME_EXAMPLES_OWNER_ID: \"../owner\" }, { AMUSEME_JUDGE_SIGN_IN: \"maybe\" }, { AMUSEME_ORIGIN: \"https://example.test:8443/path\" }]) {\n      expect(Result.isFailure(yield* Effect.result(config({ BETTER_AUTH_SECRET: secret, ...values }))), JSON.stringify(values)).toBe(true)\n    }\n  }))\n\n  it.effect(\"enables Meta-only normal uploads without MinerU credentials\", () => Effect.gen(function* () {\n    const values = { BETTER_AUTH_SECRET: \"x\".repeat(40), AMUSEME_PROCESSING_ENABLED: \"true\", META_API_KEY: \"fixture-only\", AMUSEME_BUDGET_ID: \"original-fixture-budget\", AMUSEME_PROCESSING_BUDGET_USD: \"37\" }\n    const configured = yield* config(values)\n    expect(configured.admissionConfiguration._tag).toBe(\"live\")\n    expect(configured.processing?.configuration.extractionProvider).toBe(\"meta\")\n    expect(configured.processing?.configuration.extractionModel?.promptVersion).toBe(\"2\")\n    expect(configured.processing?.pipeline.mineruToken).toBeUndefined()\n    expect(configured.processing?.pipeline.policy.authorizedBudgetMicrousd).toBe(37000000)\n    const blanks = yield* config({ ...values, AMUSEME_MINERU_TOKEN: \"\", AMUSEME_MINERU_URL: \"\" })\n    expect(blanks.processing).toEqual(configured.processing)\n  }))\n\n"
       ],
       [
         "copy",
@@ -7348,12 +8219,57 @@
       ]
     ]
   },
+  "tests/server/lifecycle-cancellation.test.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        37
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      host: \"127.0.0.1\" as const, judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined, admissionConfiguration: { _tag: \"disabled\", reason: \"Cancellation test\" },\n"
+      ],
+      [
+        "copy",
+        39
+      ]
+    ]
+  },
   "tests/server/observability.test.ts": {
     "executable": false,
     "operations": [
       [
         "copy",
-        72
+        45
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    yield* startServer(mastra, { host: \"127.0.0.1\" as const, judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined, port: 0, origin: \"http://127.0.0.1:4180\", secret: Redacted.make(\"test-only-trace-secret-with-thirty-two-characters\"), dataDirectory: path.join(directory, \"data\"), appDirectory: path.resolve(\".mastra/output/app\"), pythonBin: path.resolve(\"data/python/.venv/bin/python\"), queueLimit: 1, admissionConfiguration: { _tag: \"disabled\", reason: \"Trace test\" }, processing: null })\n"
+      ],
+      [
+        "copy",
+        22
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      yield* startServer(mastra, { host: \"127.0.0.1\" as const, judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined, port: 0, origin: \"http://127.0.0.1:4180\", secret: Redacted.make(\"test-only-persistence-secret-with-thirty-two-characters\"), dataDirectory, appDirectory: path.resolve(\".mastra/output/app\"), pythonBin: path.resolve(\"data/python/.venv/bin/python\"), queueLimit: 1, admissionConfiguration: { _tag: \"disabled\", reason: \"Persistence test\" }, processing: null })\n"
+      ],
+      [
+        "copy",
+        3
       ],
       [
         "skip",
@@ -7365,7 +8281,36 @@
       ],
       [
         "copy",
-        87
+        41
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      yield* startServer(mastra, { host: \"127.0.0.1\" as const, judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined, port: 0, origin: \"http://127.0.0.1:4180\", secret: Redacted.make(\"test-only-flush-secret-with-thirty-two-characters\"), dataDirectory: path.join(directory, \"data\"), appDirectory: path.resolve(\".mastra/output/app\"), pythonBin: path.resolve(\"data/python/.venv/bin/python\"), queueLimit: 1, admissionConfiguration: { _tag: \"disabled\", reason: \"Flush failure test\" }, processing: null })\n"
+      ],
+      [
+        "copy",
+        45
+      ]
+    ]
+  },
+  "tests/server/outputs.test.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        86
+      ],
+      [
+        "add",
+        "\n  it.effect(\"lets every signed-in reader download a shared example while ratings stay with each owner\", () => Effect.gen(function* () {\n    const options = yield* directory\n    yield* Effect.gen(function* () {\n      const { request, publication, documents, claim } = yield* fixture(options.dataDirectory)\n      const asOther = { headers: { cookie: \"other\" } }\n      const response = yield* request(\"text\", asOther)\n      expect(response.status).toBe(200)\n      expect(new Uint8Array(yield* Effect.promise(() => response.arrayBuffer()))).toEqual(text)\n      const canonical = yield* request(\"canonical\", asOther)\n      expect(yield* Effect.promise(() => canonical.json())).toEqual(publication.canonical)\n      expect((yield* request(\"report\", asOther)).status).toBe(200)\n      expect((yield* request(\"zip\", asOther)).status).toBe(200)\n      expect((yield* request(\"rate\", { method: \"PUT\", headers: { origin, \"content-type\": \"application/json\" }, body: '{\"value\":\"up\"}' })).status).toBe(200)\n      const otherRating = yield* request(\"readRating\", asOther)\n      expect(yield* Effect.promise(() => otherRating.json())).toEqual({ value: null })\n      expect((yield* request(\"rate\", { method: \"PUT\", headers: { cookie: \"other\", origin, \"content-type\": \"application/json\" }, body: '{\"value\":\"down\"}' })).status).toBe(404)\n      expect((yield* request(\"clearRating\", { method: \"DELETE\", headers: { cookie: \"other\", origin } })).status).toBe(404)\n      const ownerRating = yield* request(\"readRating\")\n      expect(yield* Effect.promise(() => ownerRating.json())).toEqual({ value: \"up\" })\n      yield* documents.delete(owner, claim.document.id)\n      expect((yield* request(\"text\", asOther)).status).toBe(404)\n    }).pipe(Effect.provide(makeDocumentStoreLayer({ ...options, examplesOwnerId: owner })))\n  }).pipe(Effect.provide(NodeServices.layer)))\n"
+      ],
+      [
+        "copy",
+        1
       ]
     ]
   },

@@ -13,15 +13,20 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `docs/runbooks/mastra-upgrade.md`
 - `docs/step-rules/app-shell.md`
 - `docs/step-rules/application-ui.md`
+- `docs/step-rules/authentication.md`
 - `docs/step-rules/document-export.md`
 - `docs/step-rules/document-http.md`
 - `docs/step-rules/document-reader.md`
+- `docs/step-rules/document-storage.md`
+- `docs/step-rules/document-ui.md`
 - `docs/step-rules/domain-contracts.md`
 - `docs/step-rules/execution-guards.md`
 - `docs/step-rules/figures.md`
 - `docs/step-rules/headings.md`
+- `docs/step-rules/http-access.md`
 - `docs/step-rules/meta-provider.md`
 - `docs/step-rules/normalization-workflow.md`
+- `docs/step-rules/output-http.md`
 - `docs/step-rules/output-publication.md`
 - `docs/step-rules/page-check.md`
 - `docs/step-rules/page-rendering.md`
@@ -33,6 +38,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/app/assets/amuseme-logo-reversed.svg`
 - `src/app/assets/amuseme-logo.svg`
 - `src/app/assets/favicon.svg`
+- `src/app/client/auth.ts`
 - `src/app/client/browser.ts`
 - `src/app/client/documents.ts`
 - `src/app/client/outputs.ts`
@@ -46,6 +52,9 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/app/reader/presentation.ts`
 - `src/app/reader/reader.css`
 - `src/app/shell.css`
+- `src/auth/index.ts`
+- `src/auth/instance.ts`
+- `src/auth/service.ts`
 - `src/domain/api.ts`
 - `src/domain/document.ts`
 - `src/domain/index.ts`
@@ -76,8 +85,12 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/processing/policy.ts`
 - `src/processing/recovery.ts`
 - `src/processing/validator-repair.ts`
+- `src/server/access.ts`
+- `src/server/config.ts`
 - `src/server/documents.ts`
+- `src/server/http.ts`
 - `src/server/lifecycle.ts`
+- `src/server/outputs.ts`
 - `src/storage/documents.ts`
 - `src/storage/files.ts`
 - `src/storage/outputs.ts`
@@ -101,17 +114,24 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/processing/pipeline.test.ts`
 - `tests/processing/preflight-failures.test.ts`
 - `tests/processing/recovery.test.ts`
+- `tests/processing/spark-trial.test.ts`
 - `tests/processing/validator-repair.test.ts`
 - `tests/processing/workflow.test.ts`
+- `tests/server/access.test.ts`
 - `tests/server/config.test.ts`
 - `tests/server/documents.test.ts`
+- `tests/server/lifecycle-cancellation.test.ts`
 - `tests/server/observability.test.ts`
+- `tests/server/outputs.test.ts`
 - `tests/storage/documents.test.ts`
 - `tests/storage/output-zip.test.ts`
 
 ## New files
 
+- `deploy/modal/app.py`
+- `deploy/modal/seed_examples.py`
 - `docs/demo/meta-only-script.md`
+- `docs/runbooks/modal-deploy.md`
 - `docs/step-rules/muse-review.md`
 - `docs/step-rules/paper-map.md`
 - `docs/step-rules/reading-guide.md`
@@ -148,6 +168,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/app/reader/OriginalPreview.tsx`
 - `src/app/text.ts`
 - `src/app/useRoutePresentation.ts`
+- `src/auth/judge.ts`
 - `src/domain/furniture.ts`
 - `src/domain/guide.ts`
 - `src/paper/extraction/page.ts`
@@ -165,7 +186,10 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/app/library.test.ts`
 - `tests/app/map-fixture.ts`
 - `tests/app/map.test.ts`
+- `tests/app/sign-in.test.ts`
 - `tests/app/text.test.ts`
+- `tests/auth/judge.test.ts`
+- `tests/deploy/test_modal_deploy.py`
 - `tests/fixtures/code-repair.ts`
 - `tests/fixtures/guide.ts`
 - `tests/paper/code-repair.test.ts`
@@ -174,6 +198,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/paper/meta-document-extraction.test.ts`
 - `tests/processing/cost-model.test.ts`
 - `tests/processing/meta-document.test.ts`
+- `tests/server/shared-examples.test.ts`
 - `tests/storage/code-repair.test.ts`
 - `tests/submission/test_prepare.py`
 
