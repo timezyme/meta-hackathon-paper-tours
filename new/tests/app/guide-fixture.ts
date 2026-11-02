@@ -4,7 +4,7 @@ import { appReaderFixture } from "./reader-fixture.ts"
 
 const start = { sourceBlockId: "block-1", quote: "Beginning" }
 const end = { sourceBlockId: "block-2", quote: "and ending." }
-export const readerGuide = Schema.decodeUnknownSync(ReadingGuide)({
+export const appGuide = Schema.decodeUnknownSync(ReadingGuide)({
   title: "A guide to a joined paragraph",
   providerAttemptId: "app-guide-attempt",
   overview: { text: "This synthetic paragraph spans two pages.", sources: [start, end] },
@@ -18,9 +18,9 @@ export const readerGuide = Schema.decodeUnknownSync(ReadingGuide)({
     { claim: { text: "The ending follows the beginning.", sources: [end] }, support: { text: "The conjunction connects the later source piece.", sources: [end], strength: "partial" }, limits: [{ text: "The short sample does not establish wider document accuracy.", sources: [start] }] },
   ],
 })
-export const guidedCanonical = Schema.decodeUnknownSync(CanonicalDocument)({ ...appReaderFixture.canonical, guide: readerGuide })
+export const guidedCanonical = Schema.decodeUnknownSync(CanonicalDocument)({ ...appReaderFixture.canonical, guide: appGuide })
 export const guidedReport = Schema.decodeUnknownSync(ProcessingReport)({ ...appReaderFixture.report, receipts: [{ delivery: "performed", receipt: {
-  id: readerGuide.providerAttemptId,
+  id: appGuide.providerAttemptId,
   ownerId: "reader-owner",
   scope: { documentId: guidedCanonical.scope.documentId, runId: guidedCanonical.scope.runId, sourceHash: guidedCanonical.sourceHash },
   stage: "guide",

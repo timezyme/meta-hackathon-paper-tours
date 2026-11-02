@@ -1,13 +1,15 @@
 import { NodeServices } from "@effect/platform-node"
 import { describe, expect, it } from "@effect/vitest"
-import { Crypto, Effect, Result, Schema } from "effect"
+import { Effect, Result, Schema } from "effect"
 import { Base64 } from "effect/encoding"
 import { ArtifactHash, BlockId, GuideContent, ProviderAttemptId, stageConfiguration, validateCanonicalDocument, validatePublication } from "../../src/domain/index.ts"
 import { buildGuideRequest, guideInput, guideSpec, validateGuideResponse, verifySavedGuide } from "../../src/paper/guide/index.ts"
-import { stableJson, strictSchema } from "../../src/paper/providers/meta/contracts.ts"
+import { strictSchema } from "../../src/paper/providers/meta/contracts.ts"
 import { printNormalizedDocument } from "../../src/paper/reading/index.ts"
 import { contractFixture } from "../fixtures/contracts.ts"
 
+const guideSourceHash = ArtifactHash.make("8eade1b1f8467001877bb80ed6562a18f7ec19aa677b8e015401d9f005521627")
+const savedResponseHash = ArtifactHash.make("2be6c15355c34aab7d7143cd962f283d968c3f8f836f2c5abfe42bc6cc88cff0")
 const content = Schema.decodeUnknownSync(GuideContent)({
   title: "A result and its scope",
   overview: { text: "The document reports a measured value.", sources: [{ sourceBlockId: "block-2", quote: "The result is 12 units." }] },
@@ -55,11 +57,16 @@ describe("source-grounded reading guide", () => {
 
   it.effect("requires exact saved response, source/context hash, accepted receipt and configured publication check", () => Effect.gen(function* () {
     const fixture = contractFixture()
-    const crypto = yield* Crypto.Crypto
-    const hash = (value: string) => crypto.digest("SHA-256", new TextEncoder().encode(value)).pipe(Effect.map((bytes) => ArtifactHash.make(Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(""))))
     const response = { format: "amuseme-meta-wire-v1", status: 200, requestId: null, complete: true, bodyBase64: Base64.encode(JSON.stringify({ model: "muse-spark-1.3", choices: [{ finish_reason: "stop", message: { role: "assistant", content: JSON.stringify(content) } }] })) }
     const configuration = { ...fixture.run.configuration, guide: guideModel }
-    const receipt = { ...fixture.report.receipts[0]!.receipt, id: ProviderAttemptId.make("guide-attempt"), stage: "guide" as const, configuration: { _tag: "model" as const, ...guideModel }, inputHashes: [ArtifactHash.make(fixture.canonical.sourceHash), yield* hash(JSON.stringify(guideInput(fixture.canonical)))] as const, state: { _tag: "completed" as const, finishedAt: fixture.run.createdAt, providerRequestId: null, responseHash: yield* hash(stableJson(response)), durationMilliseconds: 1, usage: { _tag: "unavailable" as const, reason: "Fixture only" }, validation: { _tag: "accepted" as const } } }
+    const receipt = {
+      ...fixture.report.receipts[0]!.receipt, id: ProviderAttemptId.make("guide-attempt"), stage: "guide" as const, configuration: { _tag: "model" as const, ...guideModel },
+      inputHashes: [ArtifactHash.make(fixture.canonical.sourceHash), guideSourceHash] as const,
+      state: {
+        _tag: "completed" as const, finishedAt: fixture.run.createdAt, providerRequestId: null, responseHash: savedResponseHash, durationMilliseconds: 1,
+        usage: { _tag: "unavailable" as const, reason: "Fixture only" }, validation: { _tag: "accepted" as const },
+      },
+    }
     const canonical = { ...fixture.canonical, guide: { ...content, providerAttemptId: receipt.id } }
     yield* verifySavedGuide(canonical, receipt, response)
     for (const changed of [{ ...canonical, guide: { ...canonical.guide, title: "Fabricated replacement" } }, { ...canonical, blocks: canonical.blocks.map((block) => ({ ...block, content: `${block.content} changed` })) }]) expect((yield* verifySavedGuide(changed, receipt, response).pipe(Effect.result))._tag).toBe("Failure")

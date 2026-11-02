@@ -6,7 +6,7 @@ import { makeMetaRequest, type MetaRequest, type MetaStageSpec } from "../provid
 import { guideInput } from "./evidence.ts"
 import { READING_GUIDE_PROMPT } from "./prompt.ts"
 
-export { guideInput, validateGuideResponse, verifySavedGuide } from "./evidence.ts"
+export { guideInput, guideResponseProblems, validateGuideResponse, verifySavedGuide } from "./evidence.ts"
 export const guideSpec: MetaStageSpec = { instructions: READING_GUIDE_PROMPT, promptName: "reading-guide", promptVersion: "amuseme-1", schema: stageJsonSchema(GuideContent) }
 
 export const buildGuideRequest = (canonical: CanonicalDocument, limits: StageRequestLimits): Result.Result<MetaRequest, ExecutionFailure> => {

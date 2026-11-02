@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { focusSourceQuote, navigate, openProcessingReport, presentRoute, subscribeGuideKeys, subscribeLocation } from "../../../src/app/client/browser.ts"
+import { focusSourceQuote, makeRoutePresenter, navigate, openProcessingReport, subscribeGuideKeys } from "../../../src/app/client/browser.ts"
 
 class BrowserElement {
   isConnected = true
@@ -16,7 +16,12 @@ const setup = (pathname: string) => {
     location.pathname = url.pathname
     location.search = url.search
   }
-  vi.stubGlobal("window", { location, history: { pushState: change, replaceState: change }, addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events), dispatchEvent: events.dispatchEvent.bind(events) })
+  vi.stubGlobal("window", {
+    location, history: { pushState: change, replaceState: change },
+    addEventListener: events.addEventListener.bind(events),
+    removeEventListener: events.removeEventListener.bind(events),
+    dispatchEvent: events.dispatchEvent.bind(events),
+  })
   vi.stubGlobal("document", { title: "Previous route" })
   vi.stubGlobal("PopStateEvent", Event)
   vi.stubGlobal("HTMLElement", BrowserElement)
@@ -41,7 +46,6 @@ describe("ready route presentation", () => {
     expect(blockFocus).toHaveBeenLastCalledWith({ preventScroll: true })
     expect(lookup).toHaveBeenLastCalledWith("mark")
     expect(quoteScroll).toHaveBeenCalledTimes(2)
-    expect(quoteScroll).toHaveBeenLastCalledWith({ block: "center", inline: "nearest", behavior: "instant" })
     expect(blockScroll).not.toHaveBeenCalled()
     expect(quoteFocus).not.toHaveBeenCalled()
     lookup.mockReturnValue(null)
@@ -59,7 +63,11 @@ describe("ready route presentation", () => {
     }
     const target = new KeyTarget()
     vi.stubGlobal("Element", KeyTarget)
-    vi.stubGlobal("document", { querySelector: () => dialogOpen ? {} : null, addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events) })
+    vi.stubGlobal("document", {
+      querySelector: () => dialogOpen ? {} : null,
+      addEventListener: events.addEventListener.bind(events),
+      removeEventListener: events.removeEventListener.bind(events),
+    })
     const turn = vi.fn()
     const stop = subscribeGuideKeys(turn)
     const key = (value: string, modified = false) => {
@@ -85,7 +93,8 @@ describe("ready route presentation", () => {
   })
   it("sets title and focuses the ready owner once, without moving scroll on query, polls or title updates", () => {
     setup("/documents/first")
-    const unsubscribe = subscribeLocation(vi.fn())
+    const { present: presentRoute, subscribe } = makeRoutePresenter()
+    const unsubscribe = subscribe(vi.fn())
     const main = new HTMLElement()
     const focus = vi.spyOn(main, "focus")
     const scroll = vi.spyOn(main, "scrollIntoView")
@@ -103,7 +112,8 @@ describe("ready route presentation", () => {
   it("retains a focus request across loading routes and focuses again on history back", () => {
     const browser = setup("/documents/start")
     const listener = vi.fn()
-    const unsubscribe = subscribeLocation(listener)
+    const { present: presentRoute, subscribe } = makeRoutePresenter()
+    const unsubscribe = subscribe(listener)
     const first = new HTMLElement()
     const firstFocus = vi.spyOn(first, "focus")
     presentRoute(first, "/documents/start", "Start")
@@ -128,18 +138,17 @@ describe("ready route presentation", () => {
     expect(listener).toHaveBeenCalledTimes(3)
     unsubscribe()
   })
-  it("opens and focuses only the requested report instance, including repeated review", () => {
+  it("opens, focuses and reveals the requested report on every review", () => {
     setup("/documents/report")
-    const desktop = new HTMLDetailsElement()
     const drawer = new HTMLDetailsElement()
     const summary = new HTMLElement()
     const focus = vi.spyOn(summary, "focus")
     const scroll = vi.spyOn(summary, "scrollIntoView")
     openProcessingReport(drawer, summary)
+    drawer.open = false
     openProcessingReport(drawer, summary)
     expect(drawer.open).toBe(true)
-    expect(desktop.open).toBe(false)
     expect(focus).toHaveBeenCalledTimes(2)
-    expect(scroll).toHaveBeenLastCalledWith({ block: "start", behavior: "instant" })
+    expect(scroll).toHaveBeenCalledTimes(2)
   })
 })

@@ -7,7 +7,7 @@ import { stableJson } from "../../src/paper/providers/meta/contracts.ts"
 import { exportDocument } from "../../src/paper/reading/export.ts"
 import { AttemptIntent } from "../../src/processing/contracts.ts"
 import { Admission, ArtifactStore, DocumentStore, OutputStore, StorageDatabase, makeArtifactStore, makeOutputStore } from "../../src/storage/index.ts"
-import { repairCodeOutput } from "../../src/storage/code-repair.ts"
+import { repairCodeOutput } from "../../src/processing/code-repair.ts"
 import { contractFixture, fixtureHash } from "./contracts.ts"
 import { owner } from "./published-output.ts"
 
@@ -103,6 +103,7 @@ export const publishCodeFixture = Effect.fnUntraced(function* (dataDirectory: st
   for (const file of exported.files) yield* artifacts.put(owner, claim.document.id, file.bytes)
   const outputs = yield* makeOutputStore().pipe(Effect.provideService(ArtifactStore, artifacts))
   yield* outputs.publish(claim, exported.publication)
-  const repair = (apply = true, revision = scope.revisionId, requestedOwner = owner) => repairCodeOutput(requestedOwner, claim.document.id, revision, apply).pipe(Effect.provideService(ArtifactStore, artifacts), Effect.provideService(OutputStore, outputs))
+  const repair = (apply = true, revision = scope.revisionId, requestedOwner = owner, store: ArtifactStore["Service"] = artifacts) =>
+    repairCodeOutput(requestedOwner, claim.document.id, revision, apply).pipe(Effect.provideService(ArtifactStore, store), Effect.provideService(OutputStore, outputs))
   return { claim, publication: exported.publication, files: exported.files, outputs, artifacts, database, documents, repair, imageBytes, originalBytes, responses }
 })

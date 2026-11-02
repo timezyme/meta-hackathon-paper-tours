@@ -2,7 +2,7 @@ import { NodeServices } from "@effect/platform-node"
 import { Effect, Result } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { contractFixture } from "../fixtures/contracts.ts"
-import { validatePageExtraction, pageExtractionSpec, cropBox, convertPageExtraction } from "../../src/paper/extraction/page.ts"
+import { validatePageExtraction, pageExtractionProblems, pageExtractionSpec, cropBox, convertPageExtraction } from "../../src/paper/extraction/page.ts"
 import { strictSchema } from "../../src/paper/providers/meta/contracts.ts"
 import { assembleDocument, exportDocument } from "../../src/paper/reading/index.ts"
 import { prepareReading } from "./reading/fixtures.ts"
@@ -20,6 +20,17 @@ describe("document page extraction", () => {
   it("checks physical page identity and complete coverage", () => {
     expect(Result.isFailure(validatePageExtraction(page, { ...response, pageNumber: 2 }))).toBe(true)
     expect(Result.isFailure(validatePageExtraction(page, { ...response, coverage: "incomplete" }))).toBe(true)
+  })
+  it("lists every concrete extraction problem for Muse review", () => {
+    const figure = { kind: "figure", content: "[Figure]", format: "text", furniture: null } as const
+    const problems = pageExtractionProblems(page, { ...response, pageNumber: 2, coverage: "incomplete", blocks: [block, figure, { ...block, content: " " }], figures: [{ blockIndex: 0, captionBlockIndices: [], box: null }] })
+    expect(Result.isFailure(problems) ? problems.failure : []).toEqual([
+      "pageNumber must be the physical page 1, not 2",
+      "coverage is incomplete; transcribe all visible content and return complete",
+      "Block 2 has empty content",
+      "Figures entry 0 points at block 0, which is not a figure block",
+      "Figure block 1 has no figures entry",
+    ])
   })
   it("preserves supported code verbatim and warns only for unknown non-furniture content", () => {
     const fixture = contractFixture()

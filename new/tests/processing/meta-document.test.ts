@@ -2,7 +2,7 @@ import { NodeServices } from "@effect/platform-node"
 import { describe, expect, it } from "@effect/vitest"
 import { Mastra } from "@mastra/core/mastra"
 import { LibSQLStore } from "@mastra/libsql"
-import { Effect, FileSystem, Layer, Path, Redacted, Schema, Stream } from "effect"
+import { Effect, Exit, FileSystem, Layer, Path, Redacted, Schema, Stream } from "effect"
 import { ChildProcess, ChildProcessSpawner } from "effect/process"
 import { HttpClient, HttpClientResponse } from "effect/http"
 import { CanonicalDocument, PageId, IdempotencyKey, ProcessingReport, RunConfiguration, UserId } from "../../src/domain/index.ts"
@@ -116,7 +116,6 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
         if (!("extraction" in checkpoint)) return yield* Effect.die("Expected extraction checkpoint")
         const saved = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(ExtractedData))(new TextDecoder().decode(yield* artifacts.read(owner, claim.document.id, checkpoint.extraction)))
         const receipts = saved.receipts
-        if (receipts === undefined) return yield* Effect.die("Expected page receipts")
         const countBefore = preflights
         for (const changed of [[receipts[0]], receipts.map((receipt, index) => index === 1 ? { ...receipt, id: receipts[0]!.id } : receipt), receipts.map((receipt, index) => index === 1 ? { ...receipt, pageIds: [PageId.make("page-1")] } : receipt)]) {
           const reference = yield* artifacts.put(owner, claim.document.id, new TextEncoder().encode(JSON.stringify({ conversion: saved.conversion, receipts: changed })))
@@ -169,7 +168,13 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
       const attempts = yield* database.query("meta-document-attempts", () => database.db.selectFrom("provider_attempts").selectAll().execute())
       expect(attempts).toHaveLength(scenario === "crop-unavailable" ? 7 : 8)
       expect(attempts.every((row) => row.validation_state === "accepted")).toBe(true)
-      expect(Schema.is(ExtractedData)({ conversion: { extraction: canonical, issues: [] }, receipt: report.receipts[0]?.receipt, receipts: [report.receipts[0]?.receipt] })).toBe(false)
+      const scope = { documentId: canonical.scope.documentId, runId: canonical.scope.runId, sourceHash: canonical.sourceHash }
+      const { pages, sourceBlocks, figures, pageFurniture } = canonical
+      const conversion = { extraction: { schemaVersion: "1", scope, pages, sourceBlocks, figures, pageFurniture }, issues: [] }
+      const receipt = report.receipts[0]?.receipt
+      expect(Exit.isSuccess(Schema.decodeUnknownExit(ExtractedData)({ conversion, receipts: [receipt] }))).toBe(true)
+      expect(Exit.isSuccess(Schema.decodeUnknownExit(ExtractedData)({ conversion, receipt }))).toBe(true)
+      expect(Exit.isFailure(Schema.decodeUnknownExit(ExtractedData)({ conversion, receipt, receipts: [receipt] }))).toBe(true)
     }).pipe(Effect.provide(makeDocumentStoreLayer({ dataDirectory: root, queueLimit: 5 })))
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)), { timeout: 30000 })
 })

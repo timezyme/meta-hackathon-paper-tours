@@ -1,20 +1,24 @@
 # AmuseMe
 
-AmuseMe turns a research PDF into a reading guide you can check. Upload a paper and choose how to read it: a step-by-step walkthrough, the paper's claims with their support and limits, or the full text beside the original pages. Every explanation cites an exact quotation from the paper. One click opens that passage in the clean text or on the original page.
+**Today: humans and agents. Tomorrow: robots and humanoids.**
 
-The same run produces a portable document: text, equations, tables, figure crops with AI-written descriptions, and a processing report. You can copy it or download it as a ZIP.
+AmuseMe turns a PDF into a reading guide you can check. Upload a research paper, a medical article, a court opinion, a class handout or a business brief, and choose how to read it: a step-by-step walkthrough, the document's claims with their support and limits, a document map, or the full text beside the original pages. Every explanation cites an exact quotation. One click opens that passage in the clean text or on the original page.
+
+The same run produces a portable document: text, equations, tables, figure crops with AI-written descriptions, a structured JSON guide and a processing report. People read the guide; agents can use the JSON, where every claim points to the exact words it rests on. A home robot following a manual or a safety sheet will need the same thing. Meta is [reportedly building one](https://www.engadget.com/2303434/meta-reportedly-built-a-humanoid-robot-prototype-that-can-do-household-chores/).
 
 ## How Meta Muse Spark is used
 
-Meta Muse Spark 1.3 performs every model step. The host renders pages, validates each structured response, and saves it so recovery never repeats a completed call.
+Meta Muse Spark 1.3 performs every model step, each through its own Mastra agent inside one durable Mastra workflow. The host renders pages, validates each structured response, and saves it so recovery never repeats a completed call.
 
 | Stage | What Muse Spark does |
 |---|---|
 | Page extraction | Transcribes each rendered page into ordered text, equations, tables, code and figure regions |
-| Page checking | Compares the extraction with the page image and repairs transcription errors |
-| Document structure | Builds the heading hierarchy and joins paragraphs split across pages |
+| Page checking | Compares the extraction with the page image, repairs transcription errors and joins paragraphs split across pages |
+| Document structure | Restores the heading hierarchy |
 | Figure descriptions | Describes each cropped figure using its image and the surrounding text |
 | Reading guide | Writes the overview, walkthrough and claims, citing exact source quotations |
+
+**Muse review.** When a stage's answer fails validation, a reviewer agent for that stage gets what a human editor would: the page or figure image, the original input, the rejected answer and the exact list of problems. It returns a corrected answer, which is validated again. After two rounds the stage falls back to a safe default that keeps the source text unchanged, so a run finishes instead of failing. Every review is listed in the processing report.
 
 Before a guide is published, every quotation must match exactly one location in its cited source block. This catches invented or misplaced quotes, but it does not prove the explanation is correct, so the interface labels the guide as AI-written.
 
@@ -30,13 +34,13 @@ cd ../amuseme-app
 git init
 ```
 
-Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Processing new uploads requires a Meta API key and a configured spending allowance. Saved papers stay readable and downloadable without them.
+Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Use Node 24 and exactly Python 3.14.5 (`uv venv --python 3.14.5`); PDF rendering checks the exact Python and PyMuPDF versions. Processing new uploads requires a Meta API key and a configured spending allowance. Saved documents stay readable and downloadable without them.
 
 ## What has been verified
 
-On November 1, a six-page MFGLib paper with one scanned page went from upload through guide to download. It took 360 seconds and 15 accepted Muse Spark calls. Its guide has five steps, three claims and 33 quote references, and each reference is uniquely located in its source. All overview, step and claim text was reviewed against the paper. Downloaded ZIP, text and original-PDF bytes match their saved hashes. The application passes type, lint and architecture checks, its full test suite and a production build.
+Seven documents of five types went from upload through guide to download: three research papers (one with a scanned page, one table-heavy, one figure-heavy), a psychiatry research letter, a US Supreme Court opinion, an EPA class handout and an SBA economics brief. Independent reviews checked every guide quote, table and figure description against the source pages and found no invented facts or wrong numbers; the faults they did find are listed. The application passes type, lint and architecture checks, its full test suite and a production build.
 
-That is one paper, not an accuracy benchmark. [VERIFICATION.md](VERIFICATION.md) records each check, its scope and its limits.
+Seven documents are not an accuracy benchmark. [VERIFICATION.md](VERIFICATION.md) records each check, its scope and its limits.
 
 ## What is new
 

@@ -1,12 +1,10 @@
-import type { CanonicalDocument } from "../../domain/index.ts"
+import type { CanonicalDocument, UploadUnavailable } from "../../domain/index.ts"
 import type { DocumentRecord } from "../documents.ts"
 import { paperHeading } from "../guide/presentation.ts"
 
-const processingNotConfigured = "Document processing is not configured. Uploads will open when the processing pipeline, provider access, and budget are ready."
-
-export const uploadUnavailableMessage = (reason: string, hasPapers: boolean): string => {
-  if (reason !== processingNotConfigured) return reason
-  return hasPapers ? "You can still read and download your saved papers." : "This library isn’t accepting new PDFs yet."
+export const uploadUnavailableMessage = ({ code, reason }: UploadUnavailable, hasPapers: boolean): string => {
+  if (code !== "processing-not-configured") return reason
+  return hasPapers ? "You can still read and download your saved documents." : "This library isn’t accepting new PDFs yet."
 }
 
 export const featuredPaper = (records: ReadonlyArray<DocumentRecord>): DocumentRecord | undefined =>

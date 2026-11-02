@@ -22,18 +22,20 @@ export type GuideContent = typeof GuideContent.Type
 export const ReadingGuide = Schema.Struct({ ...GuideContent.fields, providerAttemptId: ProviderAttemptId })
 export type ReadingGuide = typeof ReadingGuide.Type
 
-export const guideSources = (guide: GuideContent): ReadonlyArray<SourceQuote> => [
+const guideSources = (guide: GuideContent): ReadonlyArray<SourceQuote> => [
   ...guide.overview.sources,
   ...guide.steps.flatMap((step) => step.explanation.sources),
   ...guide.claims.flatMap((item) => [...item.claim.sources, ...item.support.sources, ...item.limits.flatMap((limit) => limit.sources)]),
 ]
 
-export const validGuideSources = (guide: GuideContent, blocks: ReadonlyArray<{ readonly id: BlockId; readonly content: string }>): boolean => {
+export const guideSourceProblems = (guide: GuideContent, blocks: ReadonlyArray<{ readonly id: BlockId; readonly content: string }>): ReadonlyArray<string> => {
   const source = new Map(blocks.map((block) => [block.id, block.content]))
-  return guideSources(guide).every(({ sourceBlockId, quote }) => {
+  return guideSources(guide).flatMap(({ sourceBlockId, quote }) => {
     const content = source.get(sourceBlockId)
-    if (content === undefined) return false
+    if (content === undefined) return [`Quote "${quote}" cites block ${sourceBlockId}, which is not a source block`]
     const start = content.indexOf(quote)
-    return start !== -1 && content.indexOf(quote, start + 1) === -1
+    if (start === -1) return [`Quote "${quote}" is not an exact substring of block ${sourceBlockId}`]
+    return content.indexOf(quote, start + 1) === -1 ? [] : [`Quote "${quote}" occurs more than once in block ${sourceBlockId}; quote a longer unique passage`]
   })
 }
+export const validGuideSources = (guide: GuideContent, blocks: ReadonlyArray<{ readonly id: BlockId; readonly content: string }>): boolean => guideSourceProblems(guide, blocks).length === 0

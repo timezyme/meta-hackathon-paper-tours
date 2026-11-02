@@ -6,7 +6,7 @@ import { DocumentDetail } from "../../src/domain/index.ts"
 import type { DocumentRecord } from "../../src/app/documents.ts"
 import { FeaturedPaperContent, PaperLibrary } from "../../src/app/library/PaperLibrary.tsx"
 import { featuredPaper, paperPreview, uploadUnavailableMessage } from "../../src/app/library/presentation.ts"
-import { guidedCanonical, readerGuide } from "./guide-fixture.ts"
+import { guidedCanonical, appGuide } from "./guide-fixture.ts"
 import { appReaderFixture } from "./reader-fixture.ts"
 
 const { scope, sourceHash } = guidedCanonical
@@ -35,10 +35,10 @@ const controls = { retryEnabled: false, onDeleted: ignore, onRefresh: ignore, on
 const feature = (content: ReturnType<typeof paperPreview> | null, error: string | null = null) =>
   renderToStaticMarkup(createElement(FeaturedPaperContent, { record, content, error, controls }))
 const excerpt = (text: string) => paperPreview({
-  ...guidedCanonical, guide: { ...readerGuide, overview: { ...readerGuide.overview, text } },
+  ...guidedCanonical, guide: { ...appGuide, overview: { ...appGuide.overview, text } },
 }).guide?.excerpt
 
-describe("signed-in paper library", () => {
+describe("signed-in document library", () => {
   it("features the current published guide ahead of a queued upload or a historical publication", () => {
     const historical = Schema.decodeUnknownSync(DocumentDetail)({ ...record, latestRun: { ...record.latestRun, configuration } })
     const changedRevision = Schema.decodeUnknownSync(DocumentDetail)({ ...record, currentRevisionId: "older-revision" })
@@ -49,12 +49,12 @@ describe("signed-in paper library", () => {
 
   it("opens the validated guide at goal selection and preserves direct reading, original page and download links", () => {
     const page = feature(paperPreview(guidedCanonical))
-    expect(page).toContain(readerGuide.title)
-    expect(page).toContain(readerGuide.overview.text)
+    expect(page).toContain(appGuide.title)
+    expect(page).toContain(appGuide.overview.text)
     expect(page).toContain("3 steps")
     expect(page).toContain("2 claims")
     expect(page).toContain(`href="/documents/${scope.documentId}?mode=choices&amp;goal=walk">Open reading guide`)
-    expect(page).toContain(`href="/documents/${scope.documentId}?mode=read">Read full paper`)
+    expect(page).toContain(`href="/documents/${scope.documentId}?mode=read">Read full document`)
     expect(page).toContain(`src="/api/documents/${scope.documentId}/preview?page=1"`)
     expect(page).toContain(`href="/documents/${scope.documentId}?mode=read&amp;view=original&amp;p=1"`)
     expect(page).toContain(`href="/api/documents/${scope.documentId}/outputs/${scope.revisionId}/text"`)
@@ -64,13 +64,13 @@ describe("signed-in paper library", () => {
 
   it("keeps the original and reader accessible without advertising an absent or unreadable guide", () => {
     const legacy = feature(paperPreview(appReaderFixture.canonical))
-    expect(legacy).toContain("This paper has no saved guide.")
+    expect(legacy).toContain("This document has no saved guide.")
     expect(legacy).toContain("source-file")
     const unreadable = feature(null, "The saved output could not be read.")
     expect(unreadable).toContain("The saved output could not be read.")
     for (const page of [legacy, unreadable]) {
       expect(page).not.toContain("Open reading guide")
-      expect(page).toContain(`href="/documents/${scope.documentId}?mode=read">Open paper`)
+      expect(page).toContain(`href="/documents/${scope.documentId}?mode=read">Open document`)
       expect(page).toContain("Download original PDF")
     }
   })
@@ -93,11 +93,11 @@ describe("signed-in paper library", () => {
     expect(excerpt(longSentence)).toBe(`${"This sample ".repeat(20).trim()}…`)
   })
 
-  it("simplifies only the known configuration message and preserves actionable server explanations", () => {
-    const known = "Document processing is not configured. Uploads will open when the processing pipeline, provider access, and budget are ready."
-    expect(uploadUnavailableMessage(known, true)).toContain("read and download")
-    expect(uploadUnavailableMessage(known, false)).toContain("isn’t accepting new PDFs")
-    const capacity = "All processing slots are in use. Try again in five minutes."
-    expect(uploadUnavailableMessage(capacity, true)).toBe(capacity)
+  it("simplifies only the unconfigured-processing code and preserves other server explanations", () => {
+    const unconfigured = { code: "processing-not-configured", reason: "Processing is not configured on this server." } as const
+    expect(uploadUnavailableMessage(unconfigured, true)).toBe("You can still read and download your saved documents.")
+    expect(uploadUnavailableMessage(unconfigured, false)).toBe("This library isn’t accepting new PDFs yet.")
+    const exhausted = { code: "budget-exhausted", reason: "The processing budget is exhausted. Try again next month." } as const
+    expect(uploadUnavailableMessage(exhausted, true)).toBe(exhausted.reason)
   })
 })

@@ -4,7 +4,7 @@ import { Effect, FileSystem, Path, Schema } from "effect"
 import { sql } from "kysely"
 import { ArtifactManifest, CanonicalDocument, OutputRevisionId, ProcessingReport } from "../../src/domain/index.ts"
 import { guideInput, verifySavedGuide } from "../../src/paper/guide/evidence.ts"
-import { ArtifactStore, DocumentStore, StorageDatabase, makeArtifactStore, makeDocumentStoreLayer, makeOutputStore } from "../../src/storage/index.ts"
+import { Admission, ArtifactStore, DocumentStore, StorageDatabase, makeArtifactStore, makeDocumentStoreLayer, makeOutputStore } from "../../src/storage/index.ts"
 import { codeIds, codeRepairFixture, publishCodeFixture, unknownId } from "../fixtures/code-repair.ts"
 import { directory, other, owner, setup } from "../fixtures/published-output.ts"
 
@@ -19,6 +19,9 @@ const history = Effect.gen(function* () {
     queued: yield* query("history", () => db.selectFrom("accepted_jobs").selectAll().execute()),
   }
 })
+
+const reorder = (value: unknown): unknown => Array.isArray(value) ? value.map(reorder)
+  : typeof value === "object" && value !== null ? Object.fromEntries(Object.entries(value).toReversed().map(([key, item]) => [key, reorder(item)])) : value
 
 describe("offline saved-output code repair", () => {
   it.effect("previews without writes, then preserves the original revision, guide, image, source and charge ledger", () => Effect.gen(function* () {
@@ -167,6 +170,44 @@ describe("offline saved-output code repair", () => {
       expect(yield* history).toEqual(before)
       expect((yield* saved.documents.detail(owner, saved.claim.document.id)).currentRevisionId).toBe(saved.publication.canonical.scope.revisionId)
       yield* saved.database.query("fault", () => sql.raw("DROP TRIGGER fail_code_repair").execute(saved.database.db))
+      expect((yield* saved.repair()).applied).toBe(true)
+    }).pipe(Effect.provide(makeDocumentStoreLayer(options)))
+  }).pipe(Effect.provide(NodeServices.layer)))
+
+  it.effect("refuses to commit when work is queued after the repair was prepared", () => Effect.gen(function* () {
+    const options = yield* directory
+    yield* Effect.gen(function* () {
+      const saved = yield* publishCodeFixture(options.dataDirectory)
+      const admission = yield* Schema.decodeUnknownEffect(Admission)({
+        ownerId: other, idempotencyKey: "queued-during-repair", bytes: saved.originalBytes, originalFilename: "normal.pdf", pageCount: 1,
+        pipelineVersion: "amuseme-meta-3", configuration: codeRepairFixture().configuration,
+      })
+      let queued = false
+      const racing = ArtifactStore.of({
+        ...saved.artifacts,
+        put: (ownerId, documentId, bytes) => saved.artifacts.put(ownerId, documentId, bytes).pipe(Effect.tap(() =>
+          queued ? Effect.void : saved.documents.admit(admission).pipe(Effect.tap(() => Effect.sync(() => { queued = true }))))),
+      })
+      const before = yield* history
+      expect((yield* saved.repair(true, saved.publication.canonical.scope.revisionId, owner, racing).pipe(Effect.result))._tag).toBe("Failure")
+      const after = yield* history
+      expect(queued).toBe(true)
+      expect(after.outputs).toEqual(before.outputs)
+      expect(after.runs.filter((run) => run.state === "queued")).toHaveLength(1)
+      expect(after.runs.filter((run) => run.mastra_run_id.startsWith("local-code-repair-"))).toEqual([])
+      expect((yield* saved.documents.detail(owner, saved.claim.document.id)).currentRevisionId).toBe(saved.publication.canonical.scope.revisionId)
+    }).pipe(Effect.provide(makeDocumentStoreLayer(options)))
+  }).pipe(Effect.provide(NodeServices.layer)))
+
+  it.effect("matches durable receipts structurally rather than by JSON key order", () => Effect.gen(function* () {
+    const options = yield* directory
+    yield* Effect.gen(function* () {
+      const saved = yield* publishCodeFixture(options.dataDirectory)
+      for (const { receipt } of saved.publication.report.receipts) {
+        yield* saved.database.query("reorder-receipt", () => saved.database.db.updateTable("provider_attempts")
+          .set({ receipt_json: JSON.stringify(reorder(receipt)) }).where("id", "=", receipt.id).execute())
+      }
+      expect(yield* saved.repair(false)).toMatchObject({ blockIds: codeIds, applied: false })
       expect((yield* saved.repair()).applied).toBe(true)
     }).pipe(Effect.provide(makeDocumentStoreLayer(options)))
   }).pipe(Effect.provide(NodeServices.layer)))

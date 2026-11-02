@@ -1,5 +1,5 @@
 import { Crypto, Effect, Result, Schema } from "effect"
-import { ArtifactHash, GuideContent, validGuideSources, type CanonicalDocument, type StageReceipt } from "../../domain/index.ts"
+import { ArtifactHash, GuideContent, guideSourceProblems, type CanonicalDocument, type StageReceipt } from "../../domain/index.ts"
 import { executionFailure, type ExecutionFailure } from "../../processing/contracts.ts"
 import { decodeMetaOutput, stableJson } from "../providers/meta/contracts.ts"
 
@@ -13,12 +13,16 @@ export const guideInput = (canonical: CanonicalDocument) => ({
   figureContext: canonical.figures.map(({ id, captionBlockIds, originalCaption, description }) => ({ id, captionBlockIds, originalCaption, aiDescription: description._tag === "generated" ? description.text : null })),
 })
 
-export const validateGuideResponse = (canonical: CanonicalDocument, value: unknown): Result.Result<GuideContent, ExecutionFailure> => {
+const guideSchemaProblem = "The answer does not match the bounded reading-guide schema (field lengths, at most 10 steps, 6 claims, 3 limits and 4 sources per passage)"
+export const guideResponseProblems = (canonical: CanonicalDocument, value: unknown): Result.Result<GuideContent, ReadonlyArray<string>> => {
   const decoded = Schema.decodeUnknownResult(GuideContent)(value, { onExcessProperty: "error" })
-  if (Result.isFailure(decoded)) return Result.fail(invalidGuide("The reading guide does not match its bounded schema"))
-  if (!validGuideSources(decoded.success, canonical.sourceBlocks)) return Result.fail(invalidGuide("Every guide quotation must match a unique passage in its immutable source block"))
-  return Result.succeed(decoded.success)
+  if (Result.isFailure(decoded)) return Result.fail([guideSchemaProblem])
+  const problems = guideSourceProblems(decoded.success, canonical.sourceBlocks)
+  return problems.length === 0 ? Result.succeed(decoded.success) : Result.fail(problems)
 }
+export const validateGuideResponse = (canonical: CanonicalDocument, value: unknown): Result.Result<GuideContent, ExecutionFailure> =>
+  guideResponseProblems(canonical, value).pipe(Result.mapError((problems) => invalidGuide(problems[0] === guideSchemaProblem
+    ? "The reading guide does not match its bounded schema" : "Every guide quotation must match a unique passage in its immutable source block")))
 
 export const verifySavedGuide = Effect.fn("verifySavedGuide")(function* (canonical: CanonicalDocument, receipt: StageReceipt, response: Schema.Json) {
   const guide = canonical.guide

@@ -3,7 +3,7 @@ import { Config, Console, Effect, Layer, Schema } from "effect"
 import { DocumentId, OutputRevisionId, UserId } from "../src/domain/index.ts"
 import { serverConfig } from "../src/server/config.ts"
 import { withProcessLock } from "../src/server/process-lock.ts"
-import { repairCodeOutput } from "../src/storage/code-repair.ts"
+import { repairCodeOutput } from "../src/processing/code-repair.ts"
 import { makeArtifactStoreLayer, makeDocumentStoreLayer, makeOutputStoreLayer, StorageFailure } from "../src/storage/index.ts"
 
 const program = Effect.gen(function* () {

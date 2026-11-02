@@ -10,7 +10,7 @@
 .library-feature h2 { margin: 10px 0 12px; font-family: var(--font-editorial, Georgia, "Times New Roman", serif); font-size: clamp(2.125rem, 3.7vw, 3.5rem); line-height: 1.06; font-weight: 400; letter-spacing: -.045em; overflow-wrap: anywhere; text-wrap: balance; }
 .library-byline { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); font-size: .8125rem; line-height: 1.5; margin: 0; }
 .library-byline > span { color: var(--muted); }
-.library-excerpt { color: var(--ink); max-width: 63ch; margin: 20px 0 0; font: 1rem/1.6 Geist, system-ui, sans-serif; overflow-wrap: anywhere; text-wrap: pretty; }
+.library-excerpt { color: var(--ink); max-width: 63ch; margin: 20px 0 0; font: 1rem/1.6 var(--font-ui); overflow-wrap: anywhere; text-wrap: pretty; }
 .library-feature-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; margin-top: 20px; }
 .reading-library .button { min-height: 44px; white-space: normal; font-size: .875rem; line-height: 1.5; padding: 10px 16px; }
 .library-feature-actions .button.primary { min-height: 48px; font-weight: 550; }
