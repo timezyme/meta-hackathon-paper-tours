@@ -52,7 +52,7 @@ export const buildPageExtractionRequest = (page: Page, pageCount: number, bytes:
 )
 export const convertPageExtraction = (document: Document, runId: RunId, page: Page, response: PageExtractionResponse, assets: ReadonlyMap<number, ImageArtifact>): { readonly extraction: Extraction; readonly issues: ReadonlyArray<Issue> } => {
   const locations = [{ _tag: "page" as const, pageId: page.id, pageNumber: page.pageNumber }] as const
-  const sourceBlocks: Array<SourceBlock> = response.blocks.map((block, index) => ({ id: BlockId.make(`page-${page.pageNumber}-block-${index + 1}`), kind: block.kind === "code" || block.furniture !== null ? "unclassified" : block.kind, readingOrder: index, content: block.content, format: block.format, locations }))
+  const sourceBlocks: Array<SourceBlock> = response.blocks.map((block, index) => ({ id: BlockId.make(`page-${page.pageNumber}-block-${index + 1}`), kind: block.furniture !== null ? "unclassified" : block.kind, readingOrder: index, content: block.content, format: block.format, locations }))
   const issues: Array<Issue> = sourceBlocks.filter((block, index) => block.kind === "unclassified" && response.blocks[index]?.furniture === null).map((block) => ({ code: "unclassified-content", message: "Extracted content is retained without a supported block classification.", stage: "extraction", locations, blockIds: [block.id], figureId: null }))
   const figures = response.figures.map((proposal): Figure => {
     const source = sourceBlocks[proposal.blockIndex]!

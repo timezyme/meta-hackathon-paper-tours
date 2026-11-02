@@ -26,7 +26,7 @@ Apply the baseline prompt above, plus these explicit review rules:
 0. **Be ambitious about structural simplification.**
    - Do not stop at "this could be a bit cleaner."
    - Look for opportunities to reframe the change so that whole branches, helpers, modes, conditionals, or layers disappear entirely.
-   - Prefer the solution that makes the code feel inevitable in hindsight.
+   - Prefer the solution that makes the code feel inevitable on review.
    - Assume there is often a "code judo" move available: a re-organization that uses the existing architecture more effectively and makes the change dramatically simpler and more elegant.
    - If you see a path to delete complexity rather than rearrange it, push hard for that path.
 

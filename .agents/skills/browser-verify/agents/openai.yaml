@@ -1,0 +1,4 @@
+interface:
+  display_name: "Browser verify"
+  short_description: "Pick a working browser driver and verify app flows"
+  default_prompt: "Use $browser-verify to verify this AmuseMe flow in a browser and record the driver and engine."
