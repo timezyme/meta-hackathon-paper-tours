@@ -5,12 +5,12 @@ description: Choose a working browser driver and verify AmuseMe flows in the rea
 
 # Verify AmuseMe in a browser
 
-Playwright is prohibited, including `cmux browser repl`. Never launch Chrome from the shell.
+Use the cmux browser first for browser testing. Playwright is only for end-to-end tests, and AmuseMe has none, so don't use it to verify flows. Never launch Chrome from the shell.
 
 ## Pick the driver
 
-1. Chrome through CUA or Chrome DevTools, when one attaches to a usable window. The Chrome extension may be disconnected, CUA keypresses may not land in automation-controlled Chrome, and Chrome started with `--remote-debugging-pipe` has no attachable port. Test one action and read back the result before trusting a driver.
-2. Otherwise, the cmux built-in browser. It is WebKit (the Safari engine), not Chrome. Every result recorded with it must say "cmux WebKit".
+1. The cmux built-in browser. It is WebKit (the Safari engine), not Chrome. Every result recorded with it must say "cmux WebKit".
+2. Chrome through CUA or Chrome DevTools, for Chrome-only behavior or when cmux can't show the flow, and only when one attaches to a usable window. The Chrome extension may be disconnected, CUA keypresses may not land in automation-controlled Chrome, and Chrome started with `--remote-debugging-pipe` has no attachable port. Test one action and read back the result before trusting a driver.
 3. If neither works, stop browser testing and report the blocker. Chrome-only behavior, such as native downloads, still needs [native download verification](../chrome-native-download-verification/SKILL.md).
 
 ## Drive cmux
