@@ -2,7 +2,15 @@
 
 ## Judge access and Modal deployment — November 2, 2026
 
-The application gained email-only judge sign-in, shared read-only examples, a per-user upload cap, HTTPS-origin support behind a proxy, and a Modal deployment (`deploy/modal/`). The deployment has not been run, so no hosted URL is verified.
+The application gained email-only judge sign-in, shared read-only examples, a per-user upload cap, HTTPS-origin support behind a proxy, and a Modal deployment (`deploy/modal/`). The judge copy is deployed at https://stephen-pasco-40042--amuseme-judges.us-east.modal.run.
+- **Seed.** Its volume was seeded with the seven current example documents: 7 documents, 8 runs and 8 outputs. There are no accounts, provider attempts, ledger rows or ratings, and the three superseded first-run copies were left out.
+- **Checked after deploy:**
+  - `/health/ready` returns `ready`.
+  - `/auth/sign-in-options` reports email sign-in with no access code.
+  - The page loads.
+  - The documents API refuses requests without a session (401).
+  - A cross-origin sign-in request is refused (403).
+- **Not yet tested on the hosted copy:** a judge signing in, opening an example and processing an upload.
 
 The submission was regenerated from application commit `15a0856` with Python 3.14.5 and Node 24.19.0. Reconstruction from this repository reproduced all 463 selected files: 121 changed, 73 new and 269 preserved. All 377 files outside `prototype/` match the commit by bytes and executable mode; the 86 inherited prototype files keep their exact foundation bytes and modes. In the reconstructed tree, after `git init`, a clean `pnpm install --frozen-lockfile --strict-peer-dependencies` and a fresh `uv` environment from `python/requirements.txt` (PyMuPDF 1.28.2), these passed: the 8 submission unit tests, the 5 offline deployment tests (`python3 -I -m unittest discover -s tests/deploy`), `pnpm check`, `pnpm test` (74 files, 751 tests) and `pnpm build`.
 

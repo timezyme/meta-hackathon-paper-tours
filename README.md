@@ -39,7 +39,7 @@ Use the release archive above: its manifest pins the exact frozen files. Then fo
 
 ## Try it as a judge
 
-A judge copy can run on Modal. It is not deployed yet, so there is no URL. Judges sign in with an email only, no password. The example documents are shared and read-only. Each judge can upload 3 documents. These settings are off for local runs. The deploy steps are in [docs/runbooks/modal-deploy.md](new/docs/runbooks/modal-deploy.md).
+Open **https://stephen-pasco-40042--amuseme-judges.us-east.modal.run** and sign in with your email. There is no password. The seven example documents are shared and read-only. Each judge can also upload 3 PDFs of their own, which are processed live by Muse Spark. This copy runs on Modal with its own $100 processing budget. Its deploy steps are in [docs/runbooks/modal-deploy.md](new/docs/runbooks/modal-deploy.md); these settings are off for local runs.
 
 ## What has been verified
 
