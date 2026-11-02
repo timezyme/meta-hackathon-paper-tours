@@ -39,7 +39,7 @@ Use the release archive above: its manifest pins the exact frozen files. Then fo
 
 ## Try it as a judge
 
-Open **https://stephen-pasco-40042--amuseme-judges.us-east.modal.run** and sign in with your email. There is no password. The seven example documents are shared and read-only. Each judge can also upload 3 PDFs of their own, which are processed live by Muse Spark. This copy runs on Modal with its own $100 processing budget. Its deploy steps are in [docs/runbooks/modal-deploy.md](new/docs/runbooks/modal-deploy.md); these settings are off for local runs.
+Watch the [demo video](https://github.com/timezyme/meta-hackathon-paper-tours/releases/download/demo-2026-11-02/amuseme-demo.mp4) (1:51, captioned stills of the real app), then open **https://stephen-pasco-40042--amuseme-judges.us-east.modal.run** and sign in with your email. There is no password. The seven example documents are shared and read-only. Each judge can also upload 3 PDFs of their own, which are processed live by Muse Spark. This copy runs on Modal with its own $100 processing budget. Its deploy steps are in [docs/runbooks/modal-deploy.md](new/docs/runbooks/modal-deploy.md); these settings are off for local runs.
 
 ## What has been verified
 
