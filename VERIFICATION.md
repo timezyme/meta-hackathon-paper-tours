@@ -2,7 +2,7 @@
 
 ## Judge access and Modal deployment — November 2, 2026
 
-The application gained email-only judge sign-in, shared read-only examples, a per-user upload cap, HTTPS-origin support behind a proxy, and a Modal deployment (`deploy/modal/`). The judge copy is deployed at https://stephen-pasco-40042--amuseme-judges.us-east.modal.run.
+The application gained email-only judge sign-in, shared read-only examples, a per-user upload cap, HTTPS-origin support behind a proxy, and a Modal deployment (`deploy/modal/`). The judge copy is deployed at https://guided-tours--amuseme-judges.us-east.modal.run.
 - **Seed.** Its volume was seeded with the seven current example documents: 7 documents, 8 runs and 8 outputs. There are no accounts, provider attempts, ledger rows or ratings, and the three superseded first-run copies were left out.
 - **Checked after deploy:**
   - `/health/ready` returns `ready`.
