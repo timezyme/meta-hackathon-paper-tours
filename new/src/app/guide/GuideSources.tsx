@@ -2,7 +2,7 @@ import { useEffect, useRef, type RefObject } from "react"
 import type { CanonicalDocument, SourceQuote } from "../../domain/index.ts"
 import { focusSourceQuote } from "../client/browser.ts"
 import { OriginalPreview } from "../reader/OriginalPreview.tsx"
-import { displayQuote, evidencePage, quotedParts, sourceForQuote, sourcePages } from "./presentation.ts"
+import { displayQuote, evidencePage, highlightedSource, readableSource, sourceForQuote, sourcePages } from "./presentation.ts"
 import { MathText, QuoteText } from "./QuoteText.tsx"
 
 const sourceText = (pages: ReadonlyArray<number>): string =>
@@ -32,8 +32,8 @@ export function SourceLinks({ canonical, sources, onSource }: {
 }
 
 export function QuotedSourceText({ content, quote }: { readonly content: string; readonly quote?: string }) {
-  const parts = quote === undefined ? null : quotedParts(content, quote)
-  if (parts === null) return <p className="guide-source-text"><MathText text={content} /></p>
+  const parts = quote === undefined ? null : highlightedSource(content, quote)
+  if (parts === null) return <p className="guide-source-text"><MathText text={readableSource(content)} /></p>
   return <p className="guide-source-text"><MathText text={parts.before} /><mark><MathText text={parts.quote} /></mark><MathText text={parts.after} /></p>
 }
 

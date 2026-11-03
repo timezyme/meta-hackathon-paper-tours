@@ -10,6 +10,7 @@ import { QuoteText } from "../../src/app/guide/QuoteText.tsx"
 import { guidedCanonical, appGuide } from "./guide-fixture.ts"
 
 const ignore = () => {}
+const drawer = (content: string, quote: string) => renderToStaticMarkup(createElement(QuotedSourceText, { content, quote }))
 
 describe("goal selection and saved-guide reading", () => {
   it("opens with the document title, a selected walkthrough, and one start action", () => {
@@ -20,6 +21,7 @@ describe("goal selection and saved-guide reading", () => {
       { ...block, kind: "heading", headingLevel: 1, content: `# ${title}` },
     ] })
     expect(heading).toBe(title)
+    expect(paperHeading({ ...guidedCanonical, blocks: [{ ...block, kind: "heading", headingLevel: 1, content: `# **${title}**` }] })).toBe(title)
     expect(paperHeading(guidedCanonical)).toBeUndefined()
     const html = renderToStaticMarkup(createElement(GoalChoices, { guide: appGuide, paperTitle: title, selected: null, processing: false, ready: true, onSelect: ignore, onOpen: ignore }))
     expect(html).toMatch(/<h1[^>]*>Two pieces of one paragraph<\/h1>/u)
@@ -112,6 +114,29 @@ describe("evidence from immutable source blocks", () => {
     expect(quotedParts("repeat repeat", "repeat")).toBeNull()
     expect(quotedParts("The actual source", "invented")).toBeNull()
     expect(quotedParts("The actual source", "")).toBeNull()
+  })
+  it("shows table and bold sources as readable text and keeps the cited highlight", () => {
+    const table = "<table><tr><td>Offices of Dentists</td><td>-10.7%</td></tr><tr><td>Offices of Physicians</td><td>-31.6%</td></tr><tr><td>Hospitals</td><td>-4.2%</td></tr></table>"
+    const whole = "Offices of Dentists · -10.7% / Offices of Physicians · -31.6% / Hospitals · -4.2%"
+    const row = drawer(table, "<tr><td>Offices of Physicians</td><td>-31.6%</td></tr>")
+    expect(row).not.toContain("&lt;")
+    expect(row).toContain("-10.7% / <mark>Offices of Physicians · -31.6%</mark> / Hospitals")
+    expect(row.replace(/<\/?(?:p|mark)[^>]*>/gu, "")).toBe(whole)
+    expect(drawer(table, "Offices of Dentists")).toContain("<mark>Offices of Dentists</mark> · -10.7%")
+    const pictograms = "<table><tr><td>Health Hazard<br>• Carcinogen<br>• Mutagenicity</td></tr></table>"
+    const cell = drawer(pictograms, "Health Hazard<br>• Carcinogen")
+    expect(cell).not.toContain("&lt;br")
+    expect(cell).toContain("<mark>Health Hazard • Carcinogen</mark> • Mutagenicity")
+    expect(drawer("**Editor:** Arfon Smith", "Editor:")).toContain("<mark>Editor:</mark> Arfon Smith")
+    expect(drawer("**Editor:** Arfon Smith", "Arfon Smith")).toContain("Editor: <mark>Arfon Smith</mark>")
+    expect(drawer("**x** and x", "**x**")).toContain("<mark>x</mark> and x")
+    expect(displayQuote("**Editor:** Arfon Smith")).toBe("Editor: Arfon Smith")
+  })
+  it("leaves underscores and asterisks that are not bold markers in sources exactly as written", () => {
+    for (const text of ["Answer: ________________________________________", "__name__ == \"__main__\"", "snake_case_name", "2 * 3 * 4", "solve(**kwargs)", "2 ** 3 ** 4"]) {
+      expect(displayQuote(text)).toBe(text)
+      expect(renderToStaticMarkup(createElement(QuotedSourceText, { content: text }))).toContain(text.replaceAll("\"", "&quot;"))
+    }
   })
   it("hides a leading list marker from displayed quotes without changing the saved quote", () => {
     for (const marker of ["- ", "* ", "• ", "1. ", "12) "]) expect(displayQuote(`${marker}A modular and extensible API`)).toBe("A modular and extensible API")

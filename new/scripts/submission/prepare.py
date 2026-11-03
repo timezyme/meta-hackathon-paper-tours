@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prepare and reconstruct a submission against an independently supplied foundation."""
 import argparse
+import base64
 import difflib
 import hashlib
 import json
@@ -77,8 +78,32 @@ def write_file(root, name, data, executable):
     path.chmod(0o755 if executable else 0o644)
 
 
+def is_text(data):
+    try:
+        data.decode('utf-8')
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
+def change(old, new, executable):
+    # Text changes are line patches, so old lines never enter the submission.
+    # A changed binary file (an icon) is carried whole; it holds no foundation text.
+    if is_text(old) and is_text(new):
+        return {'operations': patch(old, new), 'executable': executable}
+    return {'bytes': base64.b64encode(new).decode('ascii'), 'executable': executable}
+
+
+def changed_bytes(old, item):
+    if set(item) == {'operations', 'executable'}:
+        return apply_patch(old, item['operations'])
+    if set(item) == {'bytes', 'executable'} and isinstance(item['bytes'], str):
+        return base64.b64decode(item['bytes'], validate=True)
+    raise ValueError('invalid change entry')
+
+
 def patch(old, new):
-    # Changed files must be UTF-8 text; old lines never enter the submission.
+    # Changed text files must be UTF-8; old lines never enter the submission.
     old.decode('utf-8')
     new.decode('utf-8')
     a, b = old.splitlines(keepends=True), new.splitlines(keepends=True)
@@ -185,7 +210,7 @@ def prepare(args):
             after, mode = read_regular(tree, name)
             target.append(record(name, after, mode))
             if before != after or old_mode != mode:
-                changes[name] = {'operations': patch(before, after), 'executable': mode}
+                changes[name] = change(before, after, mode)
         for name in new_names:
             data, mode = read_regular(tree, name)
             write_file(candidate / 'new', name, data, mode)
@@ -198,7 +223,7 @@ def prepare(args):
         work += ''.join(f'- `{name}`\n' for name in sorted(changes)) or '- None\n'
         work += '\n## New files\n\n'
         work += ''.join(f'- `{name}`\n' for name in new_names) or '- None\n'
-        work += '\nRead `changes.json` for the added text and copy/skip operations. Deleted foundation lines and unchanged context are not included.\n'
+        work += '\nRead `changes.json` for the added text and copy/skip operations, and for changed binary files carried whole as base64. Deleted foundation lines and unchanged context are not included.\n'
         (candidate / 'NEW-WORK.md').write_text(work)
         (candidate / 'README.md').write_text('''# Submission reconstruction\n\nThe separately supplied foundation is a mixed-origin integration frozen October 28, 2026. It contains earlier source and event-era adaptations and is excluded from the new-work claim. It is not a pre-event revision. Only the changes and new files in this submission are candidates for event work; their provenance still requires review.\n\nObtain the foundation archive independently from its owner. Judge access is not verified. No public license grant for foundation source is implied. Reconstruct into a new directory with Python 3:\n\n```sh\npython3 reconstruct.py reconstruct --candidate . --archive /path/to/foundation.zip --output /path/to/new-build\n```\n\nInitialize Git inside the reconstructed build directory with `git init` before installing dependencies, so the normal preparation hook can be installed. Then follow the reconstructed application README for setup. Real processing requires separately configured services and can incur charges; the synthetic reader does not process uploads.\n''')
     except Exception:
@@ -226,13 +251,13 @@ def reconstruct(args):
     temp = Path(tempfile.mkdtemp(prefix='.submission-', dir=output.parent))
     try:
         extract_baseline(args.archive, temp, original)
-        for name, change in changes.items():
+        for name, item in changes.items():
             old, _ = read_regular(temp, name)
-            result = apply_patch(old, change['operations'])
-            verify(result, change['executable'], target[name])
+            result = changed_bytes(old, item)
+            verify(result, item['executable'], target[name])
             path = temp.joinpath(*safe_path(name).parts)
             path.unlink()
-            write_file(temp, name, result, change['executable'])
+            write_file(temp, name, result, item['executable'])
         for name in names:
             data, mode = read_regular(candidate / 'new', name)
             verify(data, mode, target[name])

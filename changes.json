@@ -648,7 +648,7 @@
       ],
       [
         "add",
-        "4. Render text-format blocks literally with preserved newlines/whitespace and wrapping; never infer Markdown or code from their content. Canonical heading kind/level controls heading markup and removes its normalized heading prefix. Other declared formats retain Markdown/GFM, sanitized HTML tables and intentional math through public renderer packages. Sanitize before trusted KaTeX rendering and disable trust features. Uploaded HTML cannot supply scripts, styles, active controls, unsafe links, or image loads. Only canonical figures use the owner-authorized image route. Literal newlines and HTML breaks inside table cells remain visible. Wide tables/equations scroll inside the reader; they cannot widen the viewport. Prose and list children have a 52ch reading measure while figures, tables and equations retain the available width.\n"
+        "4. Render text-format blocks literally with preserved newlines/whitespace and wrapping; never infer Markdown or code from their content. The one exception is a bounded `**bold**` span (opened at the start, after whitespace or `(`; closed before the end, whitespace or punctuation; one line; no edge whitespace), which the extractor writes into text blocks: show it bold in the reader and without markers in heading labels and source evidence. Every other `*`, `_` and `#` stays literal. Canonical heading kind/level controls heading markup and removes its normalized heading prefix. Other declared formats retain Markdown/GFM, sanitized HTML tables and intentional math through public renderer packages. Sanitize before trusted KaTeX rendering and disable trust features. Uploaded HTML cannot supply scripts, styles, active controls, unsafe links, or image loads. Only canonical figures use the owner-authorized image route. Literal newlines and HTML breaks inside table cells remain visible. Wide tables/equations scroll inside the reader; they cannot widen the viewport. Prose and list children have a 52ch reading measure while figures, tables and equations retain the available width.\n"
       ],
       [
         "copy",
@@ -1124,6 +1124,743 @@
       ]
     ]
   },
+  "prototype/README.md": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        20
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "The copy speaks as AmuseMe; the earlier \"Sky\" helper name was removed on October 31 because it clashed with the product name. **Try it with a sample paper** starts a twelve-second sequence in a single document card: read the pages, fix text and math, put headings in order, describe the pictures, and pack the download. The card shows a small illustrated page that untangles one step per stage, the current step, a progress bar, and a checklist of finished steps. Motion honors reduced-motion preferences by keeping only short fades.\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "Completion opens the Document page automatically. The Uploaded state's **Play sample demo** and Failed state's **Try again** start the same sequence. Uploaded is a paused preview of an otherwise automatic step. **Cancel demo** returns to Uploaded. Selecting a header tab stops playback immediately. Ready shows the completed document card with **Open your clean copy**, **Download ZIP**, and **Upload another**. A selected local file offers **Try the sample paper**.\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "- **Choose a PDF**, click the upload area, or drop a file into it. One non-empty file up to 50 MB can be added at a time. Selection reads metadata only; it does not upload or inspect the contents. These preview limits do not settle supported production formats.\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        5
+      ],
+      [
+        "add",
+        "- The Ready state provides **Open your clean copy** and **Download ZIP**. The Document header tab opens the same result page directly.\n- The result page shows the clean copy beside one **Take it with you** panel. Figures and rendered mathematics are shown by default. Page controls sit in the toolbar above the document.\n- A strip above the document shows the original filename, PDF format, page count, and file size, with a working **Open original** link. `sample/source.pdf` is copied unchanged from the same synthetic normalization fixture.\n- The panel offers **Copy all text**, ZIP, and text-only downloads. **How this was produced**, marked for researchers, reveals four planned workflow stages. Expand a stage to inspect its proposed model and reasoning setting; **View prompt** reveals the full draft prompt.\n- **What changed** (the processing report), collapsed by default beneath downloads, summarizes the saved normalization run. It records 37 updated blocks, 12 mapped headings, 2 image descriptions, and 0 paragraph joins. Download the report separately as `sample/processing-report.json`; the existing ZIP is unchanged.\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "- **With issues** adds a clearly labeled illustrative issue in a banner above the document and in the panel, and outlines Equation (10) on page 2. **Show me** jumps to it. It remains attached to the sample when returning to the dashboard and reopening it, including after reload. Choosing a different header mock state selects that fixture instead. Page navigation is optional, and downloads remain available.\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        3
+      ],
+      [
+        "add",
+        "- **Copy all text** copies the entire normalized export, including both pages, and confirms success in a short notice. If clipboard access fails, the notice directs the user to the text-only download.\n- **Was this helpful? Yes / Not really** rates the whole sample output. One choice can be selected, changed, or cleared. Feedback stays in page memory until reload, is not submitted, and is labeled accordingly after selection.\n- On narrow screens, a bar fixed to the bottom holds **Copy**, **ZIP**, and **More**. **More** opens the panel as a bottom sheet. Close, Escape, or clicking outside dismisses it; keyboard focus stays within the open sheet and returns to **More** on dismissal. These controls never modify the download.\n"
+      ],
+      [
+        "copy",
+        10
+      ],
+      [
+        "add",
+        "## Look and feel\n\nThe October 31 redesign was chosen after three independent design reviews (conversion-focused page design, interface polish and motion, and art direction). It is built for middle-school through college students and researchers:\n\n- Nothing in the product reads smaller than 12px; body text and buttons are 16px, and every target is at least 44px.\n- Plain words replace pipeline terms (\"Clean copy\", \"What changed\", \"Describe the pictures\"). Researcher detail stays one click away.\n- Honesty labels are readable chips. AI-written content is always marked in violet; sample and illustrative content in blue; issues in amber; failure in red.\n- The processing card's illustrated page shows the product's job: scrambled text, a broken equation, and a missing picture are fixed one step at a time. In the empty state, the same page sits beside the upload button as an example of copy-paste damage.\n- The reader uses a system book serif for reading and Geist for everything else.\n\n"
+      ],
+      [
+        "copy",
+        7
+      ],
+      [
+        "add",
+        "\nThe October 31 redesign was checked in Chrome the same day: every state in both themes at desktop, 390px, and 320px widths, with no text under 12px, no control under 44px, no sideways scrolling, and no KaTeX or script errors. Sample playback and downloads were not re-run on the redesign; the browser observations below describe the previous layout.\n"
+      ],
+      [
+        "copy",
+        13
+      ],
+      [
+        "add",
+        "## Three new directions\n\n[`concepts/`](concepts/) holds three alternatives to the dashboard. Open [the concept index](http://127.0.0.1:4177/concepts/) from the same server. Each concept changes what the user does, not only how it looks:\n\n- **Live Page** (`live-page.html`): the original pages show while processing runs, so reading starts at once. When the run succeeds, the clean copy takes their place at the spot being read. A switch at the top of the page then flips between the clean copy and the original pages, keeping the reading spot. A failed run leaves the originals and no clean copy.\n- **Side by Side** (`side-by-side.html`): the original page beside the clean copy. Every part the AI rewrote is an \"AI edit\", sorted into edits that change words or symbols, edits that change only formatting, and parts missing from the clean copy. A circled-i button after the filters explains the marks. Clicking a marked part opens what it said before, what it says now, where it is on the page, and why. The AI saves no reasons, so \"why\" says so and points to the original instead of guessing. Small symbol changes, such as bold lost from a math symbol, are named outright.\n- **Pieces** (`pieces.html`): the result as cards to take one at a time: an equation as LaTeX, a table for a spreadsheet, a figure with its description. Pieces appear only when processing succeeds. Table 1, printed across two pages, is one piece with both parts kept separate. Copying everything stays one click away.\n\nThe concepts share `concepts/shared/`: the saved sample (generated from this page's embedded data and `sample/processing-report.json`), one block renderer, and a reviewer strip. Live Page and Side by Side also use the first-read text and page positions (`sample-source.js`, see below) and rendered images of the two source pages. The strip switches between Empty, Working, Done, With issue, and Failed, and between light and dark. State and theme are kept in the URL. The same twelve-second timeline, illustrative issue (Equation 10), and real downloads apply to each. Progress shows only what a real run reports: the step, and for some steps how many pages or pictures are done. A chosen local PDF is labelled not processed.\n\n`sample-source.js` was generated from the saved run's first-read (\"joined\") response for the sample paper. Two parts of it are hand-made: the map of first-read blocks that the clean copy folded into a neighbouring part, and the three places missing from the saved clean copy (the panel label \"(b) Directed network\", section 9, References, and the footnote at the bottom of page 2). The scripts that generated the two sample files are not in this repository. All 37 recorded changes land in either the 26 changed parts (24 marked by block in the dashboard, plus two headings) or those missing places.\n\nThese behaviours need real-app support that does not exist yet:\n\n- Cancel needs a cancellation route; the application has none.\n- Outlines and the kept reading spot need page boxes for every block. The saved run has them; extraction that gives text blocks only a page does not.\n- Tables cannot be joined. Pieces groups a \"(continued)\" table by its caption, which holds for this sample only.\n- Finding parts missing from the clean copy needs a comparison of first-read and clean text.\n- Try again and a named failed page should show only when the failure is marked retryable and names a page.\n\nEach concept was checked in Chrome at desktop width and in 390px and 320px frames, in both themes and every state. No text was under 12px, no control under 44px, and nothing scrolled sideways. There were no KaTeX or console errors. Copy all text in Live Page matched `sample/normalized.txt` byte for byte. Pieces copied an equation as LaTeX and two pieces together correctly. Downloads were not triggered; their links point at the sample files above. Drag-and-drop from the operating system and clipboard failure were not exercised. Real processing takes minutes, not twelve seconds; the timeline is for review only.\n\n"
+      ],
+      [
+        "copy",
+        7
+      ]
+    ]
+  },
+  "prototype/assets/brand/amuseme-logo-reversed.svg": {
+    "executable": false,
+    "operations": [
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"266\" height=\"64\" viewBox=\"0 0 266 64\" role=\"img\" aria-label=\"AmuseMe\">\n  <title>AmuseMe</title>\n  <path fill=\"#a0bf94\" fill-rule=\"evenodd\" transform=\"translate(-4 2.4) scale(1.85)\" d=\"M16 4H21L28 11V28H22V25.8C20.2 27.3 18.1 28 15.5 28C8.7 28 4 23 4 16C4 9 8.8 4 16 4ZM16 10C12.4 10 10 12.4 10 16C10 19.6 12.4 22 16 22C19.6 22 22 19.6 22 16V10H16Z\"/>\n  <path fill=\"#e3e8de\" transform=\"translate(63 -3.244) scale(1.1)\" d=\"M 0.76 46 L 11 17.6 L 17.36 17.6 L 27.6 46 L 22.16 46 L 19.8 39.28 L 8.56 39.28 L 6.2 46 L 0.76 46 Z M 10.08 34.84 L 18.28 34.84 L 14.2 22.84 L 10.08 34.84 Z M 29.36 46 L 29.36 24.64 L 34 24.64 L 34.16 29.88 L 33.68 29.64 Q 34.04 27.92 34.94 26.7 Q 35.84 25.48 37.14 24.82 Q 38.44 24.16 40 24.16 Q 42.72 24.16 44.4 25.7 Q 46.08 27.24 46.52 29.92 L 45.84 29.92 Q 46.2 28.04 47.08 26.78 Q 47.96 25.52 49.3 24.84 Q 50.64 24.16 52.32 24.16 Q 54.52 24.16 56.12 25.1 Q 57.72 26.04 58.58 27.84 Q 59.44 29.64 59.44 32.28 L 59.44 46 L 54.32 46 L 54.32 33.6 Q 54.32 30.96 53.42 29.64 Q 52.52 28.32 50.68 28.32 Q 49.44 28.32 48.56 28.96 Q 47.68 29.6 47.22 30.82 Q 46.76 32.04 46.76 33.76 L 46.76 46 L 42 46 L 42 33.76 Q 42 31.12 41.2 29.72 Q 40.4 28.32 38.44 28.32 Q 37.2 28.32 36.34 28.96 Q 35.48 29.6 34.98 30.82 Q 34.48 32.04 34.48 33.76 L 34.48 46 L 29.36 46 Z M 70.56 46.48 Q 67.32 46.48 65.42 44.34 Q 63.52 42.2 63.52 38.4 L 63.52 24.64 L 68.64 24.64 L 68.64 37.12 Q 68.64 39.8 69.54 41.06 Q 70.44 42.32 72.28 42.32 Q 74.36 42.32 75.5 40.94 Q 76.64 39.56 76.64 36.92 L 76.64 24.64 L 81.76 24.64 L 81.76 46 L 77.08 46 L 76.96 40.12 L 77.6 40.32 Q 77.12 43.36 75.32 44.92 Q 73.52 46.48 70.56 46.48 Z M 94.68 46.48 Q 91.44 46.48 89.3 45.56 Q 87.16 44.64 86.04 43 Q 84.92 41.36 84.76 39.28 L 90 39.04 Q 90.28 40.72 91.36 41.64 Q 92.44 42.56 94.72 42.56 Q 96.52 42.56 97.46 41.98 Q 98.4 41.4 98.4 40.16 Q 98.4 39.44 98.06 38.96 Q 97.72 38.48 96.74 38.12 Q 95.76 37.76 93.88 37.4 Q 90.64 36.84 88.8 36.02 Q 86.96 35.2 86.22 33.96 Q 85.48 32.72 85.48 30.88 Q 85.48 27.88 87.78 26.02 Q 90.08 24.16 94.52 24.16 Q 97.6 24.16 99.58 25.14 Q 101.56 26.12 102.58 27.74 Q 103.6 29.36 103.76 31.36 L 98.56 31.6 Q 98.52 30.6 98.08 29.8 Q 97.64 29 96.76 28.54 Q 95.88 28.08 94.44 28.08 Q 92.64 28.08 91.7 28.8 Q 90.76 29.52 90.76 30.72 Q 90.76 31.56 91.14 32.12 Q 91.52 32.68 92.44 33.02 Q 93.36 33.36 94.96 33.64 Q 98.24 34.12 100.16 34.96 Q 102.08 35.8 102.9 37.06 Q 103.72 38.32 103.72 40.08 Q 103.72 43.16 101.26 44.82 Q 98.8 46.48 94.68 46.48 Z M 115.96 46.48 Q 112.76 46.48 110.4 45.1 Q 108.04 43.72 106.76 41.2 Q 105.48 38.68 105.48 35.32 Q 105.48 31.96 106.76 29.46 Q 108.04 26.96 110.38 25.56 Q 112.72 24.16 115.84 24.16 Q 118.88 24.16 121.18 25.52 Q 123.48 26.88 124.72 29.44 Q 125.96 32 125.96 35.6 L 125.96 36.76 L 110.8 36.76 Q 110.96 39.56 112.34 40.98 Q 113.72 42.4 116 42.4 Q 117.72 42.4 118.86 41.62 Q 120 40.84 120.44 39.44 L 125.68 39.76 Q 124.8 42.88 122.22 44.68 Q 119.64 46.48 115.96 46.48 Z M 110.8 33.32 L 120.68 33.32 Q 120.52 30.72 119.2 29.46 Q 117.88 28.2 115.84 28.2 Q 113.8 28.2 112.46 29.52 Q 111.12 30.84 110.8 33.32 Z M 129.36 46 L 129.36 17.6 L 136.36 17.6 L 144.2 39.6 L 152.04 17.6 L 159.04 17.6 L 159.04 46 L 153.84 46 L 153.84 26.4 L 146.68 45.96 L 141.72 45.96 L 134.56 26.4 L 134.56 46 L 129.36 46 Z M 172.88 46.48 Q 169.68 46.48 167.32 45.1 Q 164.96 43.72 163.68 41.2 Q 162.4 38.68 162.4 35.32 Q 162.4 31.96 163.68 29.46 Q 164.96 26.96 167.3 25.56 Q 169.64 24.16 172.76 24.16 Q 175.8 24.16 178.1 25.52 Q 180.4 26.88 181.64 29.44 Q 182.88 32 182.88 35.6 L 182.88 36.76 L 167.72 36.76 Q 167.88 39.56 169.26 40.98 Q 170.64 42.4 172.92 42.4 Q 174.64 42.4 175.78 41.62 Q 176.92 40.84 177.36 39.44 L 182.6 39.76 Q 181.72 42.88 179.14 44.68 Q 176.56 46.48 172.88 46.48 Z M 167.72 33.32 L 177.6 33.32 Q 177.44 30.72 176.12 29.46 Q 174.8 28.2 172.76 28.2 Q 170.72 28.2 169.38 29.52 Q 168.04 30.84 167.72 33.32 Z\"/>\n</svg>\n"
+      ]
+    ]
+  },
+  "prototype/assets/brand/amuseme-logo.svg": {
+    "executable": false,
+    "operations": [
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"266\" height=\"64\" viewBox=\"0 0 266 64\" role=\"img\" aria-label=\"AmuseMe\">\n  <title>AmuseMe</title>\n  <path fill=\"#466953\" fill-rule=\"evenodd\" transform=\"translate(-4 2.4) scale(1.85)\" d=\"M16 4H21L28 11V28H22V25.8C20.2 27.3 18.1 28 15.5 28C8.7 28 4 23 4 16C4 9 8.8 4 16 4ZM16 10C12.4 10 10 12.4 10 16C10 19.6 12.4 22 16 22C19.6 22 22 19.6 22 16V10H16Z\"/>\n  <path fill=\"#30372f\" transform=\"translate(63 -3.244) scale(1.1)\" d=\"M 0.76 46 L 11 17.6 L 17.36 17.6 L 27.6 46 L 22.16 46 L 19.8 39.28 L 8.56 39.28 L 6.2 46 L 0.76 46 Z M 10.08 34.84 L 18.28 34.84 L 14.2 22.84 L 10.08 34.84 Z M 29.36 46 L 29.36 24.64 L 34 24.64 L 34.16 29.88 L 33.68 29.64 Q 34.04 27.92 34.94 26.7 Q 35.84 25.48 37.14 24.82 Q 38.44 24.16 40 24.16 Q 42.72 24.16 44.4 25.7 Q 46.08 27.24 46.52 29.92 L 45.84 29.92 Q 46.2 28.04 47.08 26.78 Q 47.96 25.52 49.3 24.84 Q 50.64 24.16 52.32 24.16 Q 54.52 24.16 56.12 25.1 Q 57.72 26.04 58.58 27.84 Q 59.44 29.64 59.44 32.28 L 59.44 46 L 54.32 46 L 54.32 33.6 Q 54.32 30.96 53.42 29.64 Q 52.52 28.32 50.68 28.32 Q 49.44 28.32 48.56 28.96 Q 47.68 29.6 47.22 30.82 Q 46.76 32.04 46.76 33.76 L 46.76 46 L 42 46 L 42 33.76 Q 42 31.12 41.2 29.72 Q 40.4 28.32 38.44 28.32 Q 37.2 28.32 36.34 28.96 Q 35.48 29.6 34.98 30.82 Q 34.48 32.04 34.48 33.76 L 34.48 46 L 29.36 46 Z M 70.56 46.48 Q 67.32 46.48 65.42 44.34 Q 63.52 42.2 63.52 38.4 L 63.52 24.64 L 68.64 24.64 L 68.64 37.12 Q 68.64 39.8 69.54 41.06 Q 70.44 42.32 72.28 42.32 Q 74.36 42.32 75.5 40.94 Q 76.64 39.56 76.64 36.92 L 76.64 24.64 L 81.76 24.64 L 81.76 46 L 77.08 46 L 76.96 40.12 L 77.6 40.32 Q 77.12 43.36 75.32 44.92 Q 73.52 46.48 70.56 46.48 Z M 94.68 46.48 Q 91.44 46.48 89.3 45.56 Q 87.16 44.64 86.04 43 Q 84.92 41.36 84.76 39.28 L 90 39.04 Q 90.28 40.72 91.36 41.64 Q 92.44 42.56 94.72 42.56 Q 96.52 42.56 97.46 41.98 Q 98.4 41.4 98.4 40.16 Q 98.4 39.44 98.06 38.96 Q 97.72 38.48 96.74 38.12 Q 95.76 37.76 93.88 37.4 Q 90.64 36.84 88.8 36.02 Q 86.96 35.2 86.22 33.96 Q 85.48 32.72 85.48 30.88 Q 85.48 27.88 87.78 26.02 Q 90.08 24.16 94.52 24.16 Q 97.6 24.16 99.58 25.14 Q 101.56 26.12 102.58 27.74 Q 103.6 29.36 103.76 31.36 L 98.56 31.6 Q 98.52 30.6 98.08 29.8 Q 97.64 29 96.76 28.54 Q 95.88 28.08 94.44 28.08 Q 92.64 28.08 91.7 28.8 Q 90.76 29.52 90.76 30.72 Q 90.76 31.56 91.14 32.12 Q 91.52 32.68 92.44 33.02 Q 93.36 33.36 94.96 33.64 Q 98.24 34.12 100.16 34.96 Q 102.08 35.8 102.9 37.06 Q 103.72 38.32 103.72 40.08 Q 103.72 43.16 101.26 44.82 Q 98.8 46.48 94.68 46.48 Z M 115.96 46.48 Q 112.76 46.48 110.4 45.1 Q 108.04 43.72 106.76 41.2 Q 105.48 38.68 105.48 35.32 Q 105.48 31.96 106.76 29.46 Q 108.04 26.96 110.38 25.56 Q 112.72 24.16 115.84 24.16 Q 118.88 24.16 121.18 25.52 Q 123.48 26.88 124.72 29.44 Q 125.96 32 125.96 35.6 L 125.96 36.76 L 110.8 36.76 Q 110.96 39.56 112.34 40.98 Q 113.72 42.4 116 42.4 Q 117.72 42.4 118.86 41.62 Q 120 40.84 120.44 39.44 L 125.68 39.76 Q 124.8 42.88 122.22 44.68 Q 119.64 46.48 115.96 46.48 Z M 110.8 33.32 L 120.68 33.32 Q 120.52 30.72 119.2 29.46 Q 117.88 28.2 115.84 28.2 Q 113.8 28.2 112.46 29.52 Q 111.12 30.84 110.8 33.32 Z M 129.36 46 L 129.36 17.6 L 136.36 17.6 L 144.2 39.6 L 152.04 17.6 L 159.04 17.6 L 159.04 46 L 153.84 46 L 153.84 26.4 L 146.68 45.96 L 141.72 45.96 L 134.56 26.4 L 134.56 46 L 129.36 46 Z M 172.88 46.48 Q 169.68 46.48 167.32 45.1 Q 164.96 43.72 163.68 41.2 Q 162.4 38.68 162.4 35.32 Q 162.4 31.96 163.68 29.46 Q 164.96 26.96 167.3 25.56 Q 169.64 24.16 172.76 24.16 Q 175.8 24.16 178.1 25.52 Q 180.4 26.88 181.64 29.44 Q 182.88 32 182.88 35.6 L 182.88 36.76 L 167.72 36.76 Q 167.88 39.56 169.26 40.98 Q 170.64 42.4 172.92 42.4 Q 174.64 42.4 175.78 41.62 Q 176.92 40.84 177.36 39.44 L 182.6 39.76 Q 181.72 42.88 179.14 44.68 Q 176.56 46.48 172.88 46.48 Z M 167.72 33.32 L 177.6 33.32 Q 177.44 30.72 176.12 29.46 Q 174.8 28.2 172.76 28.2 Q 170.72 28.2 169.38 29.52 Q 168.04 30.84 167.72 33.32 Z\"/>\n</svg>\n"
+      ]
+    ]
+  },
+  "prototype/assets/brand/apple-touch-icon.png": {
+    "bytes": "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",
+    "executable": false
+  },
+  "prototype/assets/brand/favicon.ico": {
+    "bytes": "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",
+    "executable": false
+  },
+  "prototype/assets/brand/favicon.svg": {
+    "executable": false,
+    "operations": [
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 64 64\" role=\"img\" aria-label=\"AmuseMe\">\n  <title>AmuseMe</title>\n  <rect width=\"64\" height=\"64\" rx=\"14\" fill=\"#243629\"/>\n  <path fill=\"#f7f7f4\" fill-rule=\"evenodd\" transform=\"translate(3.2 3.2) scale(1.8)\" d=\"M16 4H21L28 11V28H22V25.8C20.2 27.3 18.1 28 15.5 28C8.7 28 4 23 4 16C4 9 8.8 4 16 4ZM16 10C12.4 10 10 12.4 10 16C10 19.6 12.4 22 16 22C19.6 22 22 19.6 22 16V10H16Z\"/>\n</svg>\n"
+      ]
+    ]
+  },
+  "prototype/index.html": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        8
+      ],
+      [
+        "skip",
+        15
+      ],
+      [
+        "add",
+        "/* Tokens */\n:root{font-family:Geist,system-ui,sans-serif;color-scheme:light;--bg:#f6f5f0;--surface:#fff;--surface-2:#eef1ea;--ink:#1f2620;--ink-2:#4a5449;--line:#d8ded2;--line-strong:#8e9a87;--accent:#3e6b4e;--accent-hover:#345c42;--on-accent:#fff;--accent-soft:#e3eee4;--warn:#8a5a12;--warn-soft:#fbf0dc;--danger:#a63d2f;--danger-soft:#fbe6e2;--ai:#5e4e96;--ai-soft:#ece8f6;--info:#3b5b85;--info-soft:#e6edf6;--shadow-card:0 1px 2px #141e1410,0 8px 24px #141e140a;--shadow-pop:0 16px 40px -8px #141e1440;--ease:cubic-bezier(.23,1,.32,1);--ease-drawer:cubic-bezier(.32,.72,0,1);--serif:Charter,'Iowan Old Style','Palatino Linotype',Georgia,serif}\nbody.dark{color-scheme:dark;--bg:#141814;--surface:#1c211c;--surface-2:#252b24;--ink:#ecf0e8;--ink-2:#aeb8a8;--line:#333b32;--line-strong:#5d6a59;--accent:#a8c99a;--accent-hover:#b8d6ab;--on-accent:#10200f;--accent-soft:#22301f;--warn:#e8c27a;--warn-soft:#33291a;--danger:#f0a296;--danger-soft:#3a211d;--ai:#b9a9f2;--ai-soft:#2a2540;--info:#a9c1e6;--info-soft:#1e2838;--shadow-card:inset 0 1px 0 #ffffff08;--shadow-pop:0 16px 48px #00000080}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "add",
+        "/* Base */\n*{box-sizing:border-box}[hidden]{display:none!important}\nbody{margin:0;background:var(--bg);color:var(--ink);min-height:100svh;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}\nbutton,a,input,select{font:inherit;color:inherit}button,a{touch-action:manipulation}button{cursor:pointer;border:0;background:none;padding:0}a{text-decoration:none}\nh1,h2,h3,p{margin:0}\n:focus-visible{outline:2px solid var(--accent);outline-offset:2px}\nbutton:disabled{cursor:default;opacity:.4}\nsvg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}\n.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        2
+      ],
+      [
+        "add",
+        "/* Shared controls */\n.button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:16px;font-weight:500;line-height:1.2;white-space:nowrap;transition:transform .12s var(--ease),background-color .15s,border-color .15s,color .15s}\n.button.primary{min-height:48px;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}\n.button:active:not(:disabled),.icon-button:active,.page-nav button:active:not(:disabled),.feedback button:active{transform:scale(.97)}\n.text-button{display:inline-flex;align-items:center;min-height:44px;padding:8px 4px;font-size:16px;color:var(--ink-2);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line-strong);transition:color .15s}\n.icon-button{display:grid;place-items:center;width:44px;height:44px;border-radius:10px;color:var(--ink-2);transition:transform .12s var(--ease),background-color .15s,color .15s}\n@media(hover:hover) and (pointer:fine){.button:hover:not(:disabled){background:var(--surface-2);border-color:var(--line-strong)}.button.primary:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover)}.text-button:hover,.back-link:hover{color:var(--ink)}.icon-button:hover{background:var(--surface-2);color:var(--ink)}}\n.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;line-height:1.2;padding:5px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}\n.chip.info{background:var(--info-soft);color:var(--info)}.chip.ai{background:var(--ai-soft);color:var(--ai)}.chip.warn{background:var(--warn-soft);color:var(--warn)}\n.status{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:500;line-height:1.2;padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}\n.status i{width:8px;height:8px;border-radius:50%;background:currentColor}\n.status.pending{background:var(--surface-2);color:var(--ink-2)}.status.review{background:var(--warn-soft);color:var(--warn)}.status.failed{background:var(--danger-soft);color:var(--danger)}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "add",
+        "/* Prototype review bar (not product UI) */\n.review-bar{height:56px;position:sticky;top:0;z-index:20;background:#232423;color:#c5c6c1;border-bottom:1px solid #111;display:flex;align-items:center;gap:20px;padding:0 22px;overflow-x:auto;white-space:nowrap;font-size:13px}\n.review-label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#92958d}.review-group{display:flex;gap:9px;align-items:center}\n.review-tabs,.review-themes{display:flex;align-items:center;gap:3px;padding:4px;background:#333532;border-radius:8px}\n.review-bar button{font-size:13px;color:#b5b9af;padding:7px 11px;border-radius:5px;white-space:nowrap}\n.review-bar button[aria-selected=true],.review-bar button[aria-pressed=true]{background:#f7f8f4;color:#20251d}\n.review-bar button:hover:not([aria-selected=true]):not([aria-pressed=true]){color:#fff;background:#ffffff0d}\n.review-bar select{border:0;border-radius:6px;background:#333532;color:#e2e5dc;padding:8px 11px;cursor:pointer}.review-spacer{flex:1}\n.app-frame{width:min(100%,var(--frame-width,100%));margin:0 auto;min-height:calc(100svh - 56px);container-type:inline-size;container-name:dashboard;background:var(--bg)}\nbody.narrow-preview{background:#dfe1da}body.dark.narrow-preview{background:#0c0e0c}.narrow-preview .app-frame{box-shadow:0 0 0 1px #80887435,0 12px 80px #10190e20}\n@media(max-width:740px){.review-bar{height:52px;padding:0 12px;gap:16px}.review-bar button{padding:7px 9px;font-size:12px}.review-spacer{display:none}.app-frame{min-height:calc(100svh - 52px)}}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        24
+      ],
+      [
+        "add",
+        "/* Header */\n.app-frame>header{height:64px;border-bottom:1px solid var(--line);background:var(--surface)}\n.header-inner{max-width:760px;margin:auto;padding:0 24px;height:100%;display:flex;align-items:center}\n.document-view .header-inner{max-width:1240px}\n.brand-logo{display:block;width:140px;height:auto}.brand-logo-dark{display:none}.dark .brand-logo-light{display:none}.dark .brand-logo-dark{display:block}\n\n/* Dashboard */\n#dashboard-page{max-width:760px;margin:0 auto;padding:56px 24px 64px}\n.intro{margin-bottom:32px}\n.sky{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:var(--accent);margin-bottom:16px}\n.sky-avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--accent-soft)}.sky-avatar svg{width:22px;height:22px;fill:currentColor;stroke:none}\nh1{font-size:40px;line-height:1.12;font-weight:600;letter-spacing:-.02em;text-wrap:balance}\n.intro p{font-size:18px;line-height:1.55;color:var(--ink-2);margin-top:12px;max-width:56ch;text-wrap:pretty}\n.jumble{display:inline-block;white-space:nowrap}.jumble span{display:inline-block;animation:settle .6s var(--ease) both;animation-delay:calc(var(--i) * 30ms + 150ms)}\n@keyframes settle{from{transform:translate(var(--x),var(--y)) rotate(var(--r))}}\n.dropzone{position:relative;display:grid;grid-template-columns:156px minmax(0,1fr);gap:32px;align-items:center;padding:32px;border:2px dashed var(--line-strong);border-radius:20px;background:var(--surface);cursor:pointer;transition:border-color .15s,background-color .15s}\n.drop-example{margin:0}.drop-example figcaption{font-size:12px;line-height:1.4;color:var(--ink-2);text-align:center;margin-top:10px}\n.drop-copy h2{font-size:22px;font-weight:600;line-height:1.3}.drop-copy p{font-size:14px;color:var(--ink-2);margin-top:6px}\n.drop-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}\n.dropzone.dragging{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}\n.dropzone.dragging:after{content:'Drop your PDF here';position:absolute;inset:8px;border-radius:14px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent);font-size:22px;font-weight:600;pointer-events:none}\n.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;list-style:none;padding:0;margin:24px 0 0;counter-reset:how}\n.how li{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--ink-2)}\n.how li:before{counter-increment:how;content:counter(how);flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:14px;font-weight:600}\n.how b{display:block;color:var(--ink);font-size:16px;font-weight:600;margin-bottom:2px}\n.message{margin-top:16px;padding:14px 16px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:16px;overflow-wrap:anywhere}.message.error{background:var(--danger-soft);color:var(--danger)}\n.list-heading{margin-bottom:12px}.list-heading h2{font-size:14px;font-weight:500;color:var(--ink-2)}.list-heading h2:empty{display:none}\n.prototype-note{font-size:14px;line-height:1.55;color:var(--ink-2);margin-top:24px}\n\n/* Document cards */\n.job-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow-card);transition:opacity .22s var(--ease),transform .22s var(--ease)}\n@starting-style{.job-card{opacity:0;transform:translateY(6px)}}\n.job-card+.job-card{margin-top:12px}\n.job-heading{display:flex;align-items:center;gap:16px}.job-heading>div:nth-child(2){flex:1;min-width:0}\n.document-icon{display:grid;place-items:center;flex:none;width:44px;height:52px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}.document-icon svg{width:24px;height:28px}\n.document-name{font-size:20px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}\n.document-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--ink-2);margin-top:6px}\n.job-main{margin-top:24px;padding-top:24px;border-top:1px solid var(--line)}\n.job-main h3,#stage-label{font-size:24px;line-height:1.3;font-weight:600;letter-spacing:-.01em}\n.job-main p,#stage-detail{font-size:16px;color:var(--ink-2);margin-top:6px}\n.job-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}.job-actions .text-button{margin-left:auto}\n.failed-band{display:flex;gap:14px;align-items:flex-start;padding:20px;border-radius:12px;background:var(--danger-soft);color:var(--danger)}.failed-band svg{width:24px;height:24px;margin-top:3px}.failed-band h3{color:var(--danger)}.failed-band p{color:var(--ink)}\n.processing-body{display:grid;grid-template-columns:184px minmax(0,1fr);gap:32px;align-items:start}\n#stage-label:focus{outline:none}\n.progress-meta{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink-2);margin:20px 0 8px;font-variant-numeric:tabular-nums}\n.progress{height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden}.progress div{height:100%;background:var(--accent);border-radius:inherit;transform-origin:left;transition:transform .12s linear}\n.stage-list{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:2px}\n.stage-list li{display:flex;align-items:center;gap:12px;min-height:36px;font-size:16px;color:var(--ink-2)}\n.stage-marker{position:relative;display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line-strong);font-size:12px;font-weight:600;line-height:1}\n.stage-list li[data-phase=active]{color:var(--ink);font-weight:600}\n.stage-list li[data-phase=active] .stage-marker{border-color:var(--accent-soft);border-top-color:var(--accent);animation:spin .8s linear infinite}\n.stage-list li[data-phase=done]{color:var(--ink)}\n.stage-list li[data-phase=done] .stage-marker{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}\n.stage-marker svg{width:14px;height:14px;stroke-width:2.6;stroke-dasharray:24;animation:draw .25s var(--ease)}\n@keyframes spin{to{transform:rotate(1turn)}}@keyframes draw{from{stroke-dashoffset:24}}\n.completion-facts{list-style:none;display:flex;flex-wrap:wrap;gap:12px 24px;margin:24px 0 0;padding:24px 0 0;border-top:1px solid var(--line);font-size:16px}\n.completion-facts li{display:flex;align-items:center;gap:8px;animation:rise .2s var(--ease) both;animation-delay:calc(var(--i) * 40ms + 120ms)}.completion-facts svg{color:var(--accent);stroke-width:2.2}\n@keyframes rise{from{opacity:0;transform:translateY(4px)}}\n\n/* Mini page: the before/after illustration */\n.mini-page{position:relative;width:100%;max-width:184px;aspect-ratio:3/4;margin:0 auto;padding:16px 14px;border-radius:10px;background:#fffdf8;color:#1f2620;box-shadow:0 0 0 1px #00000014,0 12px 28px -10px #141e1450;overflow:hidden;transition:transform .5s var(--ease),box-shadow .5s var(--ease)}\n.mp-title{height:8px;width:72%;border-radius:4px;background:#b9b4a6;transform:translate(10px,3px) rotate(-3deg);transition:transform .7s var(--ease),background-color .4s}\n.mp-text{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:12px;transition:grid-template-columns .7s var(--ease)}\n.mp-text i{display:block;height:5px;width:var(--w);border-radius:3px;background:#d3cec1;transform:translate(var(--dx),var(--dy)) rotate(var(--r));transition:transform .7s var(--ease)}\n.mp-eq{position:relative;height:24px;margin:12px 0 10px;font:14px/24px var(--serif)}\n.mp-eq span{position:absolute;inset:0;transition:opacity .35s,transform .45s var(--ease)}\n.mp-bad{font:12px/24px ui-monospace,monospace;color:#a63d2f;letter-spacing:.06em;transform:rotate(-2deg)}\n.mp-good{opacity:0;font-style:italic}.mp-good b{font-weight:400;padding:0 3px;background:linear-gradient(#f2e58a,#f2e58a) no-repeat 0 70%/0% 70%;transition:background-size .45s var(--ease) .15s}\n.mp-fig{position:relative;height:56px;border:1.5px dashed #c6c0b0;border-radius:6px;display:grid;place-items:center;transition:border-color .4s}\n.mp-missing{font-size:12px;color:#857e6d;transition:opacity .3s}\n.mp-chart{position:absolute;inset:8px 10px;width:auto;height:auto;opacity:0;stroke:#3e6b4e;stroke-width:2;transition:opacity .4s}\n.mp-ai{position:absolute;top:-8px;right:-6px;font-size:12px;font-weight:600;line-height:1;padding:4px 6px;border-radius:999px;background:#ece8f6;color:#5e4e96;opacity:0;transform:scale(.6);transition:opacity .25s,transform .25s var(--ease)}\n.mp-zip{position:absolute;right:10px;bottom:10px;font-size:12px;font-weight:600;padding:5px 8px;border-radius:6px;background:#3e6b4e;color:#fff;transform:translateY(160%);transition:transform .5s var(--ease)}\n.mp-scan{position:absolute;left:0;right:0;top:0;height:2px;background:#3e6b4e;box-shadow:0 0 14px 2px #3e6b4e80;opacity:0}\n.mini-page.at1:not(.at2) .mp-scan{opacity:1;animation:scan 1.8s linear infinite}\n@keyframes scan{to{top:100%}}\n.mini-page.at2 .mp-bad{opacity:0;transform:translateY(-6px)}.mini-page.at2 .mp-good{opacity:1}.mini-page.at2 .mp-good b{background-size:100% 70%}\n.mini-page.at3 .mp-title{transform:none;background:#3e6b4e}.mini-page.at3 .mp-text{grid-template-columns:1fr 0fr}.mini-page.at3 .mp-text i{transform:none}\n.mini-page.at4 .mp-fig{border-style:solid;border-color:#d3cec1}.mini-page.at4 .mp-missing{opacity:0}.mini-page.at4 .mp-chart{opacity:1}.mini-page.at4 .mp-ai{opacity:1;transform:none}\n.mini-page.at5 .mp-zip{transform:none}.mini-page.at5{transform:translateY(-4px);box-shadow:0 0 0 1px #00000014,0 18px 34px -12px #141e1460}\n\n/* Reader */\n.app-frame>main.result-page{max-width:1240px;margin:0 auto;padding:24px 24px 48px}\n.document-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;margin-bottom:20px}\n.back-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px 0 8px;margin-left:-8px;border-radius:10px;font-size:16px;color:var(--ink-2);transition:color .15s}\n.document-state{display:flex;align-items:center;flex-wrap:wrap;gap:8px}\n.page-nav{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink-2)}\n.page-nav button{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);transition:transform .12s var(--ease),background-color .15s}\n.page-count{min-width:84px;text-align:center}.page-count strong{color:var(--ink);font-weight:600}\n.document-workspace{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}\n.reading-surface{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-card);overflow:hidden}\n.source-strip{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;padding:14px 24px;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink-2)}\n.source-file{display:flex;align-items:center;gap:10px;min-width:0}.source-file svg{color:var(--accent);width:20px;height:24px}.source-file strong{color:var(--ink);font-weight:600;overflow-wrap:anywhere}\n.source-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-left:auto;color:var(--accent);font-weight:500}.source-link svg{width:16px;height:16px}.source-link:hover{text-decoration:underline;text-underline-offset:3px}\n.sample-note{flex-basis:100%;font-size:14px;color:var(--ink-2);margin:-4px 0 0}\n.issue-banner{display:flex;gap:12px;align-items:flex-start;margin:20px 24px 0;padding:16px;border-radius:12px;background:var(--warn-soft);color:var(--ink);font-size:16px;line-height:1.5}\n.issue-banner>svg{color:var(--warn);width:22px;height:22px;margin-top:1px}.issue-banner strong{display:block;color:var(--warn);font-weight:600}\n.issue-banner .chip{margin-top:8px;background:var(--surface);color:var(--warn);white-space:normal}\n.issue-banner .button{margin-left:auto;min-height:44px;padding:8px 14px}\n.paper-content{max-width:74ch;margin:0 auto;padding:48px 48px 56px;font:19px/1.7 var(--serif);color:var(--ink);overflow-wrap:anywhere}\n.paper-content h1{font:600 1.6em/1.25 Geist,system-ui,sans-serif;letter-spacing:-.02em;margin:0 0 20px;text-wrap:balance}\n.paper-content h2{font:600 1.2em/1.35 Geist,system-ui,sans-serif;letter-spacing:-.01em;margin:40px 0 14px}\n.paper-content h3{font:600 1em/1.45 Geist,system-ui,sans-serif;margin:28px 0 10px}\n.paper-content p{margin:0 0 18px}.paper-content strong{font-weight:700}\n.paper-content .byline{font:14px/1.7 Geist,system-ui,sans-serif;color:var(--ink-2);margin:4px 0}.paper-content .byline+.paper-block:not(.byline){margin-top:32px}\n.paper-content .abstract{padding:20px 22px;border-radius:12px;background:var(--surface-2)}\n.paper-content .abstract strong:first-child{display:block;font:600 14px/1.6 Geist,system-ui,sans-serif;color:var(--accent);margin-bottom:6px}\n.paper-block{position:relative;scroll-margin:96px}\n.paper-equation{overflow:auto;padding:10px 0;margin:0 0 22px;font-size:.9em}.paper-equation .katex-display{margin:.5em 0}.paper-content .katex{font-size:1.04em}.paper-content .katex-display>.katex{white-space:nowrap}\n.paper-block.has-issue{padding:34px 14px 8px;border:2px solid var(--warn);border-radius:12px;background:var(--warn-soft)}\n.paper-block.has-issue:before{content:attr(data-issue);position:absolute;top:8px;left:14px;font:600 12px/1.4 Geist,system-ui,sans-serif;color:var(--warn)}\n.paper-block.has-issue:focus{outline:none}\n.paper-content .caption,.paper-content .footnote{font:14px/1.65 Geist,system-ui,sans-serif;color:var(--ink-2)}\n.paper-figure{margin:28px 0 32px;border:1px solid var(--line);border-radius:12px;overflow:hidden}\n.paper-figure img{display:block;width:100%;height:auto;background:#fff}\n.paper-figure figcaption{padding:16px 18px;background:var(--surface-2);font:15px/1.65 Geist,system-ui,sans-serif;color:var(--ink)}\n.ai-label{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}.ai-label small{font-size:12px;color:var(--ink-2)}\n.paper-table{overflow:auto;margin:20px 0 26px}\n.paper-content table{display:table;width:100%;table-layout:auto;border-collapse:collapse;font:14px/1.55 Geist,system-ui,sans-serif}.paper-content tbody{display:table-row-group}.paper-content tr{display:table-row}\n.paper-content td,.paper-content th{display:table-cell;padding:10px 12px;border:1px solid var(--line);min-width:70px;vertical-align:top}.paper-content tr:first-child{background:var(--surface-2);font-weight:600}\n.paper-content ol{padding-left:26px}.paper-content li{margin:8px 0}.paper-content code{font:.82em ui-monospace,monospace}\n.reading-footer{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px;padding:16px 24px;border-top:1px solid var(--line)}\n.feedback{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-left:auto;font-size:14px;color:var(--ink-2)}.feedback>span{margin-right:4px}\n.feedback button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:10px;color:var(--ink-2);font-size:14px;transition:transform .12s var(--ease),background-color .15s,color .15s}\n.feedback button svg{width:18px;height:18px}.feedback button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}\n.footer-status{flex-basis:100%;text-align:right;font-size:14px;color:var(--ink-2)}.footer-status:empty{display:none}\n.result-page>.prototype-note{margin-top:20px}\n\n/* Output rail; becomes a bottom sheet on narrow screens */\n.rail{position:sticky;top:72px;max-height:calc(100svh - 88px);overflow-y:auto;scrollbar-width:thin;padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-card);font-size:14px;line-height:1.55}\n.rail-heading{display:flex;align-items:center;justify-content:space-between;font-size:20px;font-weight:600;line-height:1.3}\n.rail-sub{color:var(--ink-2);margin:4px 0 16px}\n.rail-actions{display:grid;gap:10px}.rail-actions .button{width:100%}\n.text-download{display:inline-flex;align-items:center;justify-content:center;min-height:44px;color:var(--accent);font-weight:500}.text-download:hover,.report-download:hover{text-decoration:underline;text-underline-offset:3px}\n.copy-done,.copied .copy-symbol{display:none}.copied .copy-done{display:block}\n.output-issue{margin:8px 0 16px;padding:14px;border-radius:12px;background:var(--warn-soft);color:var(--ink)}.output-issue strong{display:block;color:var(--warn);font-size:16px;font-weight:600}.output-issue p{margin:4px 0 8px}\n.output-issue button{min-height:44px;color:var(--warn);font-weight:600;text-decoration:underline;text-underline-offset:3px}.output-issue small{display:block;font-size:12px;color:var(--ink-2);margin-top:6px}\n.rail details{border-top:1px solid var(--line)}.rail summary{cursor:pointer;list-style:none}.rail summary::-webkit-details-marker{display:none}\n.rail>details>summary{position:relative;display:block;padding:16px 32px 16px 0;font-size:16px;font-weight:600}\n.rail>details>summary small{display:block;font-size:14px;font-weight:400;color:var(--ink-2);margin-top:2px}\n.rail>details>summary:after,.run-stage>summary:after{content:'+';position:absolute;right:4px;top:14px;font-size:20px;font-weight:400;line-height:1.2;color:var(--ink-2);transition:transform .15s var(--ease)}\n.rail details[open]>summary:after{transform:rotate(45deg)}\n.report-facts{display:grid;grid-template-columns:1fr auto;gap:8px 12px;margin:0 0 14px}.report-facts dt{color:var(--ink-2)}.report-facts dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}\n.report-note{color:var(--ink-2);margin:0 0 12px}.report-download{display:inline-flex;align-items:center;min-height:44px;margin-bottom:12px;color:var(--accent);font-weight:500}\n.demo-metadata{margin:0 0 14px;color:var(--ink-2)}.demo-metadata strong{display:inline-flex;margin-bottom:6px;font-size:12px;font-weight:600;letter-spacing:.04em;padding:4px 10px;border-radius:999px;background:var(--info-soft);color:var(--info)}\n.run-stage>summary{position:relative;display:flex;align-items:flex-start;gap:10px;padding:14px 32px 14px 0;font-size:15px;font-weight:500}\n.run-stage>summary:after{top:12px}.run-stage>summary small{display:block;font-size:13px;font-weight:400;color:var(--ink-2);margin-top:2px}\n.step-index{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:var(--surface-2);font-size:12px;font-weight:600;color:var(--ink-2)}\n.run-facts{display:grid;gap:2px;margin:0 0 12px 34px}.run-facts dt{font-size:12px;color:var(--ink-2);margin-top:8px}.run-facts dd{margin:0;overflow-wrap:anywhere}.run-facts dd.mono{font:13px/1.6 ui-monospace,monospace}\n.prompt-detail{margin:0 0 14px 34px;border:0!important}.prompt-detail>summary{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:500}\n.prompt-detail pre{font:12px/1.7 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}\n.run-footnote{color:var(--ink-2);margin:0;padding:12px 0 16px;border-top:1px solid var(--line)}.run-stage .run-footnote{border:0;padding:0 0 14px 34px}\n.accuracy-note{display:flex;gap:10px;margin:0;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-2)}.accuracy-note svg{width:18px;height:18px;margin-top:2px;color:var(--info)}\n.pane-close,.pane-shade,.action-bar{display:none}\n\n/* Toast */\n.toast{position:fixed;left:50%;bottom:24px;z-index:40;max-width:min(420px,calc(100vw - 32px));padding:12px 16px;border-radius:12px;background:var(--ink);color:var(--bg);font-size:14px;font-weight:500;box-shadow:var(--shadow-pop);transform:translate(-50%,0);transition:opacity .22s var(--ease),transform .22s var(--ease)}\n.toast:empty{opacity:0;transform:translate(-50%,12px);pointer-events:none}\n\n/* Narrow layouts follow the preview frame width */\n@container dashboard (max-width:900px){\n.document-workspace{display:block}\n.rail{position:fixed;top:auto;bottom:0;left:calc((100vw - min(100vw,var(--frame-width,100vw)))/2);width:min(100vw,var(--frame-width,100vw));max-height:82svh;z-index:30;padding:8px 20px 28px;border-radius:20px 20px 0 0;box-shadow:var(--shadow-pop);transform:translateY(105%);visibility:hidden;transition:transform .28s var(--ease-drawer),visibility 0s linear .28s}\n.rail.is-open{transform:none;visibility:visible;transition:transform .28s var(--ease-drawer),visibility 0s}\n.rail:before{content:'';display:block;width:40px;height:4px;margin:4px auto 10px;border-radius:2px;background:var(--line-strong)}\n.rail-heading{position:sticky;top:-8px;z-index:2;margin:0 -20px;padding:4px 12px 4px 20px;background:var(--surface)}\n.pane-close{display:grid}\n.pane-shade:not([hidden]){display:block;position:fixed;inset:56px 0 0;z-index:25;background:#080e0870;cursor:default;animation:fade .2s}\n@keyframes fade{from{opacity:0}}\n.action-bar{position:sticky;bottom:0;z-index:15;display:flex;gap:8px;margin:16px -24px -48px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line)}\n.action-bar .button{padding:10px 14px}.action-bar .primary{flex:1}\n.toast{bottom:92px}\n.result-page>.prototype-note{margin-bottom:8px}\n}\n@container dashboard (max-width:640px){\n.header-inner{padding:0 16px}.brand-logo{width:124px}\n#dashboard-page{padding:32px 16px 48px}\nh1{font-size:30px;line-height:1.15}.intro p{font-size:16px}.intro{margin-bottom:24px}\n.dropzone{display:block;padding:24px 20px}.drop-example{display:none}.drop-actions .button{flex:1 1 100%}\n.how{grid-template-columns:1fr;gap:14px}\n.job-card{padding:20px}.job-heading{flex-wrap:wrap;gap:12px}.job-status{flex-basis:100%}\n.document-icon{width:38px;height:46px}.document-name{font-size:18px}\n.job-main h3,#stage-label{font-size:22px}\n.processing-body{grid-template-columns:1fr;gap:20px}.processing-body .mini-page{max-width:132px}\n.job-actions .button{flex:1 1 auto}.job-actions .text-button{width:100%;margin:0;justify-content:center}\n.app-frame>main.result-page{padding:16px 16px 48px}\n.document-toolbar{gap:8px 12px}.page-nav{margin-left:0;width:100%;justify-content:space-between}\n.source-strip{padding:12px 16px}.source-link{margin-left:0}\n.issue-banner{margin:16px 16px 0;flex-wrap:wrap}.issue-banner>div{flex:1 1 calc(100% - 34px);min-width:0}.issue-banner .button{margin-left:34px}\n.paper-content{padding:28px 20px 36px;font-size:17px}.paper-content .abstract{padding:16px}\n.reading-footer{padding:14px 16px}.feedback{margin-left:0}.footer-status{text-align:left}\n.action-bar{margin:16px -16px -48px}\n}\n@container dashboard (max-width:360px){\nh1{font-size:28px}.paper-content{padding:24px 16px 32px;font-size:16px}\n.action-bar .label-long{display:none}.action-bar .button{padding:10px 12px}\n.feedback>span{flex-basis:100%}\n}\n@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:1ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-property:opacity,color,background-color,border-color,visibility!important;transition-duration:150ms!important;scroll-behavior:auto!important}.stage-list li[data-phase=active] .stage-marker{border-color:var(--accent)}}\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        2
+      ],
+      [
+        "add",
+        "<section class=\"intro\"><h1 id=\"dashboard-title\">Clean up a complicated document.</h1><p id=\"dashboard-subtitle\">AmuseMe fixes the text, math, and pictures so you can read it, copy it, or paste it into an AI chat.</p></section>\n<section class=\"dropzone\" id=\"dropzone\" aria-label=\"Document upload area\"><figure class=\"drop-example\"><div class=\"mini-page\" aria-hidden=\"true\"><span class=\"mp-scan\"></span><div class=\"mp-title\"></div><div class=\"mp-text\"><i style=\"--dx:-1px;--dy:0px;--r:2deg;--w:70%\"></i><i style=\"--dx:5px;--dy:-4px;--r:-3deg;--w:86%\"></i><i style=\"--dx:-4px;--dy:3px;--r:4deg;--w:64%\"></i><i style=\"--dx:3px;--dy:-2px;--r:-5deg;--w:90%\"></i><i style=\"--dx:-2px;--dy:5px;--r:3deg;--w:58%\"></i><i style=\"--dx:6px;--dy:2px;--r:-4deg;--w:80%\"></i><i style=\"--dx:-5px;--dy:-3px;--r:6deg;--w:74%\"></i><i style=\"--dx:2px;--dy:4px;--r:-2deg;--w:66%\"></i></div><div class=\"mp-eq\"><span class=\"mp-bad\">E(t)=?p dx</span><span class=\"mp-good\"><b>E(t) = ∫ ρ dx</b></span></div><div class=\"mp-fig\"><span class=\"mp-missing\">picture missing</span><svg class=\"mp-chart\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\"><path d=\"M2 4C20 22 40 30 98 36\"/><path d=\"M2 4C25 14 55 22 98 26\" stroke-dasharray=\"4 3\" stroke=\"#857e6d\"/></svg><span class=\"mp-ai\">AI</span></div><span class=\"mp-zip\">ZIP</span></div><figcaption>Copying from a PDF can scramble text like this.</figcaption></figure><div><div class=\"drop-copy\"><h2>Drop a PDF here</h2><p>One file at a time · Up to 50 MB in this preview</p></div><div class=\"drop-actions\"><button class=\"button primary\" id=\"choose\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 16V4m-5 5 5-5 5 5M5 17v4h14v-4\"/></svg>Choose a PDF</button><button class=\"button\" id=\"sample-run\"><svg viewBox=\"0 0 24 24\"><path d=\"M7 5v14l11-7Z\"/></svg>Try it with a sample paper</button></div></div><input type=\"file\" id=\"upload\" hidden></section>\n<ol class=\"how\" id=\"how-steps\" aria-label=\"How it works\"><li><span><b>Add a PDF</b>A paper, chapter, or worksheet.</span></li><li><span><b>AmuseMe cleans it up</b>Text, math, headings, and pictures.</span></li><li><span><b>Take it with you</b>Read it, copy it, or download it.</span></li></ol>\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<section class=\"list-section\" id=\"document-list\" aria-label=\"Your documents\"><div class=\"list-heading\"><h2 id=\"list-title\"></h2></div><div id=\"rows\"></div></section>\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<div class=\"document-toolbar\"><button class=\"back-link\" id=\"back-documents\"><svg viewBox=\"0 0 24 24\"><path d=\"m14 6-6 6 6 6M8 12h13\"/></svg>All documents</button><div class=\"document-state\"><span class=\"status\" id=\"document-status\"><i></i><span>Ready to download</span></span><span class=\"chip info\">Saved sample</span></div>\n<nav class=\"page-nav\" aria-label=\"Document pages\"><button id=\"previous-page\" aria-label=\"Previous page\" disabled><svg viewBox=\"0 0 24 24\"><path d=\"m14 6-6 6 6 6\"/></svg></button><span class=\"page-count\">Page <strong id=\"page-current\">1</strong> of 2</span><button id=\"next-page\" aria-label=\"Next page\"><svg viewBox=\"0 0 24 24\"><path d=\"m10 6 6 6-6 6\"/></svg></button></nav></div>\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        26
+      ],
+      [
+        "add",
+        "<section class=\"reading-surface\" aria-label=\"Clean copy\">\n<div class=\"source-strip\" aria-label=\"Original document\"><span class=\"source-file\"><svg viewBox=\"0 0 24 28\"><path d=\"M5 25V3h9l6 6v16ZM14 3v7h6M9 15h7M9 20h5\"/></svg><strong>parser-stress-test.pdf</strong></span><span>PDF · 2 pages · 226 KB</span><a class=\"source-link\" href=\"sample/source.pdf\" target=\"_blank\" rel=\"noopener\">Open original<svg viewBox=\"0 0 24 24\"><path d=\"M8 5H5v14h14v-3M12 3h9v9M10 14 21 3\"/></svg></a><p class=\"sample-note\">A made-up sample with equations, tables, and figures.</p></div>\n<div class=\"issue-banner\" id=\"issue-banner\" hidden><svg viewBox=\"0 0 24 24\"><path d=\"M12 3 2 21h20ZM12 10v5M12 18v.5\"/></svg><div><strong>1 thing needs a look</strong>Page 2, Equation (10): one symbol is unclear, so the original text was kept.<br><span class=\"chip\">Illustrative issue for this mock state. Not a finding about the saved sample.</span></div><button class=\"button\" id=\"show-issue-banner\">Show me</button></div>\n<article class=\"paper-content\" id=\"paper-content\" aria-label=\"Clean copy text\"></article>\n<footer class=\"reading-footer\"><button class=\"button\" id=\"footer-next\">Continue to page 2 →</button>\n<div class=\"feedback\" role=\"group\" aria-labelledby=\"feedback-label\"><span id=\"feedback-label\">Was this helpful?</span><button data-feedback=\"up\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\"><path d=\"M7 10H3v11h4ZM7 10l5-7c1-1 3 0 2.5 2L14 9h5a2 2 0 0 1 2 2l-2 8a2 2 0 0 1-2 2H7\"/></svg>Yes</button><button data-feedback=\"down\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\"><path d=\"M7 14H3V3h4ZM7 14l5 7c1 1 3 0 2.5-2L14 15h5a2 2 0 0 0 2-2l-2-8a2 2 0 0 0-2-2H7\"/></svg>Not really</button></div>\n<p class=\"footer-status\" id=\"feedback-status\" role=\"status\"></p></footer></section>\n<button class=\"pane-shade\" id=\"pane-shade\" aria-label=\"Close panel\" tabindex=\"-1\" hidden></button>\n<aside class=\"rail\" id=\"tools-pane\" aria-labelledby=\"rail-title\">\n<h2 class=\"rail-heading\"><span id=\"rail-title\">Take it with you</span><button class=\"icon-button pane-close\" aria-label=\"Close panel\" data-close-pane><svg viewBox=\"0 0 24 24\"><path d=\"m6 6 12 12M6 18 18 6\"/></svg></button></h2>\n<p class=\"rail-sub\">Clean text + 2 original pictures</p>\n<div class=\"output-issue\" id=\"output-issue\" hidden><strong>1 thing needs a look</strong><p>Page 2, Equation (10): one symbol is unclear, so the original text was kept.</p><button id=\"show-issue\">Go to page 2</button><small>Illustrative issue for this mock state. Not a finding about the saved sample.</small></div>\n<div class=\"rail-actions\"><button class=\"button primary\" id=\"copy-document\" data-copy><svg class=\"copy-symbol\" viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"8\" width=\"12\" height=\"13\" rx=\"3\"/><path d=\"M8 8V6a3 3 0 0 1 3-3h7a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-3\"/></svg><svg class=\"copy-done\" viewBox=\"0 0 24 24\"><path d=\"m5 12 4 4L19 6\"/></svg><span class=\"copy-label\">Copy all text</span></button>\n<a class=\"button\" href=\"sample/normalized-document.zip\" download=\"normalized-document.zip\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 4v12m-5-5 5 5 5-5M5 18v3h14v-3\"/></svg>Download ZIP</a>\n<a class=\"text-download\" href=\"sample/normalized.txt\" download=\"normalized.txt\">Download text only</a></div>\n<details class=\"processing-report\" id=\"processing-report\"><summary>What changed<small>Processing report</small></summary>\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<dl class=\"report-facts\"><dt>Text pieces changed</dt><dd>37</dd><dt>Headings found</dt><dd>12</dd><dt>Pictures described</dt><dd>2</dd><dt>Split paragraphs rejoined</dt><dd>0</dd></dl>\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<details class=\"run-details\" id=\"run-details\"><summary>How this was produced<small>For researchers · planned setup</small></summary>\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        2
+      ],
+      [
+        "add",
+        "<details class=\"run-stage\"><summary><span class=\"step-index\">1</span><span>Extract document<small>MinerU · Modal</small></span></summary><dl class=\"run-facts\"><dt>Processor</dt><dd>MinerU</dd><dt>Hosting</dt><dd>Modal · planned</dd><dt>Version</dt><dd>To be selected during implementation</dd><dt>Input</dt><dd>2 PDF pages</dd><dt>Reasoning setting</dt><dd>Not applicable</dd></dl><p class=\"run-footnote\">Document extraction. Muse handles the later interpretation steps.</p></details>\n<details class=\"run-stage\"><summary><span class=\"step-index\">2</span><span>Repair text & equations<small>Muse Spark 1.3 · High</small></span></summary><dl class=\"run-facts\"><dt>Model ID</dt><dd class=\"mono\">muse-spark-1.3</dd><dt>Reasoning setting</dt><dd>High</dd><dt>Input</dt><dd>Page images + extracted text</dd><dt>Prompt draft</dt><dd>page-repair / draft-v1</dd></dl><details class=\"prompt-detail\"><summary>View prompt</summary><pre>Compare the extracted text with the supplied page image.\n"
+      ],
+      [
+        "copy",
+        6
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<details class=\"run-stage\"><summary><span class=\"step-index\">3</span><span>Restore hierarchy<small>Muse Spark 1.3 · Medium</small></span></summary><dl class=\"run-facts\"><dt>Model ID</dt><dd class=\"mono\">muse-spark-1.3</dd><dt>Reasoning setting</dt><dd>Medium</dd><dt>Input</dt><dd>Corrected document blocks</dd><dt>Prompt draft</dt><dd>heading-structure / draft-v1</dd></dl><details class=\"prompt-detail\"><summary>View prompt</summary><pre>Identify the title, sections, and subsections in the document blocks.\n"
+      ],
+      [
+        "copy",
+        4
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<details class=\"run-stage\"><summary><span class=\"step-index\">4</span><span>Describe figures<small>Muse Spark 1.3 · High</small></span></summary><dl class=\"run-facts\"><dt>Model ID</dt><dd class=\"mono\">muse-spark-1.3</dd><dt>Reasoning setting</dt><dd>High</dd><dt>Input</dt><dd>2 extracted images + captions</dd><dt>Prompt draft</dt><dd>figure-description / draft-v1</dd></dl><details class=\"prompt-detail\"><summary>View prompt</summary><pre>Describe what is visible in each figure using its image and caption.\n"
+      ],
+      [
+        "copy",
+        6
+      ],
+      [
+        "add",
+        "<p class=\"accuracy-note\"><svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v6M12 7v.5\"/></svg>AmuseMe can still make mistakes. Check anything important against the original.</p>\n</aside>\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "<p class=\"prototype-note\">Saved sample output. Document processing is simulated in this prototype.</p>\n<div class=\"action-bar\" role=\"group\" aria-label=\"Document actions\"><button class=\"button primary\" id=\"copy-mobile\" data-copy><svg class=\"copy-symbol\" viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"8\" width=\"12\" height=\"13\" rx=\"3\"/><path d=\"M8 8V6a3 3 0 0 1 3-3h7a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-3\"/></svg><svg class=\"copy-done\" viewBox=\"0 0 24 24\"><path d=\"m5 12 4 4L19 6\"/></svg><span class=\"copy-label\">Copy<span class=\"label-long\"> all text</span></span></button><a class=\"button\" href=\"sample/normalized-document.zip\" download=\"normalized-document.zip\" aria-label=\"Download ZIP\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 4v12m-5-5 5 5 5-5M5 18v3h14v-3\"/></svg>ZIP</a><button class=\"button\" id=\"more-toggle\" aria-expanded=\"false\" aria-controls=\"tools-pane\"><svg viewBox=\"0 0 24 24\"><path d=\"M4 7h16M4 12h16M4 17h10\"/></svg>More</button></div>\n</main>\n<p class=\"toast\" id=\"toast\" role=\"status\"></p>\n"
+      ],
+      [
+        "copy",
+        10
+      ],
+      [
+        "add",
+        "const checkIcon='<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg>';\nconst miniPage=`<div class=\"mini-page\" aria-hidden=\"true\"><span class=\"mp-scan\"></span><div class=\"mp-title\"></div><div class=\"mp-text\"><i style=\"--dx:-1px;--dy:0px;--r:2deg;--w:70%\"></i><i style=\"--dx:5px;--dy:-4px;--r:-3deg;--w:86%\"></i><i style=\"--dx:-4px;--dy:3px;--r:4deg;--w:64%\"></i><i style=\"--dx:3px;--dy:-2px;--r:-5deg;--w:90%\"></i><i style=\"--dx:-2px;--dy:5px;--r:3deg;--w:58%\"></i><i style=\"--dx:6px;--dy:2px;--r:-4deg;--w:80%\"></i><i style=\"--dx:-5px;--dy:-3px;--r:6deg;--w:74%\"></i><i style=\"--dx:2px;--dy:4px;--r:-2deg;--w:66%\"></i></div><div class=\"mp-eq\"><span class=\"mp-bad\">E(t)=?p dx</span><span class=\"mp-good\"><b>E(t) = ∫ ρ dx</b></span></div><div class=\"mp-fig\"><span class=\"mp-missing\">picture missing</span><svg class=\"mp-chart\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\"><path d=\"M2 4C20 22 40 30 98 36\"/><path d=\"M2 4C25 14 55 22 98 26\" stroke-dasharray=\"4 3\" stroke=\"#857e6d\"/></svg><span class=\"mp-ai\">AI</span></div><span class=\"mp-zip\">ZIP</span></div>`;\n"
+      ],
+      [
+        "copy",
+        5
+      ],
+      [
+        "skip",
+        5
+      ],
+      [
+        "add",
+        "  {at:0,name:'Read the pages',label:'Reading your pages…',detail:'Pulling out the text, layout, and original pictures.',page:'Page 1 of 2'},\n  {at:2.2,name:'Fix text and math',label:'Fixing text and math…',detail:'Repairing mistakes in the extracted text and equations.',page:'Page 2 of 2'},\n  {at:5,name:'Put headings in order',label:'Putting things back in order…',detail:'Restoring headings and rejoining paragraphs split by columns or pages.',page:'2 pages read'},\n  {at:7.5,name:'Describe the pictures',label:'Describing the pictures…',detail:'Writing AI descriptions so text-only tools can use the figures.',page:'2 pictures'},\n  {at:10,name:'Pack your download',label:'Packing your files…',detail:'Bundling the clean text and pictures for you and your tools.',page:'Text + 2 pictures'}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "add",
+        "const jumble=[[0,-4,-6],[3,5,4],[-2,-6,8],[4,3,-5],[-3,6,6],[2,-5,-8],[-4,4,5],[3,-3,-4],[-2,5,7],[4,-6,-6],[-3,3,4]];\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "let toastTimer=null;\nfunction toast(text){clearTimeout(toastTimer);$('#toast').textContent=text;toastTimer=setTimeout(()=>{$('#toast').textContent=''},2600)}\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  return `<div class=\"job-heading\"><div class=\"document-icon\" aria-hidden=\"true\">${fileIcon}</div><div><h2 class=\"document-name\">Coupled Transport on Noisy Networks</h2><div class=\"document-meta\"><span class=\"chip info\">Sample</span>parser-stress-test.pdf · 2 pages</div></div><span class=\"status job-status ${tone}\"><i></i>${status}</span></div>`;\n}\nfunction setMiniStep(step){const mini=$('#rows .mini-page');if(mini)for(let k=1;k<=5;k++)mini.classList.toggle('at'+k,step>=k)}\nfunction setTitle(){\n  if(mock&&state==='empty'){\n    const letters=[...'complicated'].map((c,i)=>`<span style=\"--i:${i};--x:${jumble[i][0]}px;--y:${jumble[i][1]}px;--r:${jumble[i][2]}deg\">${c}</span>`).join('');\n    $('#dashboard-title').innerHTML=`Clean up a <span class=\"jumble\" aria-hidden=\"true\">${letters}</span><span class=\"visually-hidden\">complicated</span> document.`;return true;\n  }\n  return false;\n"
+      ],
+      [
+        "copy",
+        6
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  $('#output-issue').hidden=!outputHasIssue;$('#issue-banner').hidden=!outputHasIssue;$('#document-status').classList.toggle('review',outputHasIssue);\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  const titles={empty:['Clean up a complicated document.','AmuseMe fixes the text, math, and pictures so you can read it, copy it, or paste it into an AI chat.'],uploaded:['Your document is in.','Processing normally starts right away. This preview pauses here.'],processing:['Cleaning up your document.','Each step shows here as it finishes.'],ready:['Your clean copy is ready.','Read it, copy it into an AI chat, or download it.'],failed:[\"Let’s try that again.\",'Your original document is unchanged.']};\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        4
+      ],
+      [
+        "add",
+        "  if(!setTitle())$('#dashboard-title').textContent=copy[0];$('#dashboard-subtitle').textContent=copy[1];\n  const empty=mock&&state==='empty';\n  $('#dropzone').hidden=mock&&!empty;$('#how-steps').hidden=!empty;$('#document-list').hidden=empty;\n  $('#list-title').textContent=mock?'':`Selected file${files.length===1?'':'s'} · ${files.length}`;\n  $('#flow-note').textContent=mock&&!empty?'Sample demo · Processing is simulated. The output comes from a saved normalization run.':'Interactive prototype. New files stay on your device. The sample demo uses saved normalization output.';\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    $('#rows').innerHTML=files.map(f=>`<article class=\"job-card\"><div class=\"job-heading\"><div class=\"document-icon\" aria-hidden=\"true\">${fileIcon}</div><div><h2 class=\"document-name\">${esc(f.name)}</h2><div class=\"document-meta\">${size(f.size)} · Selected locally</div></div><button class=\"icon-button remove\" data-remove=\"${f.id}\" aria-label=\"Remove ${esc(f.name)}\"><svg viewBox=\"0 0 24 24\"><path d=\"m6 6 12 12M6 18 18 6\"/></svg></button></div><div class=\"job-main\"><h3>Not processed</h3><p>Live document processing is not connected. Try the sample paper to see the whole flow.</p></div><div class=\"job-actions\"><button class=\"button primary\" data-run><svg viewBox=\"0 0 24 24\"><path d=\"M7 5v14l11-7Z\"/></svg>Try the sample paper</button></div></article>`).join('');return;\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  if(empty){$('#rows').innerHTML='';return;}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    $('#rows').innerHTML=`<article class=\"job-card\">${jobHeading('Working','pending')}<div class=\"job-main processing-body\">${miniPage}<div><div id=\"stage-announcement\" aria-live=\"polite\" aria-atomic=\"true\"><h3 id=\"stage-label\"></h3><p id=\"stage-detail\"></p></div><div class=\"progress-meta\"><span id=\"stage-page\"></span><span id=\"progress-percent\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Simulated sample progress\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\"><div id=\"progress-fill\"></div></div><ol class=\"stage-list\" aria-label=\"Processing stages\">${stages.map((item,index)=>`<li><span class=\"stage-marker\" aria-hidden=\"true\">${index+1}</span><span>${item.name}</span></li>`).join('')}</ol><div class=\"job-actions\"><button class=\"text-button\" data-cancel>Cancel demo</button></div></div></div></article>`;\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    $('#rows').innerHTML=`<article class=\"job-card\">${jobHeading('Uploaded','pending')}<div class=\"job-main\"><h3>Ready to clean up.</h3><p>Play the sample demo to watch each step.</p></div><div class=\"job-actions\"><button class=\"button primary\" data-run><svg viewBox=\"0 0 24 24\"><path d=\"M7 5v14l11-7Z\"/></svg>Play sample demo</button><button class=\"text-button\" data-new>Choose another document</button></div></article>`;return;\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    $('#rows').innerHTML=`<article class=\"job-card\">${jobHeading('Stopped','failed')}<div class=\"job-main\"><div class=\"failed-band\"><svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v6M12 16.5v.5\"/></svg><div><h3>Processing stopped on page 2.</h3><p>An AI step didn't respond, so nothing was packed.</p></div></div></div><div class=\"job-actions\"><button class=\"button primary\" data-run>Try again</button><button class=\"text-button\" data-new>Choose another document</button></div></article>`;return;\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  $('#rows').innerHTML=`<article class=\"job-card\">${jobHeading(outputHasIssue?'Ready · 1 issue':'Ready',outputHasIssue?'review':'')}<ul class=\"completion-facts\"><li style=\"--i:0\">${checkIcon}Clean text</li><li style=\"--i:1\">${checkIcon}2 original pictures</li><li style=\"--i:2\">${checkIcon}Picture descriptions <span class=\"chip ai\">AI-written</span></li></ul><div class=\"job-actions\"><button class=\"button primary\" data-preview>Open your clean copy</button><a class=\"button\" href=\"sample/normalized-document.zip\" download=\"normalized-document.zip\">${downloadIcon}Download ZIP</a><button class=\"text-button\" data-new>Upload another</button></div></article>`;\n"
+      ],
+      [
+        "copy",
+        5
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    document.querySelectorAll('.stage-list li').forEach((item,i)=>{const phase=i<index?'done':i===index?'active':'waiting';if(item.dataset.phase===phase)return;item.dataset.phase=phase;if(i===index)item.setAttribute('aria-current','step');else item.removeAttribute('aria-current');item.querySelector('.stage-marker').innerHTML=phase==='done'?checkIcon:phase==='active'?'':String(i+1)});\n    setMiniStep(index+1);\n"
+      ],
+      [
+        "copy",
+        20
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "function add(list){if(list.length!==1){message('Please add one document at a time.',true);return}const f=list[0];if(f.size===0||f.size>50*1024*1024){message('Choose a non-empty file of 50 MB or smaller.',true);return}stop();mock=false;state='uploaded';files.unshift({id:nextId++,name:f.name,size:f.size});render();saveView();message('Your file is selected locally. Live processing is not connected. Try the sample paper to explore the full flow.')}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "const drop=$('#dropzone');drop.addEventListener('click',e=>{if(!e.target.closest('button,input'))$('#upload').click()});\ndrop.addEventListener('dragenter',e=>{e.preventDefault();dragDepth++;drop.classList.add('dragging')});drop.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});drop.addEventListener('dragleave',e=>{e.preventDefault();if(--dragDepth<=0){dragDepth=0;drop.classList.remove('dragging')}});drop.addEventListener('drop',e=>{e.preventDefault();dragDepth=0;drop.classList.remove('dragging');if(e.dataTransfer.files.length)add(e.dataTransfer.files);else message('Drop a document file here, or choose one from your device.',true)});\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "add",
+        "const issueBlock='1-19';\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "copy",
+        10
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      return `<figure class=\"paper-figure\"><img src=\"sample/${esc(im.file)}\" alt=\"${block.id==='0-30'?'Energy decay chart comparing coupled and baseline curves':'Three-node directed cycle with weighted edges'}\"><figcaption><span class=\"ai-label\"><span class=\"chip ai\">AI-written description · not citable</span><small>Written by AI, not the authors.</small></span>${esc(im.description)}</figcaption></figure>`;\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    const issue=outputHasIssue&&block.id===issueBlock;\n    const classes=['paper-block',block.kind==='equation'?'paper-equation':'',block.kind==='table'?'paper-table':'',block.kind==='caption'?'caption':'',block.kind==='footnote'?'footnote':'',['0-3','0-4','0-5'].includes(block.id)?'byline':'',block.id==='0-6'?'abstract':'',issue?'has-issue':''].filter(Boolean).join(' ');\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    return `<${tag} class=\"${classes}\"${issue?` id=\"issue-block\" tabindex=\"-1\" data-issue=\"Unclear symbol · original text kept (illustrative)\"`:''}>${content}</${tag}>`;\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "copy",
+        4
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "  pageIndex=Math.max(0,Math.min(outputPages.length-1,index));drawDocument();closePanes();$('#document-page').scrollIntoView({block:'start'});\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "add",
+        "function showIssue(){changePage(1);const block=$('#issue-block');if(block){block.scrollIntoView({block:'center'});block.focus({preventScroll:true})}}\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "$('#show-issue').onclick=showIssue;$('#show-issue-banner').onclick=showIssue;\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        2
+      ],
+      [
+        "add",
+        "const copyTimers=new Map();\ndocument.querySelectorAll('[data-copy]').forEach(button=>button.onclick=async()=>{\n  clearTimeout(copyTimers.get(button));button.disabled=true;\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        2
+      ],
+      [
+        "add",
+        "    button.classList.add('copied');button.querySelector('.copy-label').textContent='Copied!';toast('Copied all 2 pages. Paste them anywhere.');\n    copyTimers.set(button,setTimeout(()=>{button.classList.remove('copied');button.querySelector('.copy-label').innerHTML=button.id==='copy-mobile'?'Copy<span class=\"label-long\"> all text</span>':'Copy all text'},2400));\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    button.classList.remove('copied');toast('Could not copy. Use Download text only instead.');\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "});\n"
+      ],
+      [
+        "copy",
+        6
+      ],
+      [
+        "add",
+        "const pane=$('#tools-pane');\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        4
+      ],
+      [
+        "add",
+        "  const wasOpen=pane.classList.contains('is-open');\n  pane.classList.remove('is-open');$('#more-toggle').setAttribute('aria-expanded','false');$('#pane-shade').hidden=true;\n  if(focus&&wasOpen)$('#more-toggle').focus();\n"
+      ],
+      [
+        "copy",
+        1
+      ],
+      [
+        "skip",
+        3
+      ],
+      [
+        "add",
+        "$('#more-toggle').onclick=()=>{\n  if(pane.classList.contains('is-open')){closePanes(true);return}\n  pane.classList.add('is-open');$('#more-toggle').setAttribute('aria-expanded','true');$('#pane-shade').hidden=false;pane.querySelector('[data-close-pane]').focus();\n"
+      ],
+      [
+        "copy",
+        4
+      ],
+      [
+        "skip",
+        2
+      ],
+      [
+        "add",
+        "  if(event.key!=='Tab'||!pane.classList.contains('is-open'))return;\n"
+      ],
+      [
+        "copy",
+        10
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "</script>\n</body></html>\n"
+      ]
+    ]
+  },
   "python/README.md": {
     "executable": false,
     "operations": [
@@ -1451,7 +2188,7 @@
       ],
       [
         "add",
-        "function LibraryMasthead({ count, loading, onRefresh }: { readonly count: number | null; readonly loading: boolean; readonly onRefresh: () => void }) {\n  return <header className=\"library-masthead\"><div><p className=\"library-eyebrow\">Reading room</p><h2>Your library</h2></div>\n    <div className=\"library-index\">{count !== null && <span>{countLabel(count, \"document\")}</span>}\n      <button className=\"library-secondary-link\" type=\"button\" disabled={loading} onClick={onRefresh}>Refresh</button></div></header>\n}\n\ntype DropzoneProps = {\n  readonly policy: UploadPolicy\n  readonly uploading: boolean\n  readonly enabled: boolean\n  readonly primary: boolean\n  readonly onFiles: (files: ReadonlyArray<File>) => void\n}\n\nconst leftDropzone = (event: DragEvent<HTMLElement>): boolean =>\n  !event.currentTarget.contains(event.relatedTarget instanceof Node ? event.relatedTarget : null)\n\nfunction UploadDropzone({ policy, uploading, enabled, primary, onFiles }: DropzoneProps) {\n  const [dragging, setDragging] = useState(false)\n  const input = useRef<HTMLInputElement>(null)\n  const dragOver = (event: DragEvent<HTMLElement>) => {\n    event.preventDefault()\n    event.dataTransfer.dropEffect = enabled ? \"copy\" : \"none\"\n    if (enabled) setDragging(true)\n  }\n  const drop = (event: DragEvent<HTMLElement>) => { event.preventDefault(); setDragging(false); onFiles(Array.from(event.dataTransfer.files)) }\n  const choose = (event: ChangeEvent<HTMLInputElement>) => { onFiles(Array.from(event.currentTarget.files ?? [])); event.currentTarget.value = \"\" }\n  return <div className={`dropzone library-drop${dragging ? \" dragging\" : \"\"}`} role=\"group\" aria-label=\"Document upload\" aria-busy={uploading}\n    onDragOver={dragOver} onDragLeave={(event) => { if (leftDropzone(event)) setDragging(false) }} onDrop={drop}>\n    <div className=\"library-add-copy\"><span className=\"library-add-icon\"><DocumentIcon /></span>\n      <div><h2 id=\"library-upload-title\">{uploading ? \"Uploading your document…\" : \"Add a document\"}</h2>\n        <p id=\"upload-limits\">Drop one English-language PDF here, up to {formatBytes(policy.maxBytes)} and {policy.maxPages} pages.\n          Short documents work best. Expect about a minute per page, plus one to two minutes for each figure.</p>\n        {policy.allowance !== undefined && <p className=\"upload-allowance\" role=\"status\">{allowanceText(policy.allowance)}</p>}</div></div>\n    <button className={`button${primary ? \" primary\" : \"\"}`} type=\"button\" disabled={!enabled} aria-describedby=\"upload-limits\"\n      onClick={() => input.current?.click()}>Choose a file</button>\n    <input ref={input} className=\"visually-hidden\" aria-hidden=\"true\" tabIndex={-1} type=\"file\" accept=\"application/pdf,.pdf\"\n      disabled={!enabled} onChange={choose} />\n  </div>\n}\n\nconst allowanceText = ({ limit, used }: { readonly limit: number; readonly used: number }) => used >= limit\n  ? `You've used your ${countLabel(limit, \"upload\")}.`\n  : `${countLabel(limit - used, \"upload\")} left of ${limit}.`\n\ntype FailureProps = {\n  readonly attempt: UploadAttempt\n  readonly ready: boolean\n  readonly dismissable: boolean\n  readonly onRetry: () => void\n  readonly onDismiss: () => void\n}\n\nfunction UploadFailure({ attempt, ready, dismissable, onRetry, onDismiss }: FailureProps) {\n  return <section className=\"message error\" role=\"alert\"><p>{attempt.file.name}: {attempt.message}</p>\n    {attempt.state === \"uncertain\" && <p>The upload may already be saved. Check your library. Retrying uses the same submission identifier.</p>}\n    <div className=\"document-actions\"><button className=\"button\" type=\"button\" disabled={!ready} onClick={onRetry}>Retry upload</button>\n      <button className=\"button\" type=\"button\" disabled={!dismissable} onClick={onDismiss}>Choose another file</button></div></section>\n}\n\nconst uploadDisclosure = \"Your page images are sent to Meta for extraction and checking. Document text and figure regions are sent to Meta\"\n  + \" for headings, descriptions, and your reading guide. Local documents and outputs are kept for 7 days. You can delete them after processing stops.\"\nconst tooLongUpload = \"This PDF is longer than AmuseMe can process in one run. Choose a shorter PDF, or save an excerpt of a few pages and upload that.\"\nconst interruptedUpload = \"Upload interrupted. Check your documents, then retry this upload with its original submission identifier if needed.\"\n\ntype DashboardProps = {\n  readonly ownerId: string\n  readonly storedAttempt: UploadAttempt | null\n  readonly setAttempt: Dispatch<SetStateAction<UploadAttempt | null>>\n  readonly onUnauthenticated: () => void\n}\ntype ListResult = { readonly version: number; readonly data: typeof DocumentList.Type | null; readonly error: string | null }\n\nexport function Dashboard({ ownerId, storedAttempt, setAttempt, onUnauthenticated }: DashboardProps) {\n"
+        "function LibraryMasthead({ count, loading, onRefresh }: { readonly count: number | null; readonly loading: boolean; readonly onRefresh: () => void }) {\n  return <header className=\"library-masthead\"><div><p className=\"library-eyebrow\">Reading room</p><h2>Your library</h2></div>\n    <div className=\"library-index\">{count !== null && <span>{countLabel(count, \"document\")}</span>}\n      <button className=\"library-secondary-link\" type=\"button\" disabled={loading} onClick={onRefresh}>Refresh</button></div></header>\n}\n\ntype DropzoneProps = {\n  readonly policy: UploadPolicy\n  readonly uploading: boolean\n  readonly enabled: boolean\n  readonly primary: boolean\n  readonly onFiles: (files: ReadonlyArray<File>) => void\n}\n\nconst leftDropzone = (event: DragEvent<HTMLElement>): boolean =>\n  !event.currentTarget.contains(event.relatedTarget instanceof Node ? event.relatedTarget : null)\n\nfunction UploadDropzone({ policy, uploading, enabled, primary, onFiles }: DropzoneProps) {\n  const [dragging, setDragging] = useState(false)\n  const input = useRef<HTMLInputElement>(null)\n  const dragOver = (event: DragEvent<HTMLElement>) => {\n    event.preventDefault()\n    event.dataTransfer.dropEffect = enabled ? \"copy\" : \"none\"\n    if (enabled) setDragging(true)\n  }\n  const drop = (event: DragEvent<HTMLElement>) => { event.preventDefault(); setDragging(false); onFiles(Array.from(event.dataTransfer.files)) }\n  const choose = (event: ChangeEvent<HTMLInputElement>) => { onFiles(Array.from(event.currentTarget.files ?? [])); event.currentTarget.value = \"\" }\n  return <div className={`dropzone library-drop${dragging ? \" dragging\" : \"\"}`} role=\"group\" aria-label=\"Document upload\" aria-busy={uploading}\n    onDragOver={dragOver} onDragLeave={(event) => { if (leftDropzone(event)) setDragging(false) }} onDrop={drop}>\n    <div className=\"library-add-copy\"><span className=\"library-add-icon\"><DocumentIcon /></span>\n      <div><h2 id=\"library-upload-title\">{uploading ? \"Uploading your document…\" : \"Add a document\"}</h2>\n        <p id=\"upload-limits\">Drop one English-language PDF here, up to {formatBytes(policy.maxBytes)} and {policy.maxPages} pages.\n          Short documents work best. Expect about a minute per page, plus one to two minutes for each figure.</p>\n        {policy.allowance !== undefined && <p className=\"upload-allowance\" role=\"status\">{allowanceText(policy.allowance)}</p>}</div></div>\n    <button className={`button${primary ? \" primary\" : \"\"}`} type=\"button\" disabled={!enabled} aria-describedby=\"upload-limits\"\n      onClick={() => input.current?.click()}>Choose a file</button>\n    <input ref={input} className=\"visually-hidden\" aria-hidden=\"true\" tabIndex={-1} type=\"file\" accept=\"application/pdf,.pdf\"\n      disabled={!enabled} onChange={choose} />\n  </div>\n}\n\nconst allowanceText = ({ limit, used }: { readonly limit: number; readonly used: number }) => used >= limit\n  ? `You've used your ${countLabel(limit, \"upload\")}.`\n  : `${countLabel(limit - used, \"upload\")} left of ${limit}.`\n\ntype FailureProps = {\n  readonly attempt: UploadAttempt\n  readonly ready: boolean\n  readonly dismissable: boolean\n  readonly onRetry: () => void\n  readonly onDismiss: () => void\n}\n\nfunction UploadFailure({ attempt, ready, dismissable, onRetry, onDismiss }: FailureProps) {\n  return <section className=\"message error\" role=\"alert\"><p>{attempt.file.name}: {attempt.message}</p>\n    {attempt.state === \"uncertain\" && <p>The upload may already be saved. Check your library. Retrying uses the same submission identifier.</p>}\n    <div className=\"document-actions\"><button className=\"button\" type=\"button\" disabled={!ready} onClick={onRetry}>Retry upload</button>\n      <button className=\"button\" type=\"button\" disabled={!dismissable} onClick={onDismiss}>Choose another file</button></div></section>\n}\n\nconst uploadDisclosure = \"Your page images are sent to Meta for extraction and checking. Document text and figure regions are sent to Meta\"\n  + \" for headings, descriptions, and your reading guide. Uploaded documents and outputs are kept for 7 days. You can delete them after processing stops.\"\nconst tooLongUpload = \"This PDF is longer than AmuseMe can process in one run. Choose a shorter PDF, or save an excerpt of a few pages and upload that.\"\nconst interruptedUpload = \"Upload interrupted. Check your documents, then retry this upload with its original submission identifier if needed.\"\n\ntype DashboardProps = {\n  readonly ownerId: string\n  readonly storedAttempt: UploadAttempt | null\n  readonly setAttempt: Dispatch<SetStateAction<UploadAttempt | null>>\n  readonly onUnauthenticated: () => void\n}\ntype ListResult = { readonly version: number; readonly data: typeof DocumentList.Type | null; readonly error: string | null }\n\nexport function Dashboard({ ownerId, storedAttempt, setAttempt, onUnauthenticated }: DashboardProps) {\n"
       ],
       [
         "copy",
@@ -2307,6 +3044,43 @@
       [
         "add",
         "\nexport function SourcePanel({ record, canonical, page, onPage }: PageProps & { readonly record: DocumentRecord; readonly canonical: CanonicalDocument }) {\n  return <><h2 className=\"reader-pane-heading\">SOURCE</h2>\n    <div className=\"reader-source-file\"><svg viewBox=\"0 0 24 28\" aria-hidden=\"true\"><path d=\"M4 2h10l6 6v18H4ZM14 2v7h6M8 14h8M8 19h6\" /></svg>\n      <div><strong>{record.document.originalFilename}</strong><small>Original document</small></div></div>\n    <dl className=\"reader-facts\"><dt>Format</dt><dd>PDF</dd><dt>Pages</dt><dd>{canonical.pages.length}</dd>\n      <dt>File size</dt><dd>{formatBytes(record.document.byteCount)}</dd></dl>\n    <a className=\"reader-text-link\" href={originalUrl(record.document.id)} target=\"_blank\" rel=\"noreferrer\">Open original ↗</a>\n    <div className=\"reader-source-pages\"><span className=\"reader-section-label\">IN THIS DOCUMENT</span>\n      <PageNavigation pages={canonical.pages} page={page} onPage={onPage} /></div>\n    <SectionNavigation canonical={canonical} onPage={onPage} />\n    <p className=\"reader-small\">Available until {formatExpiry(record.document.expiresAt)}.</p></>\n}\n\ntype ReportProps = {\n  readonly report: ProcessingReport\n  readonly canonical?: CanonicalDocument\n  readonly identity: OutputIdentity\n  readonly onPage: (number: number) => void\n  readonly imageSummary: string\n  readonly children?: ReactNode\n}\n\nconst measured = (value: ProcessingReport[\"ambiguity\"]) => value._tag === \"measured\" ? value.count : \"Not measured\"\n\nfunction ReportFacts({ report }: { readonly report: ProcessingReport }) {\n  return <dl className=\"reader-facts\"><dt>Blocks updated</dt><dd>{report.changes.changedBlockIds.length}</dd>\n    <dt>Headings changed</dt><dd>{report.changes.changedHeadingCount}</dd><dt>Paragraph joins</dt><dd>{report.changes.appliedJoinCount}</dd>\n    <dt>Unresolved issues</dt><dd>{report.issues.length}</dd><dt>Verified corrections</dt><dd>{measured(report.verifiedCorrectionCount)}</dd>\n    <dt>Ambiguity count</dt><dd>{measured(report.ambiguity)}</dd></dl>\n}\n\ntype Review = NonNullable<ProcessingReport[\"museReviews\"]>[number]\nconst keptByFallback: Partial<Record<Review[\"stage\"], string>> = {\n  \"page-check\": \"Muse checked this and kept the original text.\",\n  headings: \"Muse checked this and kept the original headings.\",\n  figures: \"Muse checked this and published the figure without an AI description.\",\n  guide: \"Muse checked this and published the document without a reading guide.\",\n}\nconst reviewLine = (review: Review, pages: ReadonlyArray<number>): string => {\n  const where = pages.length === 0 ? (review.figureId === null ? \"\" : \" a figure\") : ` page${pages.length === 1 ? \"\" : \"s\"} ${pages.join(\", \")}`\n  if (review.outcome === \"corrected\") return `Muse’s check caught a problem${where ? ` on${where}` : \"\"} and a second review fixed it.`\n  return `${keptByFallback[review.stage] ?? \"Muse checked this and kept the safe original.\"}${where ? ` (${where.trim()})` : \"\"}`\n}\n\nfunction MuseChecks({ report, canonical }: { readonly report: ProcessingReport; readonly canonical: CanonicalDocument | undefined }) {\n  const reviews = report.museReviews ?? []\n  if (reviews.length === 0) return null\n  const pageNumber = (id: string) => canonical?.pages.find((page) => page.id === id)?.pageNumber\n  return <section className=\"reader-muse-checks\" aria-labelledby=\"muse-checks-title\"><h3 id=\"muse-checks-title\">What Muse double-checked</h3>\n    <ul>{reviews.map((review, index) => <li key={`${review.stage}-${index}`} className={review.outcome}>\n      <strong>{stageLabels[review.stage].name}</strong>\n      <span>{reviewLine(review, review.pageIds.flatMap((id) => { const number = pageNumber(id); return number === undefined ? [] : [number] }))}</span>\n    </li>)}</ul></section>\n}\n\nconst issueLead = (issue: ProcessingReport[\"issues\"][number], report: ProcessingReport): string | null =>\n  issue.code === \"provider-failure\" && (report.museReviews ?? []).some((review) => review.outcome === \"fallback\" && review.stage === issue.stage)\n    ? keptByFallback[issue.stage as Review[\"stage\"]] ?? null : null\n\nfunction ReportIssues({ report, onPage }: Pick<ReportProps, \"report\" | \"onPage\">) {\n  return report.issues.map((issue, index) => {\n    const issuePage = issue.locations[0].pageNumber\n    const lead = issueLead(issue, report)\n    return <div className=\"reader-issue\" key={`${issue.code}-${index}`}><strong>{stageLabels[issue.stage].name} · page {issuePage}</strong>\n      {lead !== null && <p className=\"reader-issue-lead\">{lead}</p>}<p>{issue.message}</p>\n      <button className=\"reader-text-link\" type=\"button\" onClick={() => onPage(issuePage)}>Compare page {issuePage} →</button></div>\n  })\n}\n\nfunction ReportDownloads({ identity }: { readonly identity: OutputIdentity }) {\n  return <div className=\"reader-report-downloads\">\n    <a className=\"reader-text-link\" href={outputUrl(identity, \"report\")} download>Download processing report ↓</a>\n    <a className=\"reader-text-link\" href={outputUrl(identity, \"canonical\")} download=\"document.json\">Download document JSON ↓</a></div>\n}\n\nconst outputSummary = (issueCount: number): string => issueCount === 0 ? \"Ready to read and use.\" : `Ready with ${countLabel(issueCount, \"issue\")}.`\n\nexport function ReportPanel({ report, canonical, identity, onPage, imageSummary, children }: ReportProps) {\n  const details = useRef<HTMLDetailsElement>(null)\n  const summary = useRef<HTMLElement>(null)\n  const issueCount = report.issues.length\n  const review = () => { if (details.current !== null && summary.current !== null) openProcessingReport(details.current, summary.current) }\n  return <><h2 className=\"reader-pane-heading\">OUTPUT</h2>\n    <p className=\"reader-output-summary\">{outputSummary(issueCount)}<span>Normalized text · {imageSummary}</span></p>\n    {issueCount > 0 && <button className=\"reader-text-link reader-review-issues\" type=\"button\" onClick={review}>\n      Review {issueCount === 1 ? \"issue\" : \"issues\"} →</button>}\n    {children}\n    <MuseChecks report={report} canonical={canonical} />\n    <details className=\"reader-details\" ref={details}><summary ref={summary}>Processing report</summary><ReportFacts report={report} />\n      <p className=\"reader-small\">Recorded changes are not a count of verified fixes.</p>\n      {report.ambiguity._tag === \"unavailable\" && <p className=\"reader-small\">{report.ambiguity.reason}</p>}\n      {report.verifiedCorrectionCount._tag === \"unavailable\" && <p className=\"reader-small\">{report.verifiedCorrectionCount.reason}</p>}\n      <ReportIssues report={report} onPage={onPage} /><ReportDownloads identity={identity} /></details>\n    <details className=\"reader-details\"><summary>How this was produced</summary>\n      {report.receipts.map(({ receipt, delivery }, index) => <ReceiptStage key={receipt.id} receipt={receipt} delivery={delivery} index={index} />)}\n      <p className=\"reader-small\">Settings come from saved attempts. Usage is shown only when reported by the provider.</p></details></>\n}\n\ntype Delivery = ProcessingReport[\"receipts\"][number][\"delivery\"]\ntype Completed = Extract<StageReceipt[\"state\"], { readonly _tag: \"completed\" }>\ntype Usage = Completed[\"usage\"] | undefined\n\nconst reportedTokens = (usage: Usage, key: \"inputTokens\" | \"outputTokens\") => usage?._tag === \"reported\" ? usage[key] ?? \"Unavailable\" : \"Unavailable\"\nconst reportedCost = (usage: Usage) => usage?._tag === \"reported\" && usage.costUsd !== null ? `$${usage.costUsd}` : \"Unavailable\"\nconst duration = (completed: Completed | null) => completed === null ? \"Unavailable\" : `${(completed.durationMilliseconds / 1000).toFixed(1)} seconds`\nconst receiptTarget = (receipt: StageReceipt) => receipt.figureId ?? (receipt.pageIds.length > 0 ? receipt.pageIds.join(\", \") : \"Document\")\n\nfunction ReceiptStage({ receipt, delivery, index }: { readonly receipt: StageReceipt; readonly delivery: Delivery; readonly index: number }) {\n  const config = receipt.configuration\n  const model = config._tag === \"model\" ? config : config.model\n  const completed = receipt.state._tag === \"completed\" ? receipt.state : null\n  const usage = completed?.usage\n  const prompt = model === undefined ? null : publicPrompt(model.promptName, model.promptVersion)\n  return <details className=\"reader-stage\"><summary><span>{String(index + 1).padStart(2, \"0\")}</span>\n    <span>{stageLabels[receipt.stage].name}<small>{model?.model ?? config.provider} · {receiptOutcome(receipt)}</small></span></summary>\n    <dl className=\"reader-run-facts\"><dt>Delivery</dt><dd>{delivery === \"reused\" ? \"Reused saved response\" : \"Performed in this run\"}</dd>\n      <dt>Provider</dt><dd>{config.provider}</dd>\n      {model !== undefined ? <><dt>Model</dt><dd>{model.model}</dd><dt>Reasoning effort</dt><dd>{model.reasoning}</dd>\n        <dt>Prompt</dt><dd>{model.promptName} · {model.promptVersion}</dd><dt>Output token ceiling</dt><dd>{model.maxOutputTokens}</dd></>\n        : <><dt>Version</dt><dd>{config._tag === \"extraction\" ? config.version : \"Unavailable\"}</dd></>}\n      <dt>Target</dt><dd>{receiptTarget(receipt)}</dd>\n      <dt>Input tokens</dt><dd>{reportedTokens(usage, \"inputTokens\")}</dd><dt>Output tokens</dt><dd>{reportedTokens(usage, \"outputTokens\")}</dd>\n      <dt>Reported cost</dt><dd>{reportedCost(usage)}</dd><dt>Duration</dt><dd>{duration(completed)}</dd></dl>\n    {prompt !== null ? <details className=\"reader-prompt\"><summary>Public prompt template</summary><pre>{prompt}</pre></details>\n      : model !== undefined && <p className=\"reader-small\">A public template is unavailable for this prompt version.</p>}\n    {receipt.state._tag === \"failed\" && <p className=\"reader-small\">{receipt.state.failure.message}</p>}\n    {completed?.validation._tag === \"rejected\" && <p className=\"reader-small\">{completed.validation.failure.message}</p>}\n    {receipt.state._tag === \"unknown-completion\" && <p className=\"reader-small\">{receipt.state.reason}</p>}\n  </details>\n}\n"
+      ]
+    ]
+  },
+  "src/app/reader/ReaderBlock.tsx": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        12
+      ],
+      [
+        "add",
+        "import { boldSpans } from \"../text.ts\"\n"
+      ],
+      [
+        "copy",
+        22
+      ],
+      [
+        "add",
+        "function PlainText({ text }: { readonly text: string }) {\n  return <>{boldSpans(text).map((span, index) => span.bold ? <strong key={index}>{span.text}</strong> : span.text)}</>\n}\n\n"
+      ],
+      [
+        "copy",
+        5
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "    {content !== \"\" && (block.kind === \"heading\" ? createElement(`h${block.headingLevel ?? 2}`, { className: block.format === \"text\" ? \"reader-plain-text\" : undefined }, block.format === \"text\" ? <PlainText text={content} /> : <DocumentMarkup content={content} inline />) : block.format === \"text\" ? <p className=\"reader-plain-text\"><PlainText text={content} /></p> : <DocumentMarkup content={content} />)}\n"
+      ],
+      [
+        "copy",
+        3
       ]
     ]
   },
@@ -3257,8 +4031,16 @@
     "executable": false,
     "operations": [
       [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { createClient } from \"@libsql/client\"\nimport { LibsqlDialect, type libsql } from \"@libsql/kysely-libsql\"\n"
+      ],
+      [
         "copy",
-        6
+        5
       ],
       [
         "add",
@@ -3266,7 +4048,31 @@
       ],
       [
         "copy",
-        52
+        33
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      try: () => {\n        const client = createClient({ url: url.href, timeout: 5000 })\n        return { client, db: new Kysely({ dialect: new LibsqlDialect({ client: client as unknown as libsql.Client }) }) }\n      },\n"
+      ],
+      [
+        "copy",
+        2
+      ],
+      [
+        "skip",
+        2
+      ],
+      [
+        "add",
+        "    ({ client, db }) => authOperation(\"database\", () => db.destroy()).pipe(Effect.andThen(Effect.sync(() => client.close())), Effect.orDie),\n  ).pipe(Effect.map(({ db }) => db))\n"
+      ],
+      [
+        "copy",
+        14
       ],
       [
         "skip",
@@ -6463,7 +7269,56 @@
       ],
       [
         "copy",
-        36
+        9
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "        return new Response(stream, { headers: { ...headers, \"content-type\": \"application/zip\", \"content-disposition\": `attachment; filename=\"amuseme-${id.slice(0, 8)}.zip\"` } })\n"
+      ],
+      [
+        "copy",
+        26
+      ]
+    ]
+  },
+  "src/storage/database.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { createClient } from \"@libsql/client\"\nimport { LibsqlDialect, type libsql } from \"@libsql/kysely-libsql\"\n"
+      ],
+      [
+        "copy",
+        163
+      ],
+      [
+        "skip",
+        3
+      ],
+      [
+        "add",
+        "    Effect.try({ try: () => {\n      const client = createClient({ url: url.href, timeout: 5000 })\n      return { client, database: new Kysely<ApplicationDatabase>({ dialect: new LibsqlDialect({ client: client as unknown as libsql.Client }) }) }\n    }, catch: (cause) => storageFailure(\"initialize\", cause) }),\n    ({ client, database }) => storageQuery(\"close\", () => database.destroy()).pipe(Effect.andThen(Effect.sync(() => client.close())), Effect.orDie),\n  ).pipe(Effect.map(({ database }) => database))\n"
+      ],
+      [
+        "copy",
+        13
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "copy",
+        20
       ]
     ]
   },
@@ -7087,7 +7942,15 @@
       ],
       [
         "copy",
-        69
+        19
+      ],
+      [
+        "add",
+        "  })\n  it(\"shows bounded bold spans in text-format blocks as bold and nothing else\", () => {\n    const doi = renderBlock({ kind: \"paragraph\", format: \"text\", content: \"**DOI:** 10.21105/joss.07793\" })\n    expect(doi).toContain('<p class=\"reader-plain-text\"><strong>DOI:</strong> 10.21105/joss.07793</p>')\n    const dates = renderBlock({ kind: \"paragraph\", format: \"text\", content: \"**Submitted:** 10 September 2024\\n**Published:** 29 May 2025\" })\n    expect(dates).toContain(\"<strong>Submitted:</strong> 10 September 2024\\n<strong>Published:</strong> 29 May 2025\")\n    for (const kind of [\"list\", \"caption\", \"unclassified\"] as const) {\n      const html = renderBlock({ kind, format: \"text\", content: \"**Reviewers:**\\n• @abougouffa\" })\n      expect(html).toContain(\"<strong>Reviewers:</strong>\\n• @abougouffa\")\n      expect(html).not.toContain(\"**\")\n    }\n    const heading = renderBlock({ kind: \"heading\", format: \"text\", headingLevel: 2, content: \"## **Software**\" })\n    expect(heading).toContain('<h2 class=\"reader-plain-text\"><strong>Software</strong></h2>')\n  })\n  it(\"keeps asterisks that are not bold markers literal in text-format blocks\", () => {\n    for (const content of [\"solve(**kwargs)\", \"f(**left), g(**right)\", \"2 ** 3 ** 4\", \"a ** b\", \"**unclosed\", \"x*y*z\", \"***x***\", \"\\\\*\\\\*x\\\\*\\\\*\", \"result = solve(**solve_kwargs)\"]) {\n      const html = renderBlock({ kind: \"paragraph\", format: \"text\", content })\n      expect(html).toContain(`<p class=\"reader-plain-text\">${content}</p>`)\n    }\n"
+      ],
+      [
+        "copy",
+        50
       ],
       [
         "add",
@@ -7100,6 +7963,43 @@
       [
         "add",
         "\ndescribe(\"reader recovery and report disclosures\", () => {\n  it(\"offers re-upload guidance only for expiry and retains retry for ambiguous or temporary failures\", () => {\n    const expired = renderToStaticMarkup(createElement(DocumentReadError, { error: { kind: \"rejected\", status: 410, message: \"Expired\" }, onRetry: () => {} }))\n    expect(expired).toContain(\"Upload the PDF again\")\n    expect(expired).toContain('href=\"/\"')\n    expect(expired).toContain(\"Return to documents\")\n    expect(expired).not.toContain(\"Try again\")\n    for (const error of [{ kind: \"rejected\", status: 404, message: \"Unavailable\" }, { kind: \"transport\", message: \"Connection failed\" }] as const) {\n      const html = renderToStaticMarkup(createElement(DocumentReadError, { error, onRetry: () => {} }))\n      expect(html).toContain(error.message)\n      expect(html).toContain(\"Try again\")\n      expect(html).not.toContain(\"expired\")\n    }\n  })\n  it(\"states issue counts beside output actions and offers review only when issues exist\", () => {\n    const expected = [\n      { count: 0, summary: \"Ready to read and use.\", review: null },\n      { count: 1, summary: \"Ready with 1 issue.\", review: \"Review issue\" },\n      { count: 2, summary: \"Ready with 2 issues.\", review: \"Review issues\" },\n    ] as const\n    for (const { count, summary, review } of expected) {\n      const report = Schema.decodeUnknownSync(ProcessingReport)({ ...appReaderFixture.report, issues: Array.from({ length: count }, () => ({ code: \"table-uncertain\", stage: \"page-check\", message: \"Check the table against the PDF.\", locations: [{ _tag: \"page\", pageId: \"page-1\", pageNumber: 1 }], blockIds: [], figureId: null })) })\n      const html = renderToStaticMarkup(createElement(ReportPanel, { report, identity: appReaderFixture.canonical.scope, onPage: () => {}, imageSummary: \"No source images\" }, createElement(\"a\", { href: \"/download\" }, \"Download ZIP\")))\n      expect(html).toContain(\"Download ZIP\")\n      expect(html).toContain(\"Processing report\")\n      expect(html).not.toContain('<details class=\"reader-details\" open')\n      expect(html).toContain(summary)\n      if (review === null) {\n        expect(html).not.toContain(\"Review issue\")\n      } else {\n        expect(html).toContain(review)\n        expect(html).toContain(\"Compare page 1\")\n      }\n    }\n  })\n  it(\"explains Muse reviews in plain words and frames a fallback as kept original text\", () => {\n    const review = { stage: \"page-check\", agent: \"page-check-review\", pageIds: [\"page-2\"], figureId: null, problems: [\"Join reused\"], rounds: 2, attemptIds: [\"attempt-1\"] }\n    const report = Schema.decodeUnknownSync(ProcessingReport)({ ...appReaderFixture.report,\n      museReviews: [{ ...review, outcome: \"fallback\", fallback: \"Kept passing fixes only\" }, { ...review, pageIds: [\"page-1\"], outcome: \"corrected\", fallback: null }],\n      issues: [{ code: \"provider-failure\", stage: \"page-check\", message: \"Page check fell back.\", locations: [{ _tag: \"page\", pageId: \"page-2\", pageNumber: 2 }], blockIds: [], figureId: null }] })\n    const html = renderToStaticMarkup(createElement(ReportPanel, { report, canonical: appReaderFixture.canonical, identity: appReaderFixture.canonical.scope, onPage: () => {}, imageSummary: \"No source images\" }))\n    expect(html).toContain(\"What Muse double-checked\")\n    expect(html).toContain(\"Muse checked this and kept the original text. (page 2)\")\n    expect(html).toContain(\"caught a problem on page 1 and a second review fixed it\")\n    expect(html.match(/kept the original text/gu)?.length).toBe(2)\n  })\n})\n"
+      ]
+    ]
+  },
+  "tests/auth/auth.test.ts": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "import { Clock, Effect, Fiber, FileSystem, Path, Redacted, Result, Stream } from \"effect\"\n"
+      ],
+      [
+        "copy",
+        3
+      ],
+      [
+        "add",
+        "import { holdReadLock } from \"../fixtures/read-lock.ts\"\n"
+      ],
+      [
+        "copy",
+        340
+      ],
+      [
+        "add",
+        "\n  it.live(\"waits for another process's read lock on auth.sqlite instead of failing sign-in\", () => Effect.gen(function* () {\n    const options = yield* fixture()\n    yield* invite(options)\n    yield* Effect.gen(function* () {\n      const auth = yield* AuthService\n      expect((yield* signIn(auth, options)).status).toBe(200)\n      const lock = yield* holdReadLock(options.databasePath, \"user\", 300)\n      yield* lock.arm\n      const response = yield* signIn(auth, options)\n      const finished = yield* Clock.currentTimeMillis\n      // A sign-in that finished before the release never met the lock, so it proves nothing.\n      expect(finished).toBeGreaterThanOrEqual(yield* lock.released)\n      expect(response.status).toBe(200)\n      expect((yield* auth.getSession(sessionHeaders(response)))?.user.email).toBe(\"reader@example.test\")\n    }).pipe(Effect.scoped, Effect.provide(makeAuthLayer(options)))\n  }).pipe(Effect.provide(NodeServices.layer)), 15000)\n"
+      ],
+      [
+        "copy",
+        1
       ]
     ]
   },
@@ -8363,7 +9263,27 @@
     "operations": [
       [
         "copy",
-        86
+        53
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      const { request, claim } = yield* fixture(options.dataDirectory, () => Effect.gen(function* () {\n"
+      ],
+      [
+        "copy",
+        7
+      ],
+      [
+        "add",
+        "      expect(response.headers.get(\"content-disposition\")).toBe(`attachment; filename=\"amuseme-${claim.document.id.slice(0, 8)}.zip\"`)\n"
+      ],
+      [
+        "copy",
+        25
       ],
       [
         "add",

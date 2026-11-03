@@ -89,6 +89,27 @@ class SubmissionTests(unittest.TestCase):
         s.reconstruct(SimpleNamespace(candidate=str(out / 'candidate'), archive=str(out / 'foundation.zip'), output=str(result)))
         self.assertEqual(s.read_regular(result, 'mode.txt'), (original, True))
 
+    def test_binary_change_round_trip(self):
+        before, after = b'\x89PNG\r\n\x1a\nOLD_PRIVATE_ICON\xff', b'\x89PNG\r\n\x1a\nNEW_ICON\xfe\x00'
+        s.write_file(self.base, 'icon.png', before, False)
+        s.write_file(self.tree, 'icon.png', after, False)
+        self.manifest.write_text(json.dumps({'files': [s.record('icon.png', before, False)]}))
+        out = self.root / 'binary-bundle'
+        s.prepare(SimpleNamespace(baseline=str(self.base), manifest=str(self.manifest), manifest_sha256=s.digest(self.manifest.read_bytes()), tree=str(self.tree), output=str(out), new_file=[]))
+        self.assertIn('icon.png', (out / 'candidate/NEW-WORK.md').read_text())
+        result = self.root / 'binary-result'
+        s.reconstruct(SimpleNamespace(candidate=str(out / 'candidate'), archive=str(out / 'foundation.zip'), output=str(result)))
+        self.assertEqual(s.read_regular(result, 'icon.png'), (after, False))
+
+    def test_reject_change_with_both_forms(self):
+        changes = self.bundle / 'candidate/changes.json'
+        data = json.loads(changes.read_text())
+        data['dir/a.txt']['bytes'] = ''
+        changes.write_text(json.dumps(data))
+        with self.assertRaises(ValueError):
+            s.reconstruct(self.args)
+        self.assertFalse(Path(self.args.output).exists())
+
     def test_reject_private_new_files(self):
         for name in ('.env.local', '.codex/config.toml', 'src/.mcp.json', '.memsearch/index', 'secrets/token'):
             with self.subTest(name=name):

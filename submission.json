@@ -271,10 +271,10 @@
       "sha256": "b8d551b1987ac3f9ab5dd3b49881a34acb38e273bbfc92515da184cc733f21e0"
     },
     {
-      "bytes": 7393,
+      "bytes": 7743,
       "executable": false,
       "path": "docs/step-rules/document-reader.md",
-      "sha256": "563865620f06511dc029b74b546d61d8e813f43da5740f34c2d0f6c56d74405f"
+      "sha256": "d009de5743bc824bf97381c46ed20e9a27955f3b240881a283e771f40664a2f3"
     },
     {
       "bytes": 5504,
@@ -583,10 +583,10 @@
       "sha256": "71609cbb5c78b5870d712eab73a31d76622635c6ed034ab5cee3b9ecbda8685f"
     },
     {
-      "bytes": 10013,
+      "bytes": 15789,
       "executable": false,
       "path": "prototype/README.md",
-      "sha256": "4c3b93cf37e1792a83c0fd5d5904740152b8f389cc04b3e2c43352cb332637a3"
+      "sha256": "639a4cf511eb5f070b0b40872c89a43fe4730a970f7ac65ba9641d7d9f837cbd"
     },
     {
       "bytes": 57584,
@@ -595,40 +595,40 @@
       "sha256": "fb253127b8c7776d4c3bd5788213bfb96ef5f0b5aed3bdc346c3fbd85e88b307"
     },
     {
-      "bytes": 4431,
+      "bytes": 3899,
       "executable": false,
       "path": "prototype/assets/brand/amuseme-logo-reversed.svg",
-      "sha256": "168f81d4ccf53ff012d0d801ef839362c4d4d922c6ec29a0dbb85e39902e170e"
+      "sha256": "6fed3583146458bf585ba2bcecbb481398e06304343524cd5bfd2ebf67f63dff"
     },
     {
-      "bytes": 4431,
+      "bytes": 3899,
       "executable": false,
       "path": "prototype/assets/brand/amuseme-logo.svg",
-      "sha256": "f45fa0fbbb9ee6641603500841218c3c10f4a0c0bc7464042cdc65b37a787752"
+      "sha256": "714d6907a5ec0fb3de10591794879c059db17a22f88e4a294d7a953874ba77b1"
     },
     {
-      "bytes": 3164,
+      "bytes": 3803,
       "executable": false,
       "path": "prototype/assets/brand/apple-touch-icon.png",
-      "sha256": "d5c6305d52774f3349c4a8d1d7c2f66b2268ca72f71ec78eff2c8f586b454a70"
+      "sha256": "fb39762a3760a1fbc7de52e9f62f6a1512ae5cd912b7ab77681b00c7ce94cab3"
     },
     {
-      "bytes": 2929,
+      "bytes": 2016,
       "executable": false,
       "path": "prototype/assets/brand/favicon.ico",
-      "sha256": "14d65f6e4ecd640cd874d4e484fadb356d0efff9ca8250c8e05f800b02b5188a"
+      "sha256": "cdbff974d4f783af4536fb281cf9d8d4ce2df83315830e68948cb06793dfda1d"
     },
     {
-      "bytes": 658,
+      "bytes": 459,
       "executable": false,
       "path": "prototype/assets/brand/favicon.svg",
-      "sha256": "1b4af7d499d31c0ebba6423a8676f43a1d1984350ccbafd7fed9cff04fbb3851"
+      "sha256": "6bd6cc2e1b7b7826361a53995b10af5dc21f013d1f1da815690909c48a7cb629"
     },
     {
-      "bytes": 119506,
+      "bytes": 128899,
       "executable": false,
       "path": "prototype/index.html",
-      "sha256": "0ff0fc9de19376739dfac51b385b0cb5e498ae062c56bab7730d02174baa3049"
+      "sha256": "e58f084fb33b7a2afeca3a95c310957fb13462e0863be1162d1800e79714577a"
     },
     {
       "bytes": 93808,
@@ -1153,10 +1153,10 @@
       "sha256": "6100455c0330490315fdd357ce31966849a34ee01d4d0eb95e1bb254f618792f"
     },
     {
-      "bytes": 12391,
+      "bytes": 13258,
       "executable": false,
       "path": "scripts/submission/prepare.py",
-      "sha256": "5d287851d00945d6e7cfb8d0dcd8de97fa04332e99ff48714fd8b89a958659e5"
+      "sha256": "700b932b15c3300741d52bae1d95e5195f6c4b7989ee48a8f64696a2b7cb3f4c"
     },
     {
       "bytes": 13468,
@@ -1171,10 +1171,10 @@
       "sha256": "2b3be7c8a3b52fc11118d6b84b9cfbff60a4a3f594684a1bc9901753fe10e792"
     },
     {
-      "bytes": 19147,
+      "bytes": 19150,
       "executable": false,
       "path": "src/app/DocumentWorkspace.tsx",
-      "sha256": "5b770bfc70af576c73f36146311b05d58b2e0495c16554fdb4cc48df97283a19"
+      "sha256": "cc64af67109b69faa8f7582c1e5286be07aac7439e44f1f0069db05417c7a60d"
     },
     {
       "bytes": 4486,
@@ -1267,10 +1267,10 @@
       "sha256": "d5280ecf33d28a08da792bb83449395f447f82d6ff1b0ded89712fdbe9fac67e"
     },
     {
-      "bytes": 5519,
+      "bytes": 5563,
       "executable": false,
       "path": "src/app/guide/GuideSources.tsx",
-      "sha256": "393cf52d46b14e9308e93c76807bb6697ceec0fda3a5671d4eb36029378aeaca"
+      "sha256": "0b0dd7adadbab2525010bb071bdfcbdb679a158e48b7c970c3470d2f558e5471"
     },
     {
       "bytes": 6841,
@@ -1309,10 +1309,10 @@
       "sha256": "7d9728df9a6041234f603ba17ce2a2c3b14cdefb986cd454fc700a6e318aad90"
     },
     {
-      "bytes": 3395,
+      "bytes": 4274,
       "executable": false,
       "path": "src/app/guide/presentation.ts",
-      "sha256": "deaa3a97e3cdf658a6de76c9c126c4dd10b72ea742d5c81a0d8b8e935fbbc944"
+      "sha256": "72e76a32adc901419d81444ed832784ec52420d48956812edec86537e2460900"
     },
     {
       "bytes": 435,
@@ -1435,10 +1435,10 @@
       "sha256": "1edb329fbb962076a0fefb6f761be478aee92052b23ccf34e903cf877f0ca43d"
     },
     {
-      "bytes": 4806,
+      "bytes": 5065,
       "executable": false,
       "path": "src/app/reader/ReaderBlock.tsx",
-      "sha256": "91bf8175ddf1a89f8250fa6f3841feed753b9f102cc09e2ad5426af5f8a6090b"
+      "sha256": "0b7a7b6ad27ed36f97a199a9c1fd1a5217f4170ce3d446b8f412daef513d616d"
     },
     {
       "bytes": 17911,
@@ -1477,10 +1477,10 @@
       "sha256": "8a162163fbe43dfe44b7b4bdba9d56c344ffdee75c4cbff41fef80559957bb1a"
     },
     {
-      "bytes": 241,
+      "bytes": 999,
       "executable": false,
       "path": "src/app/text.ts",
-      "sha256": "eea04acb8cc119afd8212d41d27bec99a6404323a29e5416766d1fc462821807"
+      "sha256": "285aed3f5f2c1a6ea7254c5d7dd98b8147fe60d47a220c393c00299d5a75ef86"
     },
     {
       "bytes": 374,
@@ -1501,10 +1501,10 @@
       "sha256": "141a89baed2da5a2f8354d3ec753de9bce7777c1a80a899df3030f256013ee9a"
     },
     {
-      "bytes": 4116,
+      "bytes": 4411,
       "executable": false,
       "path": "src/auth/instance.ts",
-      "sha256": "65c28b6ced5255b7da661348c59f6e89c5ec5f291fa60393ce3b31435ee5ee74"
+      "sha256": "a36122137293eef1d43a8f5d7ba909d2ed2ce2f7efeff708f34d9f7746a0c53b"
     },
     {
       "bytes": 2663,
@@ -1969,10 +1969,10 @@
       "sha256": "2d61ca603d63145418f9124989d78a8a2693166e5ab75ce73514e65ca17c31d1"
     },
     {
-      "bytes": 7319,
+      "bytes": 7328,
       "executable": false,
       "path": "src/server/outputs.ts",
-      "sha256": "56e0adea0f0ef152873f1721b321c2eefeaae7a0656de83f0db0cf0bf73f472b"
+      "sha256": "fd45230017f7b0cbd18eb20b260c8a916db4a09e807da543bedfc78cb85fa8e8"
     },
     {
       "bytes": 4453,
@@ -2011,10 +2011,10 @@
       "sha256": "81a6ff086c47bf2cccb8ac07cdc74cdd9f6fb0c26547d1e07d115a4f3c1bfef5"
     },
     {
-      "bytes": 12768,
+      "bytes": 12991,
       "executable": false,
       "path": "src/storage/database.ts",
-      "sha256": "83c66fcda0b8217a050f01d1afeb5471db81a6ad3477b41ff630d9b464e61283"
+      "sha256": "1eed44191abd4966aac05813a0c3d42ef0f9e6fb6fb6990470f543f574a6ff4f"
     },
     {
       "bytes": 28917,
@@ -2083,10 +2083,10 @@
       "sha256": "67346a35f09416a6e1d03fa341204078b85603961ecd517bc7231f9874b64f7b"
     },
     {
-      "bytes": 11498,
+      "bytes": 13687,
       "executable": false,
       "path": "tests/app/guide.test.ts",
-      "sha256": "3ebade05a1ae2ed0e7316660cb6ba2b76e2eab93e5bfce8f8b0fc7ffbda2057a"
+      "sha256": "69c4750a3c1626dca4f1b28336c489148246a49236a7a64bbaff86338ec687fb"
     },
     {
       "bytes": 6389,
@@ -2119,10 +2119,10 @@
       "sha256": "d9d61beaf95f9d2258ef4657ccdfcb8c04e034672ce832ed04fb3c2cd2f5c1c7"
     },
     {
-      "bytes": 9430,
+      "bytes": 10935,
       "executable": false,
       "path": "tests/app/reader.test.ts",
-      "sha256": "075e024111b76fc03a2b93fb34b50b4cbe747d4ee5b83e81ec8c530241855e94"
+      "sha256": "d98ceea2ddcb22e60e8484198474616d28716fc9b4b4160113868024b433b35e"
     },
     {
       "bytes": 1287,
@@ -2131,16 +2131,16 @@
       "sha256": "70001af3caae0fe52f8b14ef8d50da3e42b6c70a165469f079f8d6bafe0b80ba"
     },
     {
-      "bytes": 541,
+      "bytes": 850,
       "executable": false,
       "path": "tests/app/text.test.ts",
-      "sha256": "c0dd0ad145dba8c36b27ca42886fffc9e0e763cec3310a380386c5df37df2da2"
+      "sha256": "6e7365365c467cbec2f9a6f3b22bf2d3e3d611d3bbfafa1b531dcaa1502099f2"
     },
     {
-      "bytes": 20476,
+      "bytes": 21496,
       "executable": false,
       "path": "tests/auth/auth.test.ts",
-      "sha256": "d936c8cf26af62fb9b1bec7a62366a5d37b2a2b696a8d662b96c013de00c0ef2"
+      "sha256": "0f4dde72413693adf32f40e87269ec34a6558f7a7b2da6e8eeade308fe0c9ea7"
     },
     {
       "bytes": 6670,
@@ -2261,6 +2261,18 @@
       "executable": false,
       "path": "tests/fixtures/published-output.ts",
       "sha256": "8bfb17bc6f3329979da8b06642b816e7e77b71aa833121dc12c337a2649eff38"
+    },
+    {
+      "bytes": 875,
+      "executable": false,
+      "path": "tests/fixtures/read-lock-holder.mjs",
+      "sha256": "1f5b4ae8ca32136019a341c36a8f6e3deed811a05926ba0497f0ff3dff2b5bc8"
+    },
+    {
+      "bytes": 1348,
+      "executable": false,
+      "path": "tests/fixtures/read-lock.ts",
+      "sha256": "ffa863a56935e06fc5ec084b5e5170a8450d80edba47c17cba25a870a57d8a2d"
     },
     {
       "bytes": 5601,
@@ -2713,10 +2725,10 @@
       "sha256": "a8e815f0b3bda0823aab5193f1d710de3de51ae61976fc2c0a2bae825a71a512"
     },
     {
-      "bytes": 7648,
+      "bytes": 7789,
       "executable": false,
       "path": "tests/server/outputs.test.ts",
-      "sha256": "312f0fd7b788beea8b20503c2775748626d8466d138d786446d06ee4c68aff09"
+      "sha256": "c6cf6554d50f7fa91a2830d34f65ddb40e11f5de179d218a50e3f5adb164aff2"
     },
     {
       "bytes": 8579,
@@ -2755,6 +2767,12 @@
       "sha256": "4ec5cca14922d9613852b50d06b225ba5ec3ee414e3be1814aa21f85b9d7a2e6"
     },
     {
+      "bytes": 4528,
+      "executable": false,
+      "path": "tests/storage/database.test.ts",
+      "sha256": "63b7c3bdd6e87165c25f55900e27db8723f2f99459f7225f0dc1cbf1c9899ad5"
+    },
+    {
       "bytes": 26697,
       "executable": false,
       "path": "tests/storage/documents.test.ts",
@@ -2785,10 +2803,10 @@
       "sha256": "9a3c7298450a9bdc75fa8212d7c2e76a31ce034647779b92d0ec59efe83987e0"
     },
     {
-      "bytes": 5665,
+      "bytes": 6972,
       "executable": false,
       "path": "tests/submission/test_prepare.py",
-      "sha256": "d819f524a5be3646c546760a380edbd20b817ca310cb719c2badc4761f5bbc14"
+      "sha256": "5e059595f14b386931b9a96e4e3fe3c1196f9e76f3133dacca5f47826145bda9"
     },
     {
       "bytes": 3156,
@@ -2885,6 +2903,8 @@
     "tests/deploy/test_modal_deploy.py",
     "tests/fixtures/code-repair.ts",
     "tests/fixtures/guide.ts",
+    "tests/fixtures/read-lock-holder.mjs",
+    "tests/fixtures/read-lock.ts",
     "tests/paper/code-repair.test.ts",
     "tests/paper/figure-crop.test.ts",
     "tests/paper/furniture.test.ts",
@@ -2895,6 +2915,7 @@
     "tests/processing/meta-document.test.ts",
     "tests/server/shared-examples.test.ts",
     "tests/storage/code-repair.test.ts",
+    "tests/storage/database.test.ts",
     "tests/submission/test_prepare.py"
   ]
 }

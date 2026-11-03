@@ -33,6 +33,13 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `docs/step-rules/run-recovery.md`
 - `docs/step-rules/spark-extraction.md`
 - `docs/step-rules/visual-verification.md`
+- `prototype/README.md`
+- `prototype/assets/brand/amuseme-logo-reversed.svg`
+- `prototype/assets/brand/amuseme-logo.svg`
+- `prototype/assets/brand/apple-touch-icon.png`
+- `prototype/assets/brand/favicon.ico`
+- `prototype/assets/brand/favicon.svg`
+- `prototype/index.html`
 - `python/README.md`
 - `src/app/App.tsx`
 - `src/app/DocumentWorkspace.tsx`
@@ -47,6 +54,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/app/documents.ts`
 - `src/app/navigation.ts`
 - `src/app/reader/Panels.tsx`
+- `src/app/reader/ReaderBlock.tsx`
 - `src/app/reader/ReaderWorkspace.tsx`
 - `src/app/reader/RetryDocument.tsx`
 - `src/app/reader/math.ts`
@@ -92,6 +100,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `src/server/http.ts`
 - `src/server/lifecycle.ts`
 - `src/server/outputs.ts`
+- `src/storage/database.ts`
 - `src/storage/documents.ts`
 - `src/storage/files.ts`
 - `src/storage/outputs.ts`
@@ -100,6 +109,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/app/documents.test.ts`
 - `tests/app/navigation.test.ts`
 - `tests/app/reader.test.ts`
+- `tests/auth/auth.test.ts`
 - `tests/foundation/app-shell.test.ts`
 - `tests/manual/visual-server.test.ts`
 - `tests/manual/visual-server.ts`
@@ -197,6 +207,8 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/deploy/test_modal_deploy.py`
 - `tests/fixtures/code-repair.ts`
 - `tests/fixtures/guide.ts`
+- `tests/fixtures/read-lock-holder.mjs`
+- `tests/fixtures/read-lock.ts`
 - `tests/paper/code-repair.test.ts`
 - `tests/paper/figure-crop.test.ts`
 - `tests/paper/furniture.test.ts`
@@ -207,6 +219,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/processing/meta-document.test.ts`
 - `tests/server/shared-examples.test.ts`
 - `tests/storage/code-repair.test.ts`
+- `tests/storage/database.test.ts`
 - `tests/submission/test_prepare.py`
 
-Read `changes.json` for the added text and copy/skip operations. Deleted foundation lines and unchanged context are not included.
+Read `changes.json` for the added text and copy/skip operations, and for changed binary files carried whole as base64. Deleted foundation lines and unchanged context are not included.

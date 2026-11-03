@@ -12,4 +12,10 @@ describe("interface text helpers", () => {
     expect(headingText("## Results ")).toBe("Results")
     expect(headingText("#hashtag")).toBe("#hashtag")
   })
+
+  it("removes bold markers from heading labels", () => {
+    expect(headingText("# **Software**")).toBe("Software")
+    expect(headingText("**MFGLib**: A Library for Mean-Field Games")).toBe("MFGLib: A Library for Mean-Field Games")
+    expect(headingText("## solve(**kwargs)")).toBe("solve(**kwargs)")
+  })
 })

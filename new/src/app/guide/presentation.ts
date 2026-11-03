@@ -1,5 +1,5 @@
 import type { CanonicalDocument, ReadingGuide, SourceBlock, SourceQuote } from "../../domain/index.ts"
-import { headingText } from "../text.ts"
+import { headingText, withoutBold } from "../text.ts"
 import type { GuideRoute } from "./navigation.ts"
 
 export const paperHeading = (canonical: CanonicalDocument): string | undefined => {
@@ -47,11 +47,20 @@ export const quotedParts = (content: string, quote: string): QuotedParts | null 
   return { before: content.slice(0, start), quote, after: content.slice(start + quote.length) }
 }
 const entities: Readonly<Record<string, string>> = { amp: "&", lt: "<", gt: ">", quot: "\"", "#39": "'", nbsp: " " }
-const tableText = (quote: string): string => /<\/?t[rdh](?:\s[^>]*)?>/iu.test(quote)
+const tableText = (quote: string): string => /<\/?t[rdh](?:\s[^>]*)?>|<br\s*\/?>/iu.test(quote)
   ? quote.replace(/<\/t[dh]>\s*(?=<t[dh][\s>])/giu, " · ").replace(/<\/tr>\s*/giu, " / ").replace(/<[^>]*>/gu, " ")
     .replace(/&(amp|lt|gt|quot|#39|nbsp);/gu, (_, name: string) => entities[name] ?? "").replace(/\s+/gu, " ").replace(/(?:\s*[/·]\s*)+$/u, "").trim()
   : quote
+export const readableSource = (text: string): string => withoutBold(tableText(text))
 export const displayQuote = (quote: string): string => {
-  const stripped = tableText(quote).replace(/^\s*(?:[-*•]|\d{1,3}[.)])\s+/u, "")
+  const stripped = readableSource(quote).replace(/^\s*(?:[-*•]|\d{1,3}[.)])\s+/u, "")
   return stripped.length === 0 ? quote : stripped
+}
+export const highlightedSource = (content: string, quote: string): QuotedParts | null => {
+  if (/[\uE000\uE001]/u.test(content) || quotedParts(content, quote) === null) return null
+  const fenced = readableSource(content.replace(quote, () => `\uE000${quote}\uE001`))
+    .replace(/(\s*)\uE000([\s/·]*)/u, (_, space: string, separator: string) => `${space === "" ? separator : space + separator.trimStart()}\uE000`)
+    .replace(/([\s/·]*)\uE001(\s*)/u, (_, separator: string, space: string) => `\uE001${space === "" ? separator : separator.trimEnd() + space}`)
+  const match = /^([\s\S]*)\uE000([\s\S]*)\uE001([\s\S]*)$/u.exec(fenced)
+  return match === null || match[2] === "" ? null : { before: match[1] ?? "", quote: match[2] ?? "", after: match[3] ?? "" }
 }
