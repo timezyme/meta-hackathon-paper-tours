@@ -8,7 +8,7 @@ The same run produces a portable document: text, equations, tables, figure crops
 
 ## How Meta Muse Spark is used
 
-Meta Muse Spark 1.3 performs every model step, each through its own Mastra agent inside one durable Mastra workflow. The host renders pages, validates each structured response, and saves it so recovery never repeats a completed call.
+Meta Muse Spark 1.3 (`muse-spark-1.3`, called through the Meta Model API at api.meta.ai) performs every model step, each through its own Mastra agent inside one durable Mastra workflow. The app calls no other model. The host renders pages, validates each structured response, and saves it so recovery never repeats a completed call.
 
 | Stage | What Muse Spark does |
 |---|---|
@@ -35,7 +35,7 @@ cd ../amuseme-app
 git init
 ```
 
-Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Use Node 24 and exactly Python 3.14.5 (`uv venv --python 3.14.5`); PDF rendering checks the exact Python and PyMuPDF versions. Processing new uploads requires a Meta API key and a configured spending allowance. Each call is priced at its worst case before it is sent and refused if that would exceed its stage's reservation; under the default $30 cap, a document of about 40 pages with five figures fits. Saved documents stay readable and downloadable without them.
+Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Use Node 24 and exactly Python 3.14.5 (`uv venv --python 3.14.5`); PDF rendering checks the exact Python and PyMuPDF versions. It was developed and tested on macOS (Apple silicon); the judge copy runs on Linux in a Modal container (`deploy/modal/`). Windows is untested. Processing new uploads requires a Meta API key and a configured spending allowance. Each call is priced at its worst case before it is sent and refused if that would exceed its stage's reservation; under the default $30 cap, a document of about 40 pages with five figures fits. Saved documents stay readable and downloadable without them.
 
 ## Try it as a judge
 
