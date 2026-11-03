@@ -8,6 +8,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `.gitignore`
 - `README.md`
 - `cli/spark-extraction/README.md`
+- `docs/demo/presentation.md`
 - `docs/runbooks/application-operations.md`
 - `docs/runbooks/development-harness.md`
 - `docs/runbooks/mastra-upgrade.md`

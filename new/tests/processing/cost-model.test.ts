@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { GuardPolicy } from "../../src/processing/contracts.ts"
-import { metaWorstCaseMicrousd, stageReservation } from "../../src/processing/policy.ts"
+import { metaMeteredMicrousd, metaWorstCaseMicrousd, stageReservation } from "../../src/processing/policy.ts"
 
 const rates = { inputMicrousdPerMillionTokens: 1_250_000, outputMicrousdPerMillionTokens: 4_250_000 }
 const policy = (crop?: number): GuardPolicy => ({
@@ -14,6 +14,11 @@ describe("provider cost model", () => {
     expect(metaWorstCaseMicrousd(rates, 0, 16384)).toBe(69_632)
     expect(metaWorstCaseMicrousd(rates, 1_000_000, 0)).toBe(1_250_000)
     expect(metaWorstCaseMicrousd(rates, 1, 0)).toBe(2)
+  })
+  it("meters reported input and output tokens at the same rates and leaves incomplete usage unpriced", () => {
+    expect(metaMeteredMicrousd(rates, { _tag: "reported", inputTokens: 2000, outputTokens: 100, costUsd: null })).toBe(2_925)
+    expect(metaMeteredMicrousd(rates, { _tag: "reported", inputTokens: 2000, outputTokens: null, costUsd: null })).toBeNull()
+    expect(metaMeteredMicrousd(rates, { _tag: "unavailable", reason: "Meta did not report usable token counts" })).toBeNull()
   })
   it("admits the largest observed calls with their framing reserve under the new reservations", () => {
     const framing = 65536

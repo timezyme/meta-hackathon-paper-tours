@@ -86,59 +86,7 @@
       ],
       [
         "add",
-        "AmuseMe turns a PDF (a research paper, a medical letter, a court opinion, a class handout or a business brief) into a reading guide where every explanation cites an exact quote. Choose a guided walkthrough, its main claims and limits, or a document map, then open any quote highlighted in the clean text or beside the original page. Read the complete document and download its text, images and processing report.\n"
-      ],
-      [
-        "copy",
-        5
-      ],
-      [
-        "skip",
-        3
-      ],
-      [
-        "add",
-        "1. **Upload a PDF.** Choose how you want to read while AmuseMe processes the document. Live progress says in plain words what Muse is doing (\"Muse is checking page 2 of 4\"), lists every stage and shows the time elapsed. A short document takes about five minutes; a document too long for one run gets a clear message instead of a technical error.\n2. **Choose a way in.** Read a short overview, follow a walkthrough, or examine the main claims, their support and their limits. Each AI-written explanation links to quotations in the uploaded paper. A document map shows which passages each step and claim cites. Older saved documents without a guide remain available in the normal reader.\n3. **Check the document.** Open the quoted passage highlighted in its page text, or switch to the original page. Browse the full text, equations, tables and figures. The processing report says what Muse double-checked: problems a second review fixed, and places where Muse kept the original text. AI explanations and figure descriptions remain separate from the source.\n4. **Take it with you.** Copy the complete normalized text or download a ZIP. The structured document includes its saved guide; the processing report records changes and unresolved issues.\n"
-      ],
-      [
-        "copy",
-        5
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "**Meta Muse Spark 1.3 performs every runtime model stage, including initial extraction.** Local PyMuPDF renders source pages and crops proposed figure regions. Crops carry their source-page provenance; they are not labeled native embedded images.\n"
-      ],
-      [
-        "copy",
-        3
-      ],
-      [
-        "add",
-        "| Page extraction | Transcribe each physical page into ordered text, tables, equations and figure regions | High |\n"
-      ],
-      [
-        "copy",
-        3
-      ],
-      [
-        "add",
-        "| Reading guide | Explain the document and its main claims with exact quotations from its source blocks | High |\n"
-      ],
-      [
-        "copy",
-        3
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "## Historical demo result\n"
+        "AmuseMe turns a PDF into a reading guide you can check. What it does, how it uses Meta Muse Spark, setup, the judges' copy and its limits are all in the [AmuseMe README](https://github.com/timezyme/meta-hackathon-paper-tours#readme).\n"
       ],
       [
         "copy",
@@ -146,119 +94,11 @@
       ],
       [
         "skip",
-        1
+        98
       ],
       [
         "add",
-        "The earlier MinerU-plus-Meta workflow processed all six pages of Guo et al.'s *MFGLib: A Library for Mean-Field Games* (JOSS, 2026; CC BY 4.0). Page 3 was rasterized to exercise extraction from a scanned equation and code page.\n"
-      ],
-      [
-        "copy",
-        3
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "That historical run does not verify the new Meta-only extraction path. The benefit demonstrated on this paper was that useful figure context reaches a reader that only receives text. It is one example, not a general accuracy benchmark. The output still contained imperfect code formatting and bibliography punctuation.\n"
-      ],
-      [
-        "copy",
-        6
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "| `document.json` | Structured document with source locations and the saved reading guide, when generated |\n"
-      ],
-      [
-        "copy",
-        8
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "Use **Node 24.19.0**, **pnpm 10.33.0**, and **uv** on macOS or Linux. PDF handling requires exactly Python 3.14.5 and PyMuPDF 1.28.2; see the [PDF runtime prerequisites](python/README.md).\n"
-      ],
-      [
-        "copy",
-        3
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "uv venv --python 3.14.5 data/python/.venv\n"
-      ],
-      [
-        "copy",
-        14
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "New processing is disabled by default. To enable it, configure `META_API_KEY`, an authorized processing budget, and a stable budget ID in `.env.local`, then set `AMUSEME_PROCESSING_ENABLED=true`. Processing sends document evidence to Meta and can incur charges. Keep the same budget ID and data directory across restarts so spending records remain intact. Historical MinerU outputs and notices remain preserved.\n"
-      ],
-      [
-        "copy",
-        8
-      ],
-      [
-        "add",
-        "\n## Deploy for judges\n\n`deploy/modal/app.py` deploys one always-on copy to Modal with email-only sign-in, shared read-only examples, 3 uploads per judge and its own $100 budget. Follow [Modal judge deployment](docs/runbooks/modal-deploy.md). These settings are off by default for local runs:\n\n| Setting | Effect |\n|---|---|\n| `AMUSEME_JUDGE_SIGN_IN=true` | Sign in by typing an email; the account is created on first use with role `user`. |\n| `AMUSEME_JUDGE_ACCESS_CODE` | Optional code that email sign-in also requires. |\n| `AMUSEME_EXAMPLES_OWNER_ID` | This user's documents are readable, not changeable, by every signed-in user. |\n| `AMUSEME_UPLOADS_PER_USER` | Lifetime uploads per non-admin user; deleting does not free a slot. |\n| `AMUSEME_HOST` | `127.0.0.1` (default) or `0.0.0.0` inside a container. |\n"
-      ],
-      [
-        "copy",
-        13
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "The [experimental Spark extraction command](cli/spark-extraction/README.md) runs a bounded, single-page trial through the existing normalization and export workflow. Its guide covers prerequisites, local inspection and explicitly authorized execution; normal uploads use the multipage version-2 Meta extraction path.\n"
-      ],
-      [
-        "copy",
-        3
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "Upload admission allows English-language PDFs up to **50 MiB and 50 pages**, with additional document complexity, model context and spending limits. Mandatory stage reservations are checked against the document cap before any model call. With the current $30 per-document cap and stage reservations, seven or more pages exceed that allowance even before figure descriptions. The application runs locally on a single host and retains documents for seven days.\n"
-      ],
-      [
-        "copy",
-        5
-      ],
-      [
-        "skip",
-        1
-      ],
-      [
-        "add",
-        "Historical extraction experiments used MinerU; their [MinerU and service dependency notices](modal/amuseme_mineru/NOTICE.md) remain included. PDF validation and page rendering use PyMuPDF; its [license notices](python/README.md#provenance-and-licenses) are included.\n"
-      ],
-      [
-        "copy",
-        2
+        "Third-party notices: [PyMuPDF](python/README.md#provenance-and-licenses), and [MinerU and its service dependencies](modal/amuseme_mineru/NOTICE.md) from earlier extraction experiments.\n"
       ]
     ]
   },
@@ -283,6 +123,27 @@
       ]
     ]
   },
+  "docs/demo/presentation.md": {
+    "executable": false,
+    "operations": [
+      [
+        "copy",
+        44
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "1. Use the current verified production build and invited account. Confirm the serving checkout and URL with the manager. Follow [local setup](https://github.com/timezyme/meta-hackathon-paper-tours#run-it); do not start the unguarded Mastra CLI listener. Finish active processing before rehearsal. Do not submit another PDF, retry a run, or clear a receipt to make the demonstration look fresh.\n"
+      ],
+      [
+        "copy",
+        23
+      ]
+    ]
+  },
   "docs/runbooks/application-operations.md": {
     "executable": false,
     "operations": [
@@ -300,7 +161,19 @@
       ],
       [
         "copy",
-        12
+        3
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "Use the pinned Node 24.19.0, pnpm 10.33.0 and isolated Python/PyMuPDF environment from [local setup](https://github.com/timezyme/meta-hackathon-paper-tours#run-it) and [Python setup](../../python/README.md). Run from the intended checkout. Before changing the serving build, record its revision or file hashes, launch command, origin, absolute data/Python paths and non-secret configuration. Keep credential values private.\n"
+      ],
+      [
+        "copy",
+        8
       ],
       [
         "skip",
@@ -389,7 +262,19 @@
     "operations": [
       [
         "copy",
-        20
+        8
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "Use Node 24.19.0, pnpm 10.33.0, Python 3.14, and PyMuPDF 1.28.2. Python 3.14.5 is the verified interpreter. Follow [local setup](https://github.com/timezyme/meta-hackathon-paper-tours#run-it) and [Python prerequisites](../../python/README.md).\n"
+      ],
+      [
+        "copy",
+        11
       ],
       [
         "skip",
@@ -6167,7 +6052,7 @@
       ],
       [
         "add",
-        "import { metaRuntimeConfiguration, metaWorstCaseMicrousd, processingAvailability, runGuardPolicy, stageReservation } from \"./policy.ts\"\nimport { bindDocumentPolicy, providerJson as json, providerUnitKey, retrievableMineru } from \"./recovery.ts\"\n"
+        "import { metaMeteredMicrousd, metaRuntimeConfiguration, metaWorstCaseMicrousd, processingAvailability, runGuardPolicy, stageReservation } from \"./policy.ts\"\nimport { bindDocumentPolicy, providerJson as json, providerUnitKey, retrievableMineru } from \"./recovery.ts\"\n"
       ],
       [
         "copy",
@@ -6311,7 +6196,19 @@
       ],
       [
         "copy",
-        72
+        64
+      ],
+      [
+        "skip",
+        1
+      ],
+      [
+        "add",
+        "      const metered = policy.metaRates !== undefined && receipt.configuration.provider === \"meta\" ? metaMeteredMicrousd(policy.metaRates, response.usage) : null\n      return Effect.succeed({ status: \"completed\", validation_state: \"pending\", response_json: responseJson, actual_microusd: response.actualCostMicrousd ?? metered, receipt_json: JSON.stringify({ ...receipt, state: { _tag: \"completed\", finishedAt: timestamp(now), providerRequestId: row.remote_id, responseHash, durationMilliseconds: now - (row.dispatch_started_at ?? now), usage: response.usage, validation: rejected(\"The saved response has not passed stage validation\") } }) })\n"
+      ],
+      [
+        "copy",
+        7
       ],
       [
         "skip",
@@ -6665,7 +6562,7 @@
       ],
       [
         "add",
-        "import type { ProviderStage, ProviderTask, RunConfiguration } from \"../domain/index.ts\"\n"
+        "import type { ProviderStage, ProviderTask, RunConfiguration, Usage } from \"../domain/index.ts\"\n"
       ],
       [
         "copy",
@@ -6693,7 +6590,7 @@
       ],
       [
         "add",
-        "\nexport const metaRuntimeConfiguration = (configuration: typeof RunConfiguration.Type): boolean => configuration.extractionProvider === \"meta\" && configuration.extractionVersion === \"muse-spark-1.3\" && configuration.extractionModel?.provider === \"meta\" && configuration.extractionModel.model === \"muse-spark-1.3\" && [configuration.pageCheck, configuration.headings, configuration.figures, ...(configuration.guide === undefined ? [] : [configuration.guide])].every((model) => model.provider === \"meta\" && model.model === \"muse-spark-1.3\")\n\nexport const stageReservation = (policy: GuardPolicy, stage: typeof ProviderStage.Type, task?: typeof ProviderTask.Type): number | undefined =>\n  task === \"figure-crop\" ? policy.maximumCostMicrousd[\"figure-crop\"] ?? policy.maximumCostMicrousd.figures : policy.maximumCostMicrousd[stage]\n\nexport const metaWorstCaseMicrousd = (rates: NonNullable<GuardPolicy[\"metaRates\"]>, inputTokens: number, maxOutputTokens: number): number =>\n  Math.ceil((inputTokens * rates.inputMicrousdPerMillionTokens + maxOutputTokens * rates.outputMicrousdPerMillionTokens) / 1_000_000)\n"
+        "\nexport const metaRuntimeConfiguration = (configuration: typeof RunConfiguration.Type): boolean => configuration.extractionProvider === \"meta\" && configuration.extractionVersion === \"muse-spark-1.3\" && configuration.extractionModel?.provider === \"meta\" && configuration.extractionModel.model === \"muse-spark-1.3\" && [configuration.pageCheck, configuration.headings, configuration.figures, ...(configuration.guide === undefined ? [] : [configuration.guide])].every((model) => model.provider === \"meta\" && model.model === \"muse-spark-1.3\")\n\nexport const stageReservation = (policy: GuardPolicy, stage: typeof ProviderStage.Type, task?: typeof ProviderTask.Type): number | undefined =>\n  task === \"figure-crop\" ? policy.maximumCostMicrousd[\"figure-crop\"] ?? policy.maximumCostMicrousd.figures : policy.maximumCostMicrousd[stage]\n\nconst metaTokenMicrousd = (rates: NonNullable<GuardPolicy[\"metaRates\"]>, inputTokens: number, outputTokens: number): number =>\n  Math.ceil((inputTokens * rates.inputMicrousdPerMillionTokens + outputTokens * rates.outputMicrousdPerMillionTokens) / 1_000_000)\n\nexport const metaWorstCaseMicrousd = (rates: NonNullable<GuardPolicy[\"metaRates\"]>, inputTokens: number, maxOutputTokens: number): number =>\n  metaTokenMicrousd(rates, inputTokens, maxOutputTokens)\n\nexport const metaMeteredMicrousd = (rates: NonNullable<GuardPolicy[\"metaRates\"]>, usage: typeof Usage.Type): number | null =>\n  usage._tag === \"reported\" && usage.inputTokens !== null && usage.outputTokens !== null ? metaTokenMicrousd(rates, usage.inputTokens, usage.outputTokens) : null\n"
       ]
     ]
   },
@@ -8475,7 +8372,7 @@
       ],
       [
         "add",
-        "import { AttemptInput, ProviderAdapter, ProviderFailure, ProviderGuard, RunDispatcher, RunStarter, executionFailure, makeProviderGuard, makeProviderGuardLayer, makeRunRecovery, makeRunDispatcherLayer, processingAvailability, type GuardPolicy } from \"../../src/processing/index.ts\"\nimport { IdempotencyKey, StageReceipt, type RunState } from \"../../src/domain/index.ts\"\n"
+        "import { AttemptInput, ProviderAdapter, ProviderFailure, ProviderGuard, RunDispatcher, RunStarter, executionFailure, makeProviderGuard, makeProviderGuardLayer, makeRunRecovery, makeRunDispatcherLayer, processingAvailability, type GuardPolicy } from \"../../src/processing/index.ts\"\nimport { IdempotencyKey, RunConfiguration, StageReceipt, type RunState } from \"../../src/domain/index.ts\"\n"
       ],
       [
         "copy",
@@ -8515,7 +8412,15 @@
       ],
       [
         "copy",
-        189
+        75
+      ],
+      [
+        "add",
+        "  }).pipe(Effect.provide(NodeServices.layer)))\n\n  it.effect(\"charges a completed Meta call its reported tokens at the configured rates and keeps the reservation without both counts\", () => Effect.gen(function* () {\n    const settings = yield* options\n    const limits: GuardPolicy = { ...policy, metaRates: { inputMicrousdPerMillionTokens: 1_250_000, outputMicrousdPerMillionTokens: 4_250_000 } }\n    const meta = { ...model, provider: \"meta\", model: \"muse-spark-1.3\" }\n    const usages = [{ _tag: \"reported\", inputTokens: 2000, outputTokens: 100, costUsd: null }, { _tag: \"reported\", inputTokens: 2000, outputTokens: null, costUsd: null }] as const\n    let calls = 0\n    yield* Effect.gen(function* () {\n      const store = yield* DocumentStore\n      const original = yield* admission()\n      yield* store.admit({ ...original, configuration: yield* Schema.decodeUnknownEffect(RunConfiguration)({ ...original.configuration, pageCheck: meta, headings: meta }) })\n      const owned = yield* store.claimNext({ workerId: \"metered\", leaseMilliseconds: 100_000 })\n      if (owned === null) return yield* Effect.die(\"Expected metered claim\")\n      const guard = yield* ProviderGuard\n      yield* guard.execute(owned, yield* input(\"page-check\"))\n      yield* guard.execute(owned, yield* input(\"headings\"))\n      const database = yield* StorageDatabase\n      const charges = yield* database.query(\"metered-charges\", () => database.db.selectFrom(\"provider_charges\").select([\"reserved_microusd\", \"actual_microusd\"]).execute())\n      expect(charges).toEqual([{ reserved_microusd: 200_000, actual_microusd: 2_925 }, { reserved_microusd: 200_000, actual_microusd: null }])\n    }).pipe(Effect.provide(Layer.merge(fixtureLayer(settings, limits), adapter((call) => success(call).pipe(Effect.map((result) => ({ ...result, usage: usages[calls++]! })))))))\n"
+      ],
+      [
+        "copy",
+        114
       ],
       [
         "add",

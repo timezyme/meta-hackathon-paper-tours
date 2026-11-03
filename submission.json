@@ -37,10 +37,10 @@
       "sha256": "9b98a68cc03c40fe6a76f684e30783d0f0563a8ed092fe179cd9eb730f4f454f"
     },
     {
-      "bytes": 9501,
+      "bytes": 431,
       "executable": false,
       "path": "README.md",
-      "sha256": "3cd35d2d85de1c329bb09cde4f65e01dc8cdf7b8f55aa741d7e1c4f11f44a285"
+      "sha256": "5f465c15fcd95705fd6c53a08ebea7e9b48db4e668270a36c40619615bc353a6"
     },
     {
       "bytes": 3037,
@@ -163,10 +163,10 @@
       "sha256": "85a938d4a3689ea2408018a35ffa1015760b4b3aecac9dd50f5c959637db0846"
     },
     {
-      "bytes": 9127,
+      "bytes": 9161,
       "executable": false,
       "path": "docs/demo/presentation.md",
-      "sha256": "c52c6d41b952d2baa8c49bb7c0d60a7bce3bbedb3e4b01bb91261c4e77700e8a"
+      "sha256": "bb2e711e9c7bc44354c529da3d148517a2a698a443391235fea8949c0a038f8c"
     },
     {
       "bytes": 3382,
@@ -181,16 +181,16 @@
       "sha256": "29fb316c163db5f63d140004c931d93e4b96693e3ab2fd9e1bbd692e6a3eaeda"
     },
     {
-      "bytes": 22079,
+      "bytes": 22113,
       "executable": false,
       "path": "docs/runbooks/application-operations.md",
-      "sha256": "5f4507e14b70af505283349eac2ade48d3b8481bdda16f821f00855bdf7eaa45"
+      "sha256": "a9d419c792ba66357a0ab8aeed96da97d0b8f50ccc0db36fc8434d6ea2090502"
     },
     {
-      "bytes": 8224,
+      "bytes": 8258,
       "executable": false,
       "path": "docs/runbooks/development-harness.md",
-      "sha256": "8d147c524d5fd4dd690e57dbf519d64d96751f7da8fe0ba3167ddb2036edf19b"
+      "sha256": "5a056d12e9842fbfaf855860c8f002f0d4a15db08a06500ea557c8b292491266"
     },
     {
       "bytes": 6354,
@@ -1891,10 +1891,10 @@
       "sha256": "5009ad2583088a713e5f0a6e0f46b4b96760d68e06631deae8d6b4c91c4a2791"
     },
     {
-      "bytes": 39241,
+      "bytes": 39434,
       "executable": false,
       "path": "src/processing/guard.ts",
-      "sha256": "fdb598f6b8930b7c8e559bd1ce9db30e71574012358c647f59e3098a4f0ce756"
+      "sha256": "c9baeb5f04712cc0375f8a0096f55771a43c513a9ab70524cc528825ecc28dcb"
     },
     {
       "bytes": 613,
@@ -1909,10 +1909,10 @@
       "sha256": "7d184feb420fc6124624b654d62f2fbdc0ecd3a9ae029581b91c5febd1df5504"
     },
     {
-      "bytes": 2444,
+      "bytes": 2922,
       "executable": false,
       "path": "src/processing/policy.ts",
-      "sha256": "1d90ae25c0e4601ad57150b414bf344450afbcd94eec1c281b8251badc8d2d57"
+      "sha256": "c9493d5f0f0ec68cf57dc06c0e40f9c366c3a361568901ca7d7cfc1762603bca"
     },
     {
       "bytes": 17189,
@@ -2611,10 +2611,10 @@
       "sha256": "345b988680a9550865afefa38d90405dcbf42af7cc7f20fa817c4d7ec6ce499b"
     },
     {
-      "bytes": 2341,
+      "bytes": 2856,
       "executable": false,
       "path": "tests/processing/cost-model.test.ts",
-      "sha256": "2c6bc309642fe4d443f08902b6401f7987f24e036cb213ad762446e2db42a910"
+      "sha256": "4a292eeca02674ba5e5ff53285c96fc54971351df2ac33fcc08b8e6bd00d5fc7"
     },
     {
       "bytes": 17595,
@@ -2623,10 +2623,10 @@
       "sha256": "499d5fcdddd4e5dd7ff338e47fc7c376b07f6fcacf1703da8e496c31c8ad51d5"
     },
     {
-      "bytes": 44873,
+      "bytes": 46728,
       "executable": false,
       "path": "tests/processing/guards.test.ts",
-      "sha256": "858cb188d2d73021f65bd43f3b477194281605b6ba7ded180f60ee19e593558e"
+      "sha256": "3ca4d655c5ccd08b544cf73ba68160d857ef0f3805645e97b2b1e0be47d1a9f6"
     },
     {
       "bytes": 25388,

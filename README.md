@@ -25,7 +25,7 @@ Before a guide is published, every quotation must match exactly one location in 
 
 ## Run it
 
-This repository contains the event work. The frozen [foundation](https://github.com/timezyme/amuseme-foundation) it builds on is supplied separately and excluded from the new-work claim. Reconstruct the application with Python 3:
+This repository contains the event work. The frozen [foundation](https://github.com/timezyme/amuseme-foundation) it builds on is supplied separately and excluded from the new-work claim. You need Python 3, Node 24.19.0, pnpm 10.33.0 and uv. Rebuild the application, then install it:
 
 ```sh
 curl -fL https://github.com/timezyme/amuseme-foundation/releases/download/foundation-2026-10-28/foundation.zip -o ../foundation.zip
@@ -33,9 +33,25 @@ python3 reconstruct.py reconstruct --candidate . --archive ../foundation.zip --o
 cp LICENSE LICENSING.md ../amuseme-app/
 cd ../amuseme-app
 git init
+pnpm install --frozen-lockfile --strict-peer-dependencies
+uv venv --python 3.14.5 data/python/.venv
+uv pip install --python data/python/.venv/bin/python -r python/requirements.txt
+cp .env.example .env.local
 ```
 
-Use the release archive above: its manifest pins the exact frozen files. Then follow the reconstructed README for pinned dependencies, build and account setup. Use Node 24 and exactly Python 3.14.5 (`uv venv --python 3.14.5`); PDF rendering checks the exact Python and PyMuPDF versions. It was developed and tested on macOS (Apple silicon); the judge copy runs on Linux in a Modal container (`deploy/modal/`). Windows is untested. Processing new uploads requires a Meta API key and a configured spending allowance. Each call is priced at its worst case before it is sent and refused if that would exceed its stage's reservation; under the default $30 cap, a document of about 40 pages with five figures fits. Saved documents stay readable and downloadable without them.
+In `.env.local`, set `BETTER_AUTH_SECRET` to a random value of at least 32 characters and fill in the `AMUSEME_INVITE_*` fields for your account; the password must be 12–128 characters. Then build, create the account and start the app:
+
+```sh
+pnpm build
+pnpm provision:user
+pnpm start
+```
+
+Open [127.0.0.1:4180](http://127.0.0.1:4180/) and sign in with that account. `pnpm check` and `pnpm test` need no credentials.
+
+Use the release archive above: its manifest pins the exact frozen files. PDF rendering requires exactly Python 3.14.5 and PyMuPDF 1.28.2. It was developed and tested on macOS (Apple silicon); the judge copy runs on Linux in a Modal container (`deploy/modal/`). Windows is untested.
+
+Processing new uploads is off until you set `META_API_KEY`, `AMUSEME_PROCESSING_BUDGET_USD`, a stable `AMUSEME_BUDGET_ID` and `AMUSEME_PROCESSING_ENABLED=true` in `.env.local`. It sends the document to Meta and is billed to your key. Before each call, the app reserves its worst-case price and refuses the call if that would exceed the document's $30 cap or the budget. When Meta answers, the reservation is replaced by the price of the tokens Meta reports. Uploads are limited to English PDFs of up to 50 MiB and 50 pages; under the $30 cap, a document of about 40 pages with five figures fits. Saved documents stay readable and downloadable without a key.
 
 ## Try it as a judge
 
@@ -55,6 +71,18 @@ Ten documents of seven types went from upload through guide to download:
 Independent reviews checked every guide quote, table and figure description against the source pages. Every quote matched its cited source exactly. The faults they found, such as an overstated claim and a misread axis range, are listed, along with one document (a safety sheet with misplaced figure crops) that was left out. The application passes type, lint and architecture checks, its full test suite and a production build.
 
 Ten documents are not an accuracy benchmark. [VERIFICATION.md](VERIFICATION.md) records each check, its scope and its limits.
+
+## Example documents
+
+The ten shared examples are openly licensed or public domain:
+- Longman et al., "Flooding, displacement, peritraumatic experience and disaster-related PTSD in northern New South Wales", *Aust N Z J Psychiatry* (2023), [doi:10.1177/00048674231203901](https://doi.org/10.1177/00048674231203901), CC BY 4.0
+- Hartzer and Saripalli, "EKF_CAL: Extended Kalman Filter-based Calibration and Localization", *JOSS* (2025), [doi:10.21105/joss.07793](https://doi.org/10.21105/joss.07793), CC BY 4.0
+- Kamath et al., "SOLWEIG-GPU: GPU-Accelerated Thermal Comfort Modeling Framework for Urban Digital Twins", *JOSS* (2026), [doi:10.21105/joss.09535](https://doi.org/10.21105/joss.09535), CC BY 4.0
+- Guo et al., "MFGLib: A Library for Mean-Field Games", *JOSS* (2026), [doi:10.21105/joss.10137](https://doi.org/10.21105/joss.10137), CC BY 4.0
+- Elsner, "Taming the Panda with Python", [arXiv:2307.07633](https://arxiv.org/abs/2307.07633), CC BY 4.0
+- *Doe v. Dynamic Physical Therapy, LLC*, 607 U.S. 11 (2025); US EPA, *Half-Life: Teacher Answer Key* (EPA 402-B-19-055); SBA Office of Advocacy, *Critical Condition: The Poor Prognosis for Private Practices* (2026): US government works
+- NASA Marshall, "3-2-1 Pop!", *Adventures in Rocket Science* (EG-2007-12-179-MSFC): NASA work, public domain
+- US Patent 3,005,282, "Toy building brick" (1961): patent text and drawings, generally not subject to copyright
 
 ## What is new
 
