@@ -6,6 +6,7 @@ import { DateTime, Effect, Exit, FileSystem, Layer, Path, Redacted, Schema, Stre
 import { ChildProcess, ChildProcessSpawner } from "effect/process"
 import { HttpClient, HttpClientResponse } from "effect/http"
 import { CanonicalDocument, PageId, IdempotencyKey, ProcessingReport, RunConfiguration, UserId } from "../../src/domain/index.ts"
+import { FIGURE_CROP_REVIEW_PROMPT, FIGURE_CROP_REVIEW_PROMPT_V2 } from "../../src/domain/prompt-templates.ts"
 import { makeAmuseMe } from "../../src/mastra/amuseme.ts"
 import { makeNormalizationBoundary } from "../../src/mastra/normalize-workflow.ts"
 import { stageSpecs } from "../../src/paper/correction/index.ts"
@@ -37,16 +38,19 @@ const model = (stage: keyof typeof stageSpecs) => ({ provider: "meta", model: "m
 const policy: GuardPolicy = { mode: "live", enabled: true, metaCredentialConfigured: true, mineruCredentialConfigured: false, mineruEndpoint: null, budgetId: "offline-meta-fixture", authorizedBudgetMicrousd: 100, maximumCostMicrousd: { extraction: 1, "page-check": 1, headings: 1, figures: 1 }, maxConcurrentCalls: 1, maxOutputTokens: 16384, maxRequestBytes: 48 * 1024 * 1024, maxResponseBytes: 2 * 1024 * 1024, callDeadlineMilliseconds: 100000 }
 const firstText = Schema.Struct({ pageNumber: Schema.Int })
 const headingInput = Schema.Struct({ candidates: Schema.Array(Schema.Struct({ blockId: Schema.String, blockType: Schema.String })) })
-const cropInput = Schema.Struct({ figureCropReview: Schema.Struct({ round: Schema.Int, box: Schema.Struct({ x: Schema.Number, y: Schema.Number, width: Schema.Number, height: Schema.Number }) }) })
+const cropInput = Schema.Struct({ figureCropReview: Schema.Struct({ round: Schema.Int, box: Schema.Struct({ x: Schema.Number, y: Schema.Number, width: Schema.Number, height: Schema.Number }), otherFigures: Schema.optionalKey(Schema.Array(Schema.Unknown)) }) })
 const redSquare = { x: 420, y: 420, width: 160, height: 160 }
 const misplacedBox = { x: 420, y: 360, width: 160, height: 150 }
+// An unconfirmed correction is widened to hold the proposal too.
+const widenedBox = { x: 420, y: 360, width: 160, height: 220 }
 const cropAnswer = (scenario: string, round: number): Schema.Json => {
   if (scenario === "crop-corrected") return round === 1 ? { verdict: "corrected", box: redSquare } : { verdict: "confirmed", box: null }
+  if (scenario === "crop-inflated") return { verdict: "corrected", box: { x: 0, y: 0, width: 1000, height: 1000 } }
   if (scenario === "crop-exhausted" || scenario === "crop-retry") return round === 1 ? { verdict: "corrected", box: { x: 900, y: 900, width: 400, height: 400 } } : { verdict: "corrected", box: redSquare }
   return { verdict: "confirmed", box: null }
 }
 
-for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "budget-refused", "crop-corrected", "crop-exhausted", "crop-budget", "crop-retry", "crop-count-invalid", "rates-replay"] as const) describe(`Meta document workflow ${scenario}`, () => {
+for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "budget-refused", "crop-corrected", "crop-exhausted", "crop-inflated", "crop-budget", "crop-retry", "crop-count-invalid", "rates-replay"] as const) describe(`Meta document workflow ${scenario}`, () => {
   it.live("publishes all physical pages, literal tables, truthful figure assets and guarded receipts", () => Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     const path = yield* Path.Path
@@ -62,7 +66,7 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
     yield* Effect.gen(function* () {
       const store = yield* DocumentStore
       const owner = UserId.make("meta-document-owner")
-      const configuration = yield* Schema.decodeUnknownEffect(RunConfiguration)({ extractionProvider: "meta", extractionVersion: "muse-spark-1.3", extractionModel: model("extraction"), pageCheck: model("page-check"), headings: model("headings"), figures: model("figures"), maxProviderAttempts: scenario.startsWith("crop-") ? 3 : 1, deadlineMilliseconds: 120000, spendingCapUsd: scenario === "budget-refused" ? 15 : scenario === "complete" || scenario === "rates-replay" ? 16.5 : scenario === "crop-budget" ? 13.5 : 1 })
+      const configuration = yield* Schema.decodeUnknownEffect(RunConfiguration)({ extractionProvider: "meta", extractionVersion: "muse-spark-1.3", extractionModel: model("extraction"), pageCheck: model("page-check"), headings: model("headings"), figures: model("figures"), ...(scenario === "crop-inflated" ? { figureCropPromptVersion: "amuseme-2" } : {}), maxProviderAttempts: scenario.startsWith("crop-") ? 3 : 1, deadlineMilliseconds: 120000, spendingCapUsd: scenario === "budget-refused" ? 15 : scenario === "complete" || scenario === "rates-replay" ? 16.5 : scenario === "crop-budget" ? 13.5 : 1 })
       yield* store.admit({ ownerId: owner, idempotencyKey: IdempotencyKey.make("three-page"), bytes: pdf, originalFilename: "three-page.pdf", pageCount: scenario === "budget-refused" ? 4 : 3, pipelineVersion: "amuseme-meta-2", configuration })
       const claim = yield* store.claimNext({ workerId: "meta-document", leaseMilliseconds: 120000 })
       if (claim === null) return yield* Effect.die("Expected claim")
@@ -86,6 +90,8 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
         if (stage === "figures-crop-review") {
           const crop = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(cropInput))(text.text)
           expect(body.messages[1].content.filter((part) => part.type === "image_url")).toHaveLength(2)
+          expect(body.messages[0].content).toBe(scenario === "crop-inflated" ? FIGURE_CROP_REVIEW_PROMPT_V2 : FIGURE_CROP_REVIEW_PROMPT)
+          expect(crop.figureCropReview.otherFigures).toEqual(scenario === "crop-inflated" ? [] : undefined)
           generations.push(`${stage}:${crop.figureCropReview.round}`)
           result = cropAnswer(scenario, crop.figureCropReview.round)
         } else if (stage === "page-extraction") {
@@ -141,7 +147,7 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
         expect(retried.run.id).not.toBe(claim.run.id)
         active = retried
       }
-      if (scenario === "crop-corrected" || scenario === "crop-exhausted") {
+      if (scenario === "crop-corrected" || scenario === "crop-exhausted" || scenario === "crop-inflated") {
         yield* stages.execute(claim, "extraction", input)
         expect(generations.filter((entry) => entry.startsWith("figures-crop-review"))).toEqual(["figures-crop-review:1", "figures-crop-review:2"])
       }
@@ -182,14 +188,14 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
         expect(firstFigure.asset._tag).toBe("unavailable")
         expect(generations).not.toContain("figures")
       } else {
-        expect(firstFigure.asset).toMatchObject({ _tag: "available", provenance: { _tag: "rendered-page-region", sourceHash: claim.document.sourceHash, pageId: "page-1", pageNumber: 1, pageImageHash: canonical.pages[0]?.image.hash, width: 160, height: 160 } })
+        expect(firstFigure.asset).toMatchObject({ _tag: "available", provenance: { _tag: "rendered-page-region", sourceHash: claim.document.sourceHash, pageId: "page-1", pageNumber: 1, pageImageHash: canonical.pages[0]?.image.hash, width: 160, height: scenario === "crop-exhausted" || scenario === "crop-retry" ? 220 : 160 } })
         if (firstFigure.asset._tag !== "available") return yield* Effect.die("Expected crop")
         const image = yield* outputs.read(owner, claim.document.id, state.revisionId, firstFigure.asset.artifact.path)
         const imagePath = path.join(root, "published.png")
         yield* fs.writeFile(imagePath, image.bytes, { mode: 0o600 })
         yield* Effect.scoped(Effect.gen(function* () {
           const process = yield* spawner.spawn(ChildProcess.make(pythonBin, ["-I", "-c", "import pymupdf,sys,json; p=pymupdf.Pixmap(sys.argv[1]); print(json.dumps([p.width,p.height,list(p.pixel(80,80))]))", imagePath]))
-          expect(yield* process.stdout.pipe(Stream.decodeText(), Stream.mkString)).toBe("[160, 160, [255, 0, 0]]\n")
+          expect(yield* process.stdout.pipe(Stream.decodeText(), Stream.mkString)).toBe(`[160, ${scenario === "crop-exhausted" || scenario === "crop-retry" ? 220 : 160}, [255, 0, 0]]\n`)
           expect(yield* process.exitCode).toBe(0)
         }))
         expect(normalized).toContain("Image origin: rendered source-page region")
@@ -201,10 +207,11 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
       const database = yield* StorageDatabase
       const attempts = yield* database.query("meta-document-attempts", () => database.db.selectFrom("provider_attempts").selectAll().execute())
       expect(attempts).toHaveLength(scenario === "crop-unavailable" || scenario === "crop-budget" ? 7 : scenario === "crop-count-invalid" ? 8 : scenario.startsWith("crop-") ? 10 : 9)
-      expect(attempts.filter((row) => row.validation_state !== "accepted")).toHaveLength(scenario === "crop-exhausted" || scenario === "crop-retry" ? 1 : 0)
+      expect(attempts.filter((row) => row.validation_state !== "accepted")).toHaveLength(scenario === "crop-inflated" ? 2 : scenario === "crop-exhausted" || scenario === "crop-retry" ? 1 : 0)
       const cropReviews = generations.filter((entry) => entry.startsWith("figures-crop-review"))
       const crops = report.figureCrops ?? []
       const cropIssues = report.issues.filter((issue) => issue.code === "figure-crop-unconfirmed")
+      expect(cropIssues.map((issue) => issue.figureId)).toEqual(crops.filter((crop) => crop.warning !== null).map((crop) => crop.figureId))
       if (scenario === "crop-unavailable") {
         expect(cropReviews).toEqual([])
         expect(crops).toEqual([])
@@ -217,16 +224,25 @@ for (const scenario of ["complete", "page-two-preflight", "crop-unavailable", "b
         expect(generations).not.toContain("figures")
         expect(crops).toEqual([expect.objectContaining({ figureId: firstFigure.id, outcome: "not-reviewed", rounds: 0, attemptIds: [], warning: expect.stringContaining("could not check this figure's crop") })])
         expect(cropIssues).toEqual([expect.objectContaining({ figureId: firstFigure.id })])
+      } else if (scenario === "crop-inflated") {
+        expect(cropReviews).toEqual(["figures-crop-review:1", "figures-crop-review:2"])
+        expect(crops).toEqual([expect.objectContaining({
+          figureId: firstFigure.id, outcome: "unconfirmed", rounds: 2, attemptIds: [expect.any(String), expect.any(String)],
+          proposedBox: { coordinateSystem: "rendered-page-top-left-pixels", ...redSquare }, finalBox: { coordinateSystem: "rendered-page-top-left-pixels", ...redSquare },
+          problems: [expect.stringContaining("covers 100% of the page"), expect.stringContaining("covers 100% of the page")], warning: expect.stringContaining("did not confirm"),
+        })])
+        expect(cropIssues).toEqual([expect.objectContaining({ figureId: firstFigure.id, stage: "extraction" })])
       } else if (scenario === "crop-corrected" || scenario === "crop-exhausted" || scenario === "crop-retry") {
+        const published = scenario === "crop-corrected" ? redSquare : widenedBox
         expect(cropReviews).toEqual(["figures-crop-review:1", "figures-crop-review:2"])
         expect(crops).toEqual([expect.objectContaining({
           figureId: firstFigure.id, agent: "figures-crop-review", rounds: 2, attemptIds: [expect.any(String), expect.any(String)],
           outcome: scenario === "crop-corrected" ? "corrected" : "unconfirmed",
-          proposedBox: { coordinateSystem: "rendered-page-top-left-pixels", ...misplacedBox }, finalBox: { coordinateSystem: "rendered-page-top-left-pixels", ...redSquare },
+          proposedBox: { coordinateSystem: "rendered-page-top-left-pixels", ...misplacedBox }, finalBox: { coordinateSystem: "rendered-page-top-left-pixels", ...published },
         })])
-        expect(firstFigure.asset).toMatchObject({ provenance: { box: { coordinateSystem: "rendered-page-top-left-pixels", ...redSquare } } })
+        expect(firstFigure.asset).toMatchObject({ provenance: { box: { coordinateSystem: "rendered-page-top-left-pixels", ...published } } })
         if (scenario === "crop-exhausted" || scenario === "crop-retry") {
-          expect(crops[0]?.problems).toEqual([expect.stringContaining("inside the 1000x1000 rendered page"), expect.stringContaining("overlap the proposed figure region")])
+          expect(crops[0]?.problems).toEqual([expect.stringContaining("inside the 1000x1000 rendered page"), expect.stringContaining("overlap the given box (420, 360, 160x150)")])
           expect(cropIssues).toEqual([expect.objectContaining({ figureId: firstFigure.id, stage: "extraction", message: expect.stringContaining("did not confirm") })])
         } else expect(cropIssues).toEqual([])
         const cropReceipts = report.receipts.filter(({ receipt }) => receipt.task === "figure-crop")

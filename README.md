@@ -8,12 +8,12 @@ The same run produces a portable document: text, equations, tables, figure crops
 
 ## How Meta Muse Spark is used
 
-Meta Muse Spark 1.3 (`muse-spark-1.3`, called through the Meta Model API at api.meta.ai) performs every model step, each through its own Mastra agent inside one durable Mastra workflow. The app calls no other model. The host renders pages, validates each structured response, and saves it so recovery never repeats a completed call.
+Meta Muse Spark 1.3 (`muse-spark-1.3`, called through the Meta Model API at api.meta.ai) performs every model step, each through its own Mastra agent inside one durable Mastra workflow. The app calls no other model. Outside the app, the repository's Muse command-line tool ([new/cli/muse/](new/cli/muse/README.md)) calls Muse Spark 1.3 and Muse Wonder 1.0 (`muse-wonder-1.0`, same API). We used it to check narration audio and review the demo video. The host renders pages, validates each structured response, and saves it so recovery never repeats a completed call.
 
 | Stage | What Muse Spark does |
 |---|---|
 | Page extraction | Transcribes each rendered page into ordered text, equations, tables, code and figure regions |
-| Figure crop review | Checks each figure crop against the page image and corrects it if needed. A crop it can't confirm is kept with a visible warning |
+| Figure crop review | Checks each figure crop against the page image and corrects it if needed. When it can't confirm its correction, the published crop covers both the first box and the correction, and carries a visible warning |
 | Page checking | Compares the extraction with the page image, repairs transcription errors, marks running headers and footers, and joins paragraphs split across pages, even across a running header |
 | Document structure | Restores the heading hierarchy |
 | Figure descriptions | Describes each cropped figure using its image and the surrounding text |
@@ -39,13 +39,22 @@ Use the release archive above: its manifest pins the exact frozen files. Then fo
 
 ## Try it as a judge
 
-Watch the [demo video](https://github.com/timezyme/meta-hackathon-paper-tours/releases/download/demo-2026-11-02/amuseme-demo.mp4) (1:51, captioned stills of the real app), then open **https://guided-tours--amuseme-judges.us-east.modal.run** and sign in with your email. There is no password. The seven example documents are shared and read-only. Each judge can also upload 3 PDFs of their own, which are processed live by Muse Spark. This copy runs on Modal with its own $100 processing budget. Its deploy steps are in [docs/runbooks/modal-deploy.md](new/docs/runbooks/modal-deploy.md); these settings are off for local runs.
+Watch the [demo video](https://github.com/timezyme/meta-hackathon-paper-tours/releases/download/demo-2026-11-02/amuseme-demo.mp4) (1:51, captioned stills of the real app), then open **https://guided-tours--amuseme-judges.us-east.modal.run** and sign in with your email. There is no password. The ten example documents are shared and read-only. Each judge can also upload 3 PDFs of their own, which are processed live by Muse Spark. This copy runs on Modal with its own $100 processing budget. Its deploy steps are in [docs/runbooks/modal-deploy.md](new/docs/runbooks/modal-deploy.md); these settings are off for local runs.
 
 ## What has been verified
 
-Seven documents of five types went from upload through guide to download: three research papers (one with a scanned page, one table-heavy, one figure-heavy), a psychiatry research letter, a US Supreme Court opinion, an EPA class handout and an SBA economics brief. Independent reviews checked every guide quote, table and figure description against the source pages and found no invented facts or wrong numbers; the faults they did find are listed. The application passes type, lint and architecture checks, its full test suite and a production build.
+Ten documents of seven types went from upload through guide to download:
+- four research papers: one with a scanned page, one table-heavy, one figure-heavy and one code-heavy;
+- a psychiatry research letter;
+- a US Supreme Court opinion;
+- an EPA class handout;
+- an SBA economics brief;
+- a NASA classroom activity;
+- a scanned 1961 patent.
 
-Seven documents are not an accuracy benchmark. [VERIFICATION.md](VERIFICATION.md) records each check, its scope and its limits.
+Independent reviews checked every guide quote, table and figure description against the source pages. Every quote matched its cited source exactly. The faults they found, such as an overstated claim and a misread axis range, are listed, along with one document (a safety sheet with misplaced figure crops) that was left out. The application passes type, lint and architecture checks, its full test suite and a production build.
+
+Ten documents are not an accuracy benchmark. [VERIFICATION.md](VERIFICATION.md) records each check, its scope and its limits.
 
 ## What is new
 

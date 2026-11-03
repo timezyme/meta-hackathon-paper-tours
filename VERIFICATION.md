@@ -1,5 +1,70 @@
 # Verification and limits
 
+## Submission sync to application commit `11ebdd1` — November 3, 2026
+
+The submission was regenerated from application commit `11ebdd1`, thirteen commits after `15a0856`.
+- **The first eight** (synced earlier to `906302d`) add the Muse CLI (`cli/muse/`), raise the processing ceiling to $480.564373, reject figure-crop corrections that grow into the page or a neighbouring figure, and run up to three figure calls at a time.
+- **The last five** pin Python 3.14.5 in the setup steps and estimate one to two minutes per figure. They also let each crop-review round measure overlap from the box it was shown, and publish an unconfirmed crop widened to hold both the extractor's proposal and the last valid correction. The last commit records the approved $35 NASA and OSHA crop re-run in the operations runbook.
+
+Preparation used the commit's tracked files (`git archive 11ebdd1`) with the foundation's own `prototype/` files, as before. The untracked `cli/modal/` and the application's later `prototype/concepts/` files were not included. The last five commits add or delete no files, so the 79 new files are unchanged. They include the six selected at the `906302d` sync: `cli/muse/README.md`, `cli/muse/muse`, `cli/muse/muse.py`, `cli/muse/test_muse.py`, `tests/paper/figure-crop.test.ts` and `tests/processing/figure-concurrency.test.ts`. `python/README.md` now differs from the foundation, so it moves from preserved to changed.
+
+Every line added in the last five commits was read for credentials, private documents, runtime data, generated memory and non-event work, and none were found. All five commits are dated November 2, 2026. The four Muse CLI files were read again: the key comes only from `META_API_KEY` or `--env-file`, is redacted from error text and is never written to the ledger. A pattern scan of all added text and new files found only `example.test` placeholder addresses, a Modal secret name and lists that exclude private paths.
+
+Preparation, reconstruction and the Python unit tests ran with the system Python 3.14.7. Reconstruction from this repository reproduced all 469 selected files: 122 changed, 79 new and 268 preserved. All 383 files outside `prototype/` match the commit by bytes and executable mode, checked against both the application checkout and a `git archive` of the commit. The 86 inherited prototype files keep their exact foundation bytes and modes.
+
+The reconstructed tree was set up with:
+- `git init`;
+- a clean `pnpm install --frozen-lockfile --strict-peer-dependencies` into a new `node_modules`, filled from the machine's pnpm package store rather than linked to an existing installation (pnpm 10.33.0 under Node 24.19.0, through `volta run --node 24.19.0`);
+- a fresh `uv venv --python 3.14.5` environment from `python/requirements.txt` (Python 3.14.5, PyMuPDF 1.28.2).
+
+These passed:
+- the 8 submission unit tests (`python3 -m unittest discover -s tests/submission -v`);
+- the 10 offline Muse CLI tests (`python3 -m unittest discover -s cli/muse -p 'test_*.py' -v`);
+- the 5 offline deployment tests (`python3 -I -m unittest discover -s tests/deploy`);
+- `pnpm check`, `pnpm test` (76 files, 782 tests) and `pnpm build`.
+
+The application's setup now pins `--python 3.14.5`. At the `906302d` sync, an environment created with `--python 3.14` resolved to Python 3.14.7, and 32 PDF tests in 5 files failed until it was recreated with 3.14.5. No live processing, Chrome check or hosted-copy check was run for this sync. The NASA and OSHA re-runs in the application's runbook, including the approved $35 crop re-run, were not run or verified here.
+
+## Three more example documents — November 2–3, 2026
+
+The user authorized processing four more openly licensed documents of other kinds: up to $120 for six runs, then up to $35 for two crop re-runs. Three became shared examples; the safety sheet did not.
+
+| Type | Document | Rights | Pages | Example run |
+|---|---|---|---|---|
+| Classroom instructions | NASA Marshall, "3-2-1 Pop!", *Adventures in Rocket Science* (EG-2007-12-179-MSFC) | NASA work, public domain | 4 | `dfc4a546` (third run) |
+| Patent, scanned | US 3,005,282, "Toy building brick" (1961) | Patent text and drawings, generally not subject to copyright | 5 | `82703425` |
+| Code-heavy paper | Elsner, "Taming the Panda with Python", arXiv:2307.07633 | CC BY 4.0 | 5 | `15ce6a85` |
+| Safety sheet (not used) | OSHA 3491, Hazard Communication Standard pictogram QuickCard | US government work | 2 | none |
+
+Uploaded PDF SHA-256: NASA `28490ea659d062c1dd908bd9d8f7751d858456881a5da882b514c999f118c5d6`; patent `879bc9f70d072affae63c481d122d29f3a285f5c3b2ed5245ad805c6d86c2045`; Panda `b8f6dc919aba43bd62003bb269b5bbe2c0e4451c73a91d326de60b3d9686bff6`; OSHA `9841b6a851befb60fd7bf3532813afc521fafaf9b0b5cc37c7dabe7b7cf55a83`.
+
+### Figure crops took three rounds
+
+1. **First runs.** Crop review grew NASA step drawings (1–6% of the page) and OSHA pictograms (0.8% each) into boxes of 49–60% of the page that held the other figures. Corrections that cover half the page, or half of another figure's region, are now rejected unless the proposal already did.
+2. **Second runs.** No crop was inflated, but two other faults showed.
+   - Corrections Muse never confirmed were published. They cut off three NASA step drawings and the top of the patent's FIG. 6, all of which the proposals had held whole.
+   - OSHA proposals sat up to 290 px above their pictograms. Each correction had to overlap the first proposal, so it could move only about 110 px in total.
+
+   Each review round now measures overlap from the box it was shown. A crop that ends unconfirmed is published as the smallest box holding both the proposal and the last correction, unless that takes in another figure.
+3. **Third runs (NASA and OSHA only).**
+   - **NASA:** every crop holds its drawing. The worst clip is about 27 px of one fin tip, from a correction Muse confirmed.
+   - **OSHA page 1:** fixed; all nine crops hold at least 94% of their pictogram.
+   - **OSHA page 2:** the six lower crops still hold no pictogram, because those proposals were 250–290 px off. Three of their descriptions describe pictograms that are not in the image, so OSHA is not an example.
+
+The patent example ran before the third fix. Its FIG. 6 is missing the top of the drawing, and FIGS. 9–11 lose a few labels.
+
+### Independent accuracy reviews
+
+Each guide was reviewed by a different agent, using the application's guide-accuracy-review skill, against rendered pages.
+
+| Document | Quotes verbatim in the cited block | Findings |
+|---|---|---|
+| NASA | 35 of 35 | Five low-severity faults. A step-3 description says three fins; the drawing shows four. One claim says "upward rocket motion" is equal and opposite where the source says "a force". |
+| Patent | 30 of 30 | Three low-severity faults. A limit about the disclaimer of claims 1–3 can be read the wrong way. FIG. 4's description counts three tubes where two are visible. FIG. 10's description puts the slits at the contact points. All reference numerals match the drawings. |
+| Panda | 34 of 34 | One medium-severity fault: claim 2 says the Python bindings "perform nearly like native C++", but the paper's Table I shows inverse kinematics about 3× slower. One low-severity fault: a figure description gives the horizontal axis as ±0.25 where it runs to ±0.3. Table I matches exactly, and the one figure crop is tight. |
+
+Reserved spend: the six runs reserved $78.70, and the two crop re-runs reserved $29.60. These are worst-case reservations; the application does not record measured billing (`actual_microusd` is null). Processing took 13–29 minutes per document, about a minute per page plus one to two minutes per figure.
+
 ## Judge access and Modal deployment — November 2, 2026
 
 The application gained email-only judge sign-in, shared read-only examples, a per-user upload cap, HTTPS-origin support behind a proxy, and a Modal deployment (`deploy/modal/`). The judge copy is deployed at https://guided-tours--amuseme-judges.us-east.modal.run.
@@ -11,6 +76,7 @@ The application gained email-only judge sign-in, shared read-only examples, a pe
   - The documents API refuses requests without a session (401).
   - A cross-origin sign-in request is refused (403).
 - **Not yet tested on the hosted copy:** a judge signing in, opening an example and processing an upload.
+- **Re-seeded and redeployed on November 3.** Before the change, the volume still had no accounts, provider attempts or charges, and only the examples owner's 7 documents. The app was stopped, and the volume was given the ten reviewed examples: the seven above plus NASA `dfc4a546`, the patent `82703425` and Panda `15ce6a85`. That is 10 documents, 11 runs and 11 outputs, with no charges. The superseded NASA and OSHA runs were left out. The app was then redeployed from application commit `11ebdd1`. `/health/ready` returned `ready`, sign-in options reported email only, the page loaded, the documents API returned 401 without a session, a cross-origin sign-in returned 403, and the logs showed no errors.
 
 The submission was regenerated from application commit `15a0856` with Python 3.14.5 and Node 24.19.0. Reconstruction from this repository reproduced all 463 selected files: 121 changed, 73 new and 269 preserved. All 377 files outside `prototype/` match the commit by bytes and executable mode; the 86 inherited prototype files keep their exact foundation bytes and modes. In the reconstructed tree, after `git init`, a clean `pnpm install --frozen-lockfile --strict-peer-dependencies` and a fresh `uv` environment from `python/requirements.txt` (PyMuPDF 1.28.2), these passed: the 8 submission unit tests, the 5 offline deployment tests (`python3 -I -m unittest discover -s tests/deploy`), `pnpm check`, `pnpm test` (74 files, 751 tests) and `pnpm build`.
 

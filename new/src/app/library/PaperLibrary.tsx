@@ -44,7 +44,7 @@ function PaperDetails({ record, controls }: Props) {
 }
 
 function RunNotice({ record, controls }: Props) {
-  const summary = runSummary(record.latestRun)
+  const summary = runSummary(record.latestRun, record.document.pageCount)
   if (summary.failed) return <div className="library-run-notice failed">
     <p><strong>{summary.title}.</strong> {summary.description}{record.currentRevisionId !== null && " Your saved copy is still available."}</p>
     {controls.retryEnabled && controls.readOnly !== true && <RetryDocumentControl record={record} onRefresh={controls.onRefresh} onUnauthenticated={controls.onUnauthenticated} />}

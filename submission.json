@@ -37,10 +37,34 @@
       "sha256": "9b98a68cc03c40fe6a76f684e30783d0f0563a8ed092fe179cd9eb730f4f454f"
     },
     {
-      "bytes": 9489,
+      "bytes": 9501,
       "executable": false,
       "path": "README.md",
-      "sha256": "1cb575dd6674c9dbe01e0855c73ab5eedf6b59ef858745b67e5e807acf2080d5"
+      "sha256": "3cd35d2d85de1c329bb09cde4f65e01dc8cdf7b8f55aa741d7e1c4f11f44a285"
+    },
+    {
+      "bytes": 3037,
+      "executable": false,
+      "path": "cli/muse/README.md",
+      "sha256": "57f38284096022516622e717928aca2760dfcd0b464f22d2d656783bb2dffa5a"
+    },
+    {
+      "bytes": 253,
+      "executable": true,
+      "path": "cli/muse/muse",
+      "sha256": "1b7c9c70c48ab53d17681c1960046b162abc2b5d27010375c30107eabb2a1b07"
+    },
+    {
+      "bytes": 14820,
+      "executable": false,
+      "path": "cli/muse/muse.py",
+      "sha256": "723df4f6e17eb0ba4c4e786aff2bcee30e4b939380f9cb0751218b15a32ab106"
+    },
+    {
+      "bytes": 9674,
+      "executable": false,
+      "path": "cli/muse/test_muse.py",
+      "sha256": "a3d02b8518a36f82043bd71b5a6d67241ef6d6d8eb3794bad17649029c343985"
     },
     {
       "bytes": 1500,
@@ -157,10 +181,10 @@
       "sha256": "29fb316c163db5f63d140004c931d93e4b96693e3ab2fd9e1bbd692e6a3eaeda"
     },
     {
-      "bytes": 20733,
+      "bytes": 22079,
       "executable": false,
       "path": "docs/runbooks/application-operations.md",
-      "sha256": "a78166ac57192f115619fb8c5f57f1fde49afc9bc06ccfbfe7256283ec9e898e"
+      "sha256": "5f4507e14b70af505283349eac2ade48d3b8481bdda16f821f00855bdf7eaa45"
     },
     {
       "bytes": 8224,
@@ -193,10 +217,10 @@
       "sha256": "717e749521251595154b72f99c1d8873f33082f8a39d46857676403801ca3f74"
     },
     {
-      "bytes": 6495,
+      "bytes": 7004,
       "executable": false,
       "path": "docs/step-rules/application-ui.md",
-      "sha256": "fc0f9d0b2ee0e94d9962c5eb8254ea8eefa8396424d6c8439f9aaa218de9e0f4"
+      "sha256": "fd62b5bc944de173507188b5d8981766670b031375d260c01a514dd1e63a2de9"
     },
     {
       "bytes": 5557,
@@ -271,16 +295,16 @@
       "sha256": "1f8b417e7d5660c4fcbaa7ff6251599dc9ea15337658a1077beec92541e17ea9"
     },
     {
-      "bytes": 8499,
+      "bytes": 8866,
       "executable": false,
       "path": "docs/step-rules/execution-guards.md",
-      "sha256": "1b8cc75c25ce38f267deab2f317249e52375e61f6b297e00948e2367859c91be"
+      "sha256": "11a4bbfb162709744a1715214b9c60aacd5ba90f9b5dff294f87f001fabd8cab"
     },
     {
-      "bytes": 3245,
+      "bytes": 5200,
       "executable": false,
       "path": "docs/step-rules/figures.md",
-      "sha256": "5b3aaf2f45d2953a492e642fbaab51708696d0441087f0f4a79845e2f94828af"
+      "sha256": "fbe42c6421fcd0ac0050669a965d9415620938a86f729467f43195d66148160f"
     },
     {
       "bytes": 2572,
@@ -295,10 +319,10 @@
       "sha256": "c332a1d52a4755a209bc69df28093809e92de6cd3638670d1bb695ce3b32d228"
     },
     {
-      "bytes": 5072,
+      "bytes": 5129,
       "executable": false,
       "path": "docs/step-rules/meta-provider.md",
-      "sha256": "b15ba14256094fe84c399e221e40daf099dd2aeb6d7fe6472173d2a89b31ada8"
+      "sha256": "6f9376ef41bce1891363987a336d23e5487fd4cd594d0e92635498ac6e01b7bc"
     },
     {
       "bytes": 5163,
@@ -319,10 +343,10 @@
       "sha256": "e9e49708c60c6c2cc726527c5e3e3a9edcb3b23d9f89e290c5df50b6b25bb63a"
     },
     {
-      "bytes": 6630,
+      "bytes": 8789,
       "executable": false,
       "path": "docs/step-rules/muse-review.md",
-      "sha256": "f03721957b4c3b202e2b4fb861433a67d61b2745422bae4a9f78384b7305d8ac"
+      "sha256": "b996210fafe967f3da86b710e97953a22c8739e1b26117df0a455d1fe0886727"
     },
     {
       "bytes": 3143,
@@ -1075,10 +1099,10 @@
       "sha256": "40e60697600535eabfb5ae05f72829d88cfe8d02dd4792f5a754f6f51dabe55b"
     },
     {
-      "bytes": 2955,
+      "bytes": 2962,
       "executable": false,
       "path": "python/README.md",
-      "sha256": "742ee91a0a1b8681c473a8156392cf27a6552d1789008eed9dc9f52cb2adad86"
+      "sha256": "ff9dd34aabb27ccc8db56545799344e6684209ff16410849158b53065351cc1c"
     },
     {
       "bytes": 16,
@@ -1147,10 +1171,10 @@
       "sha256": "2b3be7c8a3b52fc11118d6b84b9cfbff60a4a3f594684a1bc9901753fe10e792"
     },
     {
-      "bytes": 19077,
+      "bytes": 19147,
       "executable": false,
       "path": "src/app/DocumentWorkspace.tsx",
-      "sha256": "4ccee35cf95d604b4939280b56712a9c21990fadd391574689df6e785e4289ef"
+      "sha256": "5b770bfc70af576c73f36146311b05d58b2e0495c16554fdb4cc48df97283a19"
     },
     {
       "bytes": 4486,
@@ -1225,10 +1249,10 @@
       "sha256": "f3d406e7bef5610d6ba63775dc3da429240237a7b4f258d4e8595be801609789"
     },
     {
-      "bytes": 6666,
+      "bytes": 6898,
       "executable": false,
       "path": "src/app/documents.ts",
-      "sha256": "bb76b6e7426dc6e09e8a8cc21912cdf06cb5efc8753f05d28f735c0b0722c232"
+      "sha256": "0426aa46bafaf0bec3d696e7ea9ae809a65cdec20c516c59e2c7d4b6c2caaa2a"
     },
     {
       "bytes": 4089,
@@ -1255,16 +1279,16 @@
       "sha256": "fc5db84ba5197787241e0c1b0c05b6b740003226b4f60807cbb383e970e59aca"
     },
     {
-      "bytes": 1680,
+      "bytes": 1707,
       "executable": false,
       "path": "src/app/guide/PaperStatus.tsx",
-      "sha256": "65d18b21f11d203dd758e30dbc7556d9b6b904118c987786b082ad65b60257cd"
+      "sha256": "133cd0be0bc770060fd3f5c5797feb9c455e534d5317837edce1170772fb0006"
     },
     {
-      "bytes": 2163,
+      "bytes": 2190,
       "executable": false,
       "path": "src/app/guide/ProcessingProgress.tsx",
-      "sha256": "d8a7c269044f431b709a1089e7f8069b212d5818ed76e77195ece2333f420976"
+      "sha256": "f264d4aefb701e66b39ce0c9cc27bba7706e4e7549339f4b2b5644ee203aa5ae"
     },
     {
       "bytes": 722,
@@ -1297,10 +1321,10 @@
       "sha256": "8730fef5d16f243f22562cbb95b3d8180961c6fc5bf75aacbd85559e479dc84c"
     },
     {
-      "bytes": 9988,
+      "bytes": 10015,
       "executable": false,
       "path": "src/app/library/PaperLibrary.tsx",
-      "sha256": "0371d7b539ea63759f47472f18e2927e3298454070599b07d27366f68fe6990d"
+      "sha256": "a5fd854254fac85f9642231bde2790a8bdecd6053eb59f8d2233061f31fb2ebc"
     },
     {
       "bytes": 9762,
@@ -1417,10 +1441,10 @@
       "sha256": "91bf8175ddf1a89f8250fa6f3841feed753b9f102cc09e2ad5426af5f8a6090b"
     },
     {
-      "bytes": 17884,
+      "bytes": 17911,
       "executable": false,
       "path": "src/app/reader/ReaderWorkspace.tsx",
-      "sha256": "07759c333a8676b283de599d35c971674ca1a5c82e83b7ddd71a23e85f1aecb2"
+      "sha256": "593189623747de9f0b500fc73aacf7b383eecf52783f2133477a5b0bf183612c"
     },
     {
       "bytes": 5928,
@@ -1555,16 +1579,16 @@
       "sha256": "7b31a23bdf92d68a6baa4c38b6587a95b4433e1adf7297267b491f440bf3b3be"
     },
     {
-      "bytes": 12100,
+      "bytes": 12497,
       "executable": false,
       "path": "src/domain/processing.ts",
-      "sha256": "560255f0ffa634464ca8b2d5c3a3c4e5224167b95e52a6f318afd5a5c82ad5a9"
+      "sha256": "aa3059a580547f379e423bc33d5b0b540742d7f9dcb8979b424e0e86cc0d6281"
     },
     {
-      "bytes": 23422,
+      "bytes": 25205,
       "executable": false,
       "path": "src/domain/prompt-templates.ts",
-      "sha256": "88f8e03e3904e50a7f5474db9bf62b703d3b7043209476e0e89db0b158fb2734"
+      "sha256": "3495ebc836669111185b4106f2a9132301378320585a47adb6727dccfc64de07"
     },
     {
       "bytes": 35273,
@@ -1663,10 +1687,10 @@
       "sha256": "3a7a7e8f70dbcec8e70611c467037dbd0770b0f465dd36ca689f78fddc1b3e84"
     },
     {
-      "bytes": 5513,
+      "bytes": 8189,
       "executable": false,
       "path": "src/paper/figures/crop.ts",
-      "sha256": "749ad7c9284a99625243301282074ed67212944cdc08011e1545be47284712e7"
+      "sha256": "96b15495d9aa5b0aa7b6c104a65ad0ef37398849594a100e150df78bfb4664a9"
     },
     {
       "bytes": 4578,
@@ -1753,10 +1777,10 @@
       "sha256": "b48359b75dcbfe9c7a06a83d784ad7b870563f8201c876a343d823ca90b6828d"
     },
     {
-      "bytes": 11569,
+      "bytes": 11740,
       "executable": false,
       "path": "src/paper/providers/meta/agents.ts",
-      "sha256": "251ee2102bc8f8adc3e710a018a17516b843acf14b9f2f68a2eca90c9a7e3cd6"
+      "sha256": "3cb2573e4d27e927bc64dd9b0bbb52b91f937bc556b09567888c32145f8b8dc1"
     },
     {
       "bytes": 9249,
@@ -1849,10 +1873,10 @@
       "sha256": "57af77bb1cba211dfbc45114a8462b2ad0ad2cc0060b8d67650e220d2a502b5f"
     },
     {
-      "bytes": 3644,
+      "bytes": 3778,
       "executable": false,
       "path": "src/processing/config.ts",
-      "sha256": "43a1cac85d025239c59b0a40270410b2663d7c2eabae115f5b3cfa9304684644"
+      "sha256": "83517ec8928317d7b7c1c07fa8e8af36fe5f2b46ec658a350b5c5b9762de57ba"
     },
     {
       "bytes": 5343,
@@ -1879,10 +1903,10 @@
       "sha256": "67e0d057a1e007e026d19ee72291d7d6d2f81f3ec9304350b611430eb1dd13f1"
     },
     {
-      "bytes": 52334,
+      "bytes": 54845,
       "executable": false,
       "path": "src/processing/pipeline.ts",
-      "sha256": "e5c47be4dd6dc40d5e45db7549e0943621ea70c0f55d06173be8a9351dd799e0"
+      "sha256": "7d184feb420fc6124624b654d62f2fbdc0ecd3a9ae029581b91c5febd1df5504"
     },
     {
       "bytes": 2444,
@@ -2047,10 +2071,10 @@
       "sha256": "5214e9a68af6d1d947307286ddf70e3cdf374dad18a75e0173793c398134a326"
     },
     {
-      "bytes": 4341,
+      "bytes": 4817,
       "executable": false,
       "path": "tests/app/documents.test.ts",
-      "sha256": "315cbf39c061b2d6200b9d02584a838ade4225ca4f47f49a2d4be82fcc9795ad"
+      "sha256": "f12401b40126c0cd8b6dc444ae795d8a6c0a13b8e4b59cadc9eeca35eb0ea9fd"
     },
     {
       "bytes": 2711,
@@ -2389,6 +2413,12 @@
       "sha256": "237544c6b253b8fe14e00e6f9017d53762b8aefdb0b6389246280082c8c95410"
     },
     {
+      "bytes": 14887,
+      "executable": false,
+      "path": "tests/paper/figure-crop.test.ts",
+      "sha256": "dba527cddab18d548299dd10fa847294bbcda684d88685d97f31edc4616a7ba1"
+    },
+    {
       "bytes": 6896,
       "executable": false,
       "path": "tests/paper/figures.test.ts",
@@ -2575,16 +2605,22 @@
       "sha256": "2c6bc309642fe4d443f08902b6401f7987f24e036cb213ad762446e2db42a910"
     },
     {
-      "bytes": 42585,
+      "bytes": 17595,
       "executable": false,
-      "path": "tests/processing/guards.test.ts",
-      "sha256": "8dd48f0229128bc5381fa2813ef063efecc0734fa8b25f2136f92915fb3c2252"
+      "path": "tests/processing/figure-concurrency.test.ts",
+      "sha256": "499d5fcdddd4e5dd7ff338e47fc7c376b07f6fcacf1703da8e496c31c8ad51d5"
     },
     {
-      "bytes": 23396,
+      "bytes": 44873,
+      "executable": false,
+      "path": "tests/processing/guards.test.ts",
+      "sha256": "858cb188d2d73021f65bd43f3b477194281605b6ba7ded180f60ee19e593558e"
+    },
+    {
+      "bytes": 25388,
       "executable": false,
       "path": "tests/processing/meta-document.test.ts",
-      "sha256": "58aa5babb92c3a4026cbc7c6db3ff94bbcee1393fcc3a04b3006c80451560380"
+      "sha256": "5f87f66e3da1c0427d19cd6e1b31e134d1edd537635d58860056ebe9f66238c3"
     },
     {
       "bytes": 27254,
@@ -2629,10 +2665,10 @@
       "sha256": "601b6db3327a9b259384cafd75b73c14bc028919bc6b84db957e48fdf109474d"
     },
     {
-      "bytes": 9946,
+      "bytes": 10368,
       "executable": false,
       "path": "tests/server/config.test.ts",
-      "sha256": "a6c486c671f3e7ecb876d62c749e11398dad0ce6d219f3e65452cc93b8003057"
+      "sha256": "617fb71f324922dcb5b12ea019536aeeb78d3553bd2bd6a7442aeaa9857ae3e5"
     },
     {
       "bytes": 6475,
@@ -2781,6 +2817,10 @@
   ],
   "foundationManifestSha256": "c1f8472f6ab529c5a274584f28ef73559f5a4df30e13a2a0c298b10d23959563",
   "newFiles": [
+    "cli/muse/README.md",
+    "cli/muse/muse",
+    "cli/muse/muse.py",
+    "cli/muse/test_muse.py",
     "deploy/modal/app.py",
     "deploy/modal/seed_examples.py",
     "docs/demo/meta-only-script.md",
@@ -2846,10 +2886,12 @@
     "tests/fixtures/code-repair.ts",
     "tests/fixtures/guide.ts",
     "tests/paper/code-repair.test.ts",
+    "tests/paper/figure-crop.test.ts",
     "tests/paper/furniture.test.ts",
     "tests/paper/guide.test.ts",
     "tests/paper/meta-document-extraction.test.ts",
     "tests/processing/cost-model.test.ts",
+    "tests/processing/figure-concurrency.test.ts",
     "tests/processing/meta-document.test.ts",
     "tests/server/shared-examples.test.ts",
     "tests/storage/code-repair.test.ts",

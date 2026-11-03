@@ -5,7 +5,7 @@ import { ProcessingProgress } from "./ProcessingProgress.tsx"
 
 export function PaperStatus({ record, onOriginal }: { readonly record: DocumentRecord; readonly onOriginal?: () => void }) {
   const unpublished = record.currentRevisionId === null
-  const summary = runSummary(record.latestRun)
+  const summary = runSummary(record.latestRun, record.document.pageCount)
   return <aside className="guide-paper-status" aria-label={unpublished ? "Your document and processing status" : "Original document preview"}>
     {unpublished && <div className="guide-file"><h2>{record.document.originalFilename}</h2>
       {activeRun(record.latestRun) ? <ProcessingProgress record={record} />

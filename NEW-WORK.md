@@ -33,6 +33,7 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `docs/step-rules/run-recovery.md`
 - `docs/step-rules/spark-extraction.md`
 - `docs/step-rules/visual-verification.md`
+- `python/README.md`
 - `src/app/App.tsx`
 - `src/app/DocumentWorkspace.tsx`
 - `src/app/assets/amuseme-logo-reversed.svg`
@@ -128,6 +129,10 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 
 ## New files
 
+- `cli/muse/README.md`
+- `cli/muse/muse`
+- `cli/muse/muse.py`
+- `cli/muse/test_muse.py`
 - `deploy/modal/app.py`
 - `deploy/modal/seed_examples.py`
 - `docs/demo/meta-only-script.md`
@@ -193,10 +198,12 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 - `tests/fixtures/code-repair.ts`
 - `tests/fixtures/guide.ts`
 - `tests/paper/code-repair.test.ts`
+- `tests/paper/figure-crop.test.ts`
 - `tests/paper/furniture.test.ts`
 - `tests/paper/guide.test.ts`
 - `tests/paper/meta-document-extraction.test.ts`
 - `tests/processing/cost-model.test.ts`
+- `tests/processing/figure-concurrency.test.ts`
 - `tests/processing/meta-document.test.ts`
 - `tests/server/shared-examples.test.ts`
 - `tests/storage/code-repair.test.ts`

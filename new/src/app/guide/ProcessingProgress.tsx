@@ -15,7 +15,7 @@ const stepState = { done: "Done", now: "In progress", next: "Up next" } as const
 
 export function ProcessingProgress({ record, compact = false }: { readonly record: DocumentRecord; readonly compact?: boolean }) {
   const run = record.latestRun
-  const summary = runSummary(run)
+  const summary = runSummary(run, record.document.pageCount)
   if (!activeRun(run)) return null
   const steps = processingSteps(run)
   const startedAt = run.state._tag === "running" ? run.state.startedAt : null
