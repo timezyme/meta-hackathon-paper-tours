@@ -1,5 +1,77 @@
 # Verification and limits
 
+## Submission syncs to application commits `38fd2f8` and `76f7d43` — November 3, 2026
+
+The submission was regenerated twice on November 3: first from application commit `38fd2f8` (pushed as `563e307`), then from `76f7d43` (pushed as `546a453`). Together they add:
+- the hosted-copy fixes and the real-cost charging described below;
+- the single README, which replaces the application's own README with a pointer to this one;
+- a base64 form in `changes.json` for changed binary foundation files. With it, the submission now records the changed `prototype/` brand icons and the 7 prototype files changed on November 1, which earlier syncs had missed.
+
+Reconstruction from `foundation-2026-10-28` reproduces all 472 selected paths: 133 changed, 82 new and 257 preserved. Every path matches application commit `76f7d43` by bytes and executable mode. The rebuilt tree was set up with `git init`, with `node_modules` and `data/python/.venv` linked from the existing application install, so this was not a clean install. These passed:
+- the submission unit tests;
+- `pnpm check`;
+- `pnpm test` (793 of 793; 791 of 791 at `38fd2f8`);
+- `pnpm build`.
+
+## Judges' copy tested as a judge, and real costs recorded — November 3, 2026
+
+### Hosted judge test
+
+A separate agent followed a written judge checklist on https://guided-tours--amuseme-judges.us-east.modal.run, signed in as two QA judges (`amuseme-qa-a-20261103@example.com` and `amuseme-qa-b-20261103@example.com`). It used Chrome at 1440 px and cmux WebKit at 1024, 390 and 320 px. Neither account uploaded anything.
+
+- **Passed:**
+  - Email sign-in, sign-out and signing in again as the same account, including with a mixed-case address and spaces. Two judges were signed in at once.
+  - A signed-out link to a document returns there after sign-in.
+  - The library shows the 10 examples and "3 uploads left of 3", and the examples are read-only.
+  - Every example opens. The walkthrough, claims, map, original-page preview, full reader, pages dialog, processing report and prompt templates all work.
+  - For all 10 examples, the ZIP, text, report, document JSON and original download (checked through fetch, not saved to disk). Copying all the text matches the text download.
+  - Keyboard focus works. The security headers are present. Requests without a session get 401, and a cross-origin sign-in gets 403.
+  - Nothing overflows sideways at 390 or 320 px.
+- **Found and fixed** in application commit `55c0203`, redeployed at 22:26Z:
+  - Citations from tables showed raw HTML in the evidence drawer, on 7 of the 10 examples.
+  - Literal `**` bold markers showed in the reader on 8 of the 10.
+  - SQLite writes on the hosted copy did not wait for locks. The volume snapshot's read lock made them fail at once with `SQLITE_BUSY` (three errors in the logs). Both databases now wait up to 5 s. New tests hold a lock from another process; they fail on the old code.
+  - The upload notice said "Local documents"; it now says "Uploaded documents".
+  - Every ZIP was named `amuseme-document.zip`; each is now `amuseme-<document ID prefix>.zip`.
+- **Rechecked after that redeploy:**
+  - All 270 walkthrough and claim citations show no table HTML and keep their highlight.
+  - All 42 reader pages show no bold markers.
+  - Downloads return 200 with the new names.
+  - The logs showed no `SQLITE_BUSY` in the 12 minutes after the deploy.
+- **Not run on the hosted copy:**
+  - Processing an upload, the checklist's one paid step.
+  - Native Chrome downloads to disk.
+  - Offline behavior, because neither browser driver can cut the network.
+  - Refusing a fourth upload. That rule is covered by `tests/server/shared-examples.test.ts`.
+- **Open:** the README's demo video link downloads a file instead of playing, because GitHub serves release files as attachments.
+
+### Completed Meta calls are charged their reported tokens
+
+Meta reports token counts but no price, so every completed call kept its worst-case reservation in the ledger. On the judges' copy, the $100 budget would have run out after about 18 short uploads. Application commit `43c67e5` prices each completed Meta call from its reported input and output tokens, at $1.25 per million input tokens and $4.25 per million output tokens. A call without both counts keeps its reservation. Every call is still checked against its worst-case price before it is sent.
+
+All 447 completed Meta calls in the local ledger reported both counts. None would have cost more than its reservation: the highest was 38% of it. Across those calls' 19 runs, including failed ones, the priced totals were $0.02 to $1.89, against $2.90 to $28.50 reserved. New tests in `tests/processing/cost-model.test.ts` and `tests/processing/guards.test.ts` cover the priced charge and the missing-count case, and the guard test fails on the previous code. `pnpm check` and all 793 tests in 77 files passed. Ledger totals in the entries below are worst-case reservations recorded before this change.
+
+The judges' copy was redeployed from application commit `76f7d43`, which includes the change, at 22:48Z, as app `ap-LPfwPcnF84Df7OnKgMzglj`. Before the deploy, `pnpm check`, all 793 tests, `pnpm build` and the submission unit tests passed in that checkout. After it:
+- health reported ready, and sign-in was email-only with no access code;
+- requests without a session got 401, and a cross-origin judge sign-in got 403;
+- the volume's documents, runs, outputs, users (2), provider attempts (0) and charges (0) were identical row for row before and after;
+- the logs for the next 10 minutes showed no `SQLITE_BUSY` and no failed snapshot.
+
+The interface sweeps were not repeated on this deploy, since the change does not touch the interface. The new pricing has not run on the hosted copy, because nothing has been processed there.
+
+### Other checks
+
+- **Rights.** The five openly licensed examples were checked at their sources: Crossref for the three JOSS papers, Europe PMC for the research letter and arXiv for the Panda paper. All five are CC BY 4.0. The README credits all ten examples.
+- **Setup from a fresh clone.** A fresh clone of this repository at `546a453` (application `76f7d43`) was set up by running the README's "Run it" commands in order:
+  - reconstruction;
+  - a clean `pnpm install` into a new `node_modules`;
+  - a fresh Python 3.14.5 environment with PyMuPDF 1.28.2;
+  - build, account creation and start;
+  - signing in at 127.0.0.1:4180 and opening the library.
+
+  `pnpm check`, all 793 tests in 77 files and the 10 submission unit tests passed. The same steps had also passed at `de6b4c3`. pnpm 10.33.0 ran through `npx`, because this machine's default pnpm runs on Node 22 and fails the engine check.
+- **MinerU app stopped.** The superseded `amuseme-staging-mineru` Modal app was stopped and its volumes kept. It served MinerU, the non-Meta model of the early extraction experiments. The judges' copy never called it.
+
 ## Submission sync to application commit `11ebdd1` — November 3, 2026
 
 The submission was regenerated from application commit `11ebdd1`, thirteen commits after `15a0856`.
@@ -75,7 +147,7 @@ The application gained email-only judge sign-in, shared read-only examples, a pe
   - The page loads.
   - The documents API refuses requests without a session (401).
   - A cross-origin sign-in request is refused (403).
-- **Not yet tested on the hosted copy:** a judge signing in, opening an example and processing an upload.
+- **Hosted judge test:** signing in and opening the examples were tested on November 3 (see above). Processing an upload there has not been tested.
 - **Re-seeded and redeployed on November 3.** Before the change, the volume still had no accounts, provider attempts or charges, and only the examples owner's 7 documents. The app was stopped, and the volume was given the ten reviewed examples: the seven above plus NASA `dfc4a546`, the patent `82703425` and Panda `15ce6a85`. That is 10 documents, 11 runs and 11 outputs, with no charges. The superseded NASA and OSHA runs were left out. The app was then redeployed from application commit `11ebdd1`. `/health/ready` returned `ready`, sign-in options reported email only, the page loaded, the documents API returned 401 without a session, a cross-origin sign-in returned 403, and the logs showed no errors.
 
 The submission was regenerated from application commit `15a0856` with Python 3.14.5 and Node 24.19.0. Reconstruction from this repository reproduced all 463 selected files: 121 changed, 73 new and 269 preserved. All 377 files outside `prototype/` match the commit by bytes and executable mode; the 86 inherited prototype files keep their exact foundation bytes and modes. In the reconstructed tree, after `git init`, a clean `pnpm install --frozen-lockfile --strict-peer-dependencies` and a fresh `uv` environment from `python/requirements.txt` (PyMuPDF 1.28.2), these passed: the 8 submission unit tests, the 5 offline deployment tests (`python3 -I -m unittest discover -s tests/deploy`), `pnpm check`, `pnpm test` (74 files, 751 tests) and `pnpm build`.
