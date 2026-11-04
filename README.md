@@ -2,7 +2,7 @@
 
 Turn a PDF into a reading guide you can check. Every explanation quotes the document, and one click shows that passage on the original page.
 
-**Try it:** https://guided-tours--amuseme-judges.us-east.modal.run. Sign in with any email. There's no password, so upload only documents you're happy to share. Ten examples are ready, and you can upload 3 PDFs of your own. [Demo video](https://github.com/timezyme/meta-hackathon-paper-tours/releases/download/demo-2026-11-02/amuseme-demo.mp4)
+**Try it:** https://guided-tours--amuseme-judges.us-east.modal.run. Sign in with any email. There's no password, so upload only documents you're happy to share. Ten examples are ready, and you can upload 3 PDFs of your own. [Demo video](https://youtu.be/OYrDeTHN2HE)
 
 ## How it works
 
