@@ -22,7 +22,7 @@ import { RetryDocumentControl } from "./RetryDocument.tsx"
 import { GuideWorkspace } from "../guide/GuideWorkspace.tsx"
 import { ProcessingProgress } from "../guide/ProcessingProgress.tsx"
 import { guideLocation, type GuideRoute } from "../guide/navigation.ts"
-import { paperHeading } from "../guide/presentation.ts"
+import { documentTitle, paperHeading } from "../guide/presentation.ts"
 import { countLabel } from "../text.ts"
 import { GlyphText } from "../GlyphText.tsx"
 import "./reader.css"
@@ -99,7 +99,7 @@ export function ReaderWorkspace({ record, revisionId, readOnly, onRefresh, onUna
   const { copyState, rating, ratingPending, message, copy, rate, setRating } = useReaderActions(identity, onUnauthenticated)
   const { data, error, loaded, retry } = useReaderOutput(identity, onUnauthenticated, setRating)
   const heading = data === null ? undefined : paperHeading(data.canonical)
-  const paperTitle = heading ?? record.document.originalFilename
+  const paperTitle = (data === null ? undefined : documentTitle(data.canonical)) ?? record.document.originalFilename
   const main = useRoutePresentation(loaded, `${guideTitle(route, data?.canonical)} · ${paperTitle} · AmuseMe`)
   const page = data === null ? 1 : boundedPage(requestedPage, data.canonical.pages)
   useFocusOnChange(route.mode, () => {

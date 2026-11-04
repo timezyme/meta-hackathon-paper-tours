@@ -1,6 +1,6 @@
 import type { CanonicalDocument, UploadPolicy, UploadUnavailable } from "../../domain/index.ts"
 import { formatBytes, type DocumentRecord } from "../documents.ts"
-import { paperHeading } from "../guide/presentation.ts"
+import { documentTitle } from "../guide/presentation.ts"
 
 export const uploadUnavailableMessage = ({ code, reason }: UploadUnavailable, hasPapers: boolean): string => {
   if (code !== "processing-not-configured") return reason
@@ -43,7 +43,7 @@ const overviewTeaser = (text: string): string => {
 export const paperPreview = (canonical: CanonicalDocument) => {
   const guide = canonical.guide
   return {
-    title: paperHeading(canonical) ?? guide?.title,
+    title: documentTitle(canonical),
     guide: guide === undefined ? null : {
       steps: guide.steps.length,
       claims: guide.claims.length,

@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { chooseGoal, GoalChoices } from "../../src/app/guide/GoalChoices.tsx"
 import { GuideComplete, GuidePath } from "../../src/app/guide/GuidePath.tsx"
 import { GuideEvidence, QuotedSourceText, SourceLinks } from "../../src/app/guide/GuideSources.tsx"
-import { boundedGuideStep, displayQuote, turnRoute, evidencePage, paperHeading, quotedParts, visibleGuideSources } from "../../src/app/guide/presentation.ts"
+import { boundedGuideStep, displayQuote, documentTitle, turnRoute, evidencePage, paperHeading, quotedParts, visibleGuideSources } from "../../src/app/guide/presentation.ts"
 import { guideRouteFromLocation, selectedGoal } from "../../src/app/guide/navigation.ts"
 import { QuoteText } from "../../src/app/guide/QuoteText.tsx"
 import { guidedCanonical, appGuide } from "./guide-fixture.ts"
@@ -23,6 +23,8 @@ describe("goal selection and saved-guide reading", () => {
     expect(heading).toBe(title)
     expect(paperHeading({ ...guidedCanonical, blocks: [{ ...block, kind: "heading", headingLevel: 1, content: `# **${title}**` }] })).toBe(title)
     expect(paperHeading(guidedCanonical)).toBeUndefined()
+    expect(documentTitle(guidedCanonical)).toBe(appGuide.title)
+    expect(documentTitle({ ...guidedCanonical, blocks: [{ ...block, kind: "heading", headingLevel: 1, content: `# ${title}` }] })).toBe(title)
     const html = renderToStaticMarkup(createElement(GoalChoices, { guide: appGuide, paperTitle: title, selected: null, processing: false, ready: true, onSelect: ignore, onOpen: ignore }))
     expect(html).toMatch(/<h1[^>]*>Two pieces of one paragraph<\/h1>/u)
     expect(html).toMatch(/<input(?=[^>]*value="walk")(?=[^>]*checked="")[^>]*>/u)

@@ -11,7 +11,7 @@ import { PaperStatus } from "./PaperStatus.tsx"
 import { GuideComplete, GuideOverview, GuidePath } from "./GuidePath.tsx"
 import { GuideEvidence } from "./GuideSources.tsx"
 import { guideLocation, selectedGoal, type GuideMode, type GuideRoute, type ReadingGoal } from "./navigation.ts"
-import { boundedGuideStep, paperHeading, sourceForQuote, turnRoute, visibleGuideSources } from "./presentation.ts"
+import { boundedGuideStep, documentTitle, sourceForQuote, turnRoute, visibleGuideSources } from "./presentation.ts"
 import { mapNodeAt, paperMap, sameQuote, type PaperMap } from "../map/graph.ts"
 import { PaperMapView } from "../map/PaperMapView.tsx"
 import "./guide.css"
@@ -45,7 +45,7 @@ function RunningHead({ title, mode, onChoose, onOpen }: {
 export function GuideWorkspace({ record, canonical, route, page }: Props) {
   const guide = canonical.guide
   const documentId = record.document.id
-  const title = paperHeading(canonical) ?? record.document.originalFilename
+  const title = documentTitle(canonical) ?? record.document.originalFilename
   const mode = guide === undefined ? "choices" : route.mode
   const number = guide === undefined ? 1 : boundedGuideStep(route, guide)
   const total = mode === "claims" ? guide?.claims.length ?? 0 : guide?.steps.length ?? 0

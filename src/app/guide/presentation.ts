@@ -8,6 +8,8 @@ export const paperHeading = (canonical: CanonicalDocument): string | undefined =
   return title === undefined ? undefined : headingText(title.content) || undefined
 }
 
+export const documentTitle = (canonical: CanonicalDocument): string | undefined => paperHeading(canonical) ?? canonical.guide?.title
+
 export const boundedGuideStep = (route: GuideRoute, guide: ReadingGuide): number =>
   Math.min(route.n, route.mode === "claims" ? guide.claims.length : guide.steps.length)
 
