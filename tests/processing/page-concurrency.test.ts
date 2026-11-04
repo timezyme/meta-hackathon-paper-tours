@@ -40,13 +40,15 @@ it.live("overlaps extraction without changing serial receipts, retries, crop dec
       const guard = yield* makeProviderGuard(limits)
       const bytes = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])
       const image = yield* artifacts.put(claim.document.ownerId, claim.document.id, bytes)
+      const firstCropReviewed = yield* Deferred.make<void>()
       const renderer = PdfRenderer.of({
         render: ({ outputDirectory }) => Effect.forEach([1, 2, 3], (pageNumber) => Effect.gen(function* () {
           const name = `page-${pageNumber}.png`
           yield* fs.writeFile(path.join(outputDirectory, name), bytes).pipe(Effect.orDie)
           return { pageNumber, width: 100, height: 100, dpi: 72, widthPoints: 100, heightPoints: 100, physicalRotation: 0 as const, image: { ...image, path: name, mediaType: "image/png" as const } }
         })),
-        crop: ({ outputPath, box }) => fs.writeFile(outputPath, bytes).pipe(Effect.orDie, Effect.as({ ...image, width: box.width, height: box.height })),
+        crop: ({ outputPath, box }) => (box.x > 0 ? Deferred.await(firstCropReviewed) : Effect.void).pipe(
+          Effect.andThen(fs.writeFile(outputPath, bytes)), Effect.orDie, Effect.as({ ...image, width: box.width, height: box.height })),
       })
       let active = 0
       let peak = 0
@@ -66,6 +68,7 @@ it.live("overlaps extraction without changing serial receipts, retries, crop dec
         const context = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(contextSchema))(text.text)
         const pageNumber = "pageNumber" in context ? context.pageNumber : context.figureCropReview.page.pageNumber
         const name = body.response_format.json_schema.name
+        if ("figureCropReview" in context) yield* Deferred.succeed(firstCropReviewed, undefined)
         const initial = name === "page-extraction"
         if (initial) {
           active += 1; peak = Math.max(peak, active)
