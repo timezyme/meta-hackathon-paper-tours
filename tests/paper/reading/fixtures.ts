@@ -25,7 +25,7 @@ export const prepareReading = Effect.fnUntraced(function* (base: { document: Doc
 export const imageFixture = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   const crypto = yield* Crypto.Crypto
-  const bytes = yield* fs.readFile(new URL("../mineru/fixtures/page_1_image_4.jpg", import.meta.url).pathname)
+  const bytes = yield* fs.readFile(new URL("../../fixtures/seaborn-figure.jpg", import.meta.url).pathname)
   const hash = yield* crypto.digest("SHA-256", bytes).pipe(Effect.map((value) => Array.from(value, (byte) => byte.toString(16).padStart(2, "0")).join("")), Effect.flatMap(Schema.decodeUnknownEffect(ArtifactHash)))
   const artifact = yield* Schema.decodeUnknownEffect(ImageArtifact)({ path: "images/native.jpeg", mediaType: "image/jpeg", byteCount: bytes.byteLength, hash })
   const base = contractFixture("missing-description")

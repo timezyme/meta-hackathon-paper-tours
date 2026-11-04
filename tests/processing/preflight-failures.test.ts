@@ -46,7 +46,7 @@ describe("saved-stage token-count failures", () => {
       const outputs = yield* makeOutputStore().pipe(Effect.provideService(ArtifactStore, artifacts))
       const activePolicy = scenario.failure === "over-reservation" ? ratedPolicy : policy
       const guard = yield* makeProviderGuard(activePolicy)
-      const image = yield* artifacts.put(owner, claim.document.id, yield* fs.readFile(path.resolve("tests/paper/mineru/fixtures/page_1_image_4.jpg")))
+      const image = yield* artifacts.put(owner, claim.document.id, yield* fs.readFile(path.resolve("tests/fixtures/seaborn-figure.jpg")))
       const extraction = { ...fixture.extraction, scope: { documentId: claim.document.id, runId: claim.run.id, sourceHash: claim.document.sourceHash }, figures: fixture.extraction.figures.map((figure) => ({ ...figure, asset: { _tag: "available" as const, artifact: { ...image, path: "images/figure.jpeg", mediaType: "image/jpeg" as const } } })) }
       const template = fixture.report.receipts[0]?.receipt
       if (template === undefined) return yield* Effect.die("Expected fixture receipt")

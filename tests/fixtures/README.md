@@ -9,3 +9,5 @@ These inputs exercise contracts, not OCR accuracy. `scan.pdf` contains a raster 
 `build-mineru-normal.py` creates `mineru-normal.zip`, a synthetic native/compatibility archive for the complete saved-pipeline integration test. Its deliberate `l2 units` extraction mistake is repaired by a deterministic Meta fixture. This archive is not a real MinerU result.
 
 `reader.ts` supplies the synthetic document, report, and text used by the manual visual server and its HTTP tests. It has no browser-runner dependency.
+
+`seaborn-figure.jpg` is a figure from Michael L. Waskom (2021), "seaborn: statistical data visualization," *Journal of Open Source Software*, 6(60), 3021, https://doi.org/10.21105/joss.03021, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). It is unchanged.
