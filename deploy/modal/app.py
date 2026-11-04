@@ -1,4 +1,4 @@
-"""AmuseMe judge deployment on Modal: one always-on container serving the guarded app.
+"""AmuseMe judge deployment on Modal: one always-on, non-preemptible container serving the guarded app.
 
 Deploy from the repository root:
 
@@ -68,7 +68,7 @@ def deploy_settings():
         "AMUSEME_EXAMPLES_OWNER_ID": os.environ["AMUSEME_EXAMPLES_OWNER_ID"],
         "AMUSEME_UPLOADS_PER_USER": os.environ.get("AMUSEME_UPLOADS_PER_USER", "3"),
         "AMUSEME_BUDGET_ID": os.environ.get("AMUSEME_BUDGET_ID", "amuseme-modal-judges-2026-11"),
-        "AMUSEME_PROCESSING_BUDGET_USD": os.environ.get("AMUSEME_PROCESSING_BUDGET_USD", "100"),
+        "AMUSEME_PROCESSING_BUDGET_USD": os.environ.get("AMUSEME_PROCESSING_BUDGET_USD", "30"),
     }
 
 
@@ -218,6 +218,8 @@ def snapshot():
     volumes={VOLUME_ROOT: volume},
     min_containers=1,
     max_containers=1,
+    nonpreemptible=True,
+    region="us",
     timeout=60 * 60,
     cpu=2.0,
     memory=4096,
