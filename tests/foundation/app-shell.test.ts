@@ -12,12 +12,12 @@ describe("application foundation", () => {
     expect(mastra.getServer()?.apiRoutes?.map((route) => `${route.method} ${route.path}`)).toEqual([
       "GET /", "GET /sign-in", "GET /documents/:documentId", "GET /app/assets/:filename",
       "POST /api/documents", "GET /api/documents", "GET /api/documents/:documentId",
-      "GET /api/documents/:documentId/status", "GET /api/documents/:documentId/original", "POST /api/documents/:documentId/retry", "DELETE /api/documents/:documentId",
+      "GET /api/documents/:documentId/status", "GET /api/documents/:documentId/original", "GET /api/documents/:documentId/preview", "POST /api/documents/:documentId/retry", "DELETE /api/documents/:documentId",
       "GET /api/documents/:documentId/outputs/:revisionId/document", "GET /api/documents/:documentId/outputs/:revisionId/text", "GET /api/documents/:documentId/outputs/:revisionId/zip",
       "GET /api/documents/:documentId/outputs/:revisionId/images/:figureId", "GET /api/documents/:documentId/outputs/:revisionId/report",
       "GET /api/documents/:documentId/outputs/:revisionId/rating", "PUT /api/documents/:documentId/outputs/:revisionId/rating", "DELETE /api/documents/:documentId/outputs/:revisionId/rating",
     ])
-    expect(Object.keys(mastra.listAgents()).toSorted()).toEqual(["extraction", "figures", "headings", "page-check"])
+    expect(Object.keys(mastra.listAgents()).toSorted()).toEqual(["extraction", "extraction-review", "figures", "figures-crop-review", "figures-review", "guide", "guide-review", "headings", "headings-review", "page-check", "page-check-review"])
     expect(Object.keys(mastra.listWorkflows())).toEqual(["normalize-document"])
     yield* Effect.promise(() => mastra.shutdown())
   }))

@@ -1,6 +1,7 @@
 import { Effect, Schema } from "effect"
 import { boundaryParseOptions, DocumentId, IdempotencyKey, RetryRequest, UserId, type RunId } from "../../domain/index.ts"
-import { DocumentFailure, newSubmissionKey } from "./documents.ts"
+import { newSubmissionKey } from "./documents.ts"
+import { DocumentFailure } from "./http.ts"
 
 const RetryAttempt = Schema.Struct({ ownerId: UserId, documentId: DocumentId, key: IdempotencyKey, request: RetryRequest })
 export type RetryAttempt = typeof RetryAttempt.Type

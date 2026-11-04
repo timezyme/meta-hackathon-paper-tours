@@ -8,6 +8,7 @@ export const documentRouteDefinitions = [
   { operation: "detail", method: productRoutes.detail.method, path: productRoutes.detail.path },
   { operation: "status", method: productRoutes.status.method, path: productRoutes.status.path },
   { operation: "original", method: productRoutes.original.method, path: productRoutes.original.path },
+  { operation: "preview", method: productRoutes.preview.method, path: productRoutes.preview.path },
   { operation: "retry", method: productRoutes.retry.method, path: productRoutes.retry.path },
   { operation: "delete", method: productRoutes.delete.method, path: productRoutes.delete.path },
 ] as const

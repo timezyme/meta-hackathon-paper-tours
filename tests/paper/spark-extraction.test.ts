@@ -18,7 +18,7 @@ const extracted = { pageNumber: 1, coverage: "complete", hasFigures: false, bloc
   { kind: "heading", content: "  A title  ", format: "text", furniture: null },
   { kind: "equation", content: String.raw`\sum_{i=0}^{n} x_i = 2`, format: "latex", furniture: null },
   { kind: "table", content: "<table><tr><td>1</td><td>2</td></tr></table>", format: "html", furniture: null },
-  { kind: "code", content: "```python\nx = 1\n```", format: "markdown", furniture: null },
+  { kind: "code", content: "```python\r\nfor α in values:\r\n\tprint(α)  \r\n```", format: "markdown", furniture: null },
   { kind: "note", content: "7", format: "text", furniture: "page_number" },
 ] }
 const makeClaim = (maxOutputTokens = 1000) => Effect.gen(function* () {
@@ -36,11 +36,22 @@ describe("bounded Spark extraction", () => {
     expect(Result.isSuccess(result)).toBe(true)
     if (Result.isFailure(result)) return
     expect(result.success.extraction.sourceBlocks.map((block) => block.content)).toEqual(extracted.blocks.map((block) => block.content))
+    expect(result.success.extraction.sourceBlocks[3]).toMatchObject({ kind: "code", format: "markdown", content: extracted.blocks[3]!.content, locations: [{ _tag: "page", pageId: fixture.extraction.pages[0].id, pageNumber: 1 }] })
     expect(result.success.extraction.sourceBlocks.every((block) => block.locations[0]._tag === "page")).toBe(true)
     expect(result.success.extraction.pageFurniture).toEqual([{ blockId: "page-1-block-5", role: "page_number" }])
-    expect(result.success.issues).toHaveLength(1)
+    expect(result.success.issues).toEqual([])
     expect(result.success.extraction.figures).toEqual([])
     expect(Schema.decodeUnknownSync(SavedExtraction)({ ...result.success, accounting: [] })).toEqual(result.success)
+  })
+  it("warns only for genuinely unclassified content while preserving code and furniture", () => {
+    const result = convertSparkExtraction(fixture.document, fixture.run.id, fixture.extraction.pages[0], { ...extracted, blocks: [...extracted.blocks, { kind: "unclassified", content: "[unreadable] unknown notation", format: "text", furniture: null }] })
+    expect(Result.isSuccess(result)).toBe(true)
+    if (Result.isFailure(result)) return
+    expect(result.success.issues).toMatchObject([{ code: "unclassified-content", blockIds: ["page-1-block-6"], locations: [{ _tag: "page", pageId: fixture.extraction.pages[0].id, pageNumber: 1 }] }])
+    expect(result.success.extraction.sourceBlocks[3]?.kind).toBe("code")
+    expect(result.success.extraction.sourceBlocks[4]?.kind).toBe("unclassified")
+    expect(result.success.extraction.pageFurniture).toEqual([{ blockId: "page-1-block-5", role: "page_number" }])
+    expect(result.success.extraction.sourceBlocks[5]?.content).toBe("[unreadable] unknown notation")
   })
   for (const invalid of [
     { ...extracted, pageNumber: 2 }, { ...extracted, coverage: "incomplete" }, { ...extracted, blocks: [] }, { ...extracted, hasFigures: true },

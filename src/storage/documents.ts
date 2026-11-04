@@ -1,15 +1,16 @@
 import { Clock, DateTime, Effect, Layer, Schema, Semaphore } from "effect"
 import type { Kysely } from "kysely"
-import { AcceptedRun, Document, DocumentDetail, Run, RunState, StageReceipt, boundaryParseOptions, validateRunTransition, type DocumentId, type UserId } from "../domain/index.ts"
+import { AcceptedRun, Document, DocumentDetail, Run, RunState, StageReceipt, UserId, boundaryParseOptions, validateRunTransition, type DocumentId } from "../domain/index.ts"
 import { PdfLimits } from "../paper/pdf/index.ts"
 import { StorageDatabase, makeStorageDatabaseLayer, type ApplicationDatabase, type DocumentRow, type RunRow } from "./database.ts"
 import { makeSourceFiles } from "./files.ts"
-import { Admission, DocumentStore, StorageFailure, documentNotFound, documentRetentionMilliseconds, storageConflict, storageFailure, type DispatchClaim, type StorageOptions } from "./service.ts"
+import { Admission, DocumentStore, StorageFailure, documentNotFound, documentRetentionMilliseconds, storageConflict, storageFailure, uploadLimitReached, type DispatchClaim, type StorageOptions } from "./service.ts"
 
 const Options = Schema.Struct({
   queueLimit: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 1000 })),
   retentionMilliseconds: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: documentRetentionMilliseconds })),
   maxUploadBytes: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: PdfLimits.maxBytes })),
+  examplesOwnerId: Schema.optionalKey(UserId),
 })
 const Lease = Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 86400000 }))
 const iso = (milliseconds: number) => DateTime.formatIso(DateTime.makeUnsafe(milliseconds))
@@ -49,6 +50,7 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
     queueLimit: options.queueLimit,
     retentionMilliseconds: options.retentionMilliseconds ?? documentRetentionMilliseconds,
     maxUploadBytes: options.maxUploadBytes ?? PdfLimits.maxBytes,
+    ...(options.examplesOwnerId === undefined ? {} : { examplesOwnerId: options.examplesOwnerId }),
   }, "configuration")
   const database = yield* StorageDatabase
   const { db, query, transaction } = database
@@ -128,6 +130,21 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
       .where("documents.owner_id", "=", ownerId).where("documents.lifecycle", "=", "active").where("documents.expires_at", ">", now).orderBy("documents.expires_at", "desc").execute())
     return yield* Effect.forEach(rows, decodeDetail)
   })
+  const listExamples = Effect.fn("DocumentStore.listExamples")(function* (readerId: UserId) {
+    if (settings.examplesOwnerId === undefined || settings.examplesOwnerId === readerId) return null
+    return yield* list(settings.examplesOwnerId)
+  })
+  const readableOwner = Effect.fn("DocumentStore.readableOwner")(function* (readerId: UserId, documentId: DocumentId) {
+    const now = yield* Clock.currentTimeMillis
+    const owners = settings.examplesOwnerId === undefined ? [readerId] : [readerId, settings.examplesOwnerId]
+    const row = yield* query("read-document-owner", () => db.selectFrom("documents").select("owner_id")
+      .where("id", "=", documentId).where("owner_id", "in", owners)
+      .where("lifecycle", "=", "active").where("expires_at", ">", now).executeTakeFirst())
+    if (row === undefined) return yield* documentNotFound()
+    return yield* decode(UserId, row.owner_id, "read-document-owner")
+  })
+  const countUploads = (connection: Kysely<ApplicationDatabase>, ownerId: UserId) => query("upload-count", () => connection.selectFrom("documents")
+    .select((expression) => expression.fn.countAll<number>().as("count")).where("owner_id", "=", ownerId).executeTakeFirstOrThrow()).pipe(Effect.map((row) => Number(row.count)))
   const admit = Effect.fn("DocumentStore.admit")(function* (input: Admission) {
     const request = yield* Schema.decodeUnknownEffect(Admission)(input, boundaryParseOptions).pipe(
       Effect.mapError((cause) => new StorageFailure({ code: "invalid-input", operation: "admit", message: "Invalid document submission", cause })),
@@ -142,6 +159,7 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
       sourceHash, request.originalFilename, request.pageCount, request.pipelineVersion, configuration.extractionProvider,
       configuration.extractionVersion, ...(configuration.extractionModel === undefined ? [] : [modelFingerprint(configuration.extractionModel)]), modelFingerprint(configuration.pageCheck), modelFingerprint(configuration.headings),
       modelFingerprint(configuration.figures), configuration.maxProviderAttempts, configuration.deadlineMilliseconds, configuration.spendingCapUsd,
+      ...(configuration.guide === undefined ? [] : [modelFingerprint(configuration.guide)]),
     ])))
     const previous = yield* query("read-admission", () => db.selectFrom("admission_requests").selectAll()
       .where("owner_id", "=", request.ownerId).where("request_key", "=", request.idempotencyKey).executeTakeFirst())
@@ -151,6 +169,7 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
       yield* detail(request.ownerId, accepted.documentId)
       return accepted
     }
+    if (request.uploadLimit !== undefined && (yield* countUploads(db, request.ownerId)) >= request.uploadLimit) return yield* uploadLimitReached(request.uploadLimit)
     const id = yield* files.identifier()
     const runId = yield* files.identifier()
     const mastraRunId = yield* files.identifier()
@@ -182,6 +201,7 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
           if (activeDocument === undefined) return yield* documentNotFound()
           return yield* decode(AcceptedRun, { documentId: repeated.document_id, runId: repeated.run_id }, "read-admission")
         }
+        if (request.uploadLimit !== undefined && (yield* countUploads(connection, request.ownerId)) >= request.uploadLimit) return yield* uploadLimitReached(request.uploadLimit)
         const active = yield* query("admission-limit", () => connection.selectFrom("runs").select("id").where("owner_id", "=", request.ownerId).where("state", "in", ["queued", "running"]).executeTakeFirst())
         if (active !== undefined) return yield* storageConflict("admit", "A document is already queued or processing for this account")
         const count = yield* query("queue-limit", () => connection.selectFrom("runs").select((expression) => expression.fn.countAll<number>().as("count")).where("state", "=", "queued").executeTakeFirstOrThrow())
@@ -208,7 +228,7 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
       Effect.ensuring(Effect.sync(() => { inFlightFiles.delete(document.id) })),
     )
   }, staging.withPermit)
-  const claimNext = Effect.fn("DocumentStore.claimNext")(function* (input: { readonly workerId: string; readonly leaseMilliseconds: number }) {
+  const claimNext = Effect.fn("DocumentStore.claimNext")(function* (input: { readonly workerId: string; readonly leaseMilliseconds: number; readonly budget?: { readonly id: string; readonly authorizedMicrousd: number | null } }) {
     yield* decode(Document.fields.ownerId, input.workerId, "claim")
     yield* decode(Lease, input.leaseMilliseconds, "claim")
     const token = yield* files.identifier()
@@ -216,17 +236,18 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
       const now = yield* Clock.currentTimeMillis
       yield* expireDocuments(connection, now)
       yield* expireClaims(connection, now)
-      const running = yield* query("claim", () => connection.selectFrom("runs").selectAll().where("state", "=", "running").executeTakeFirst())
-      if (running !== undefined) {
-        if (running.lease_expires_at === null || running.lease_expires_at > now) return null
+      const runningRows = yield* query("claim", () => connection.selectFrom("runs").selectAll().where("state", "=", "running").orderBy("created_at", "asc").orderBy("id", "asc").execute())
+      for (const running of runningRows) {
+        if (running.lease_expires_at === null || running.lease_expires_at > now) continue
         const activeAttempt = yield* query("claim-recovery", () => connection.selectFrom("provider_attempts").select("id").where("run_id", "=", running.id).where("status", "in", ["prepared", "dispatching", "submitted", "unknown"]).where("lease_expires_at", ">", now).executeTakeFirst())
-        if (activeAttempt !== undefined) return null
+        if (activeAttempt !== undefined) continue
         const documentRow = yield* query("claim-document", () => connection.selectFrom("documents").selectAll().where("id", "=", running.document_id).executeTakeFirstOrThrow())
         const run = yield* decodeRun(running)
         const document = yield* decodeDocument(documentRow)
         yield* saveRun(connection, run, { claim_token: token, worker_id: input.workerId, lease_expires_at: now + input.leaseMilliseconds })
         return { document, run, claimToken: token, leaseExpiresAt: now + input.leaseMilliseconds, recovered: true }
       }
+      if (runningRows.length >= 2) return null
       const candidate = yield* query("claim", () => connection.selectFrom("runs").innerJoin("accepted_jobs", "accepted_jobs.run_id", "runs.id")
         .innerJoin("documents", "documents.id", "runs.document_id").selectAll("runs")
         .where("runs.state", "=", "queued").where("documents.lifecycle", "=", "active").where("documents.expires_at", ">", now)
@@ -235,6 +256,17 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
       const documentRow = yield* query("claim-document", () => connection.selectFrom("documents").selectAll().where("id", "=", candidate.document_id).executeTakeFirstOrThrow())
       const document = yield* decodeDocument(documentRow)
       const before = yield* decodeRun(candidate)
+      if (runningRows.length > 0 && input.budget !== undefined && input.budget.authorizedMicrousd !== null) {
+        const budget = input.budget
+        const runningIds = runningRows.map((running) => running.id)
+        const charges = yield* query("claim-budget", () => connection.selectFrom("provider_charges").leftJoin("provider_attempts", "provider_attempts.id", "provider_charges.attempt_id")
+          .select(["provider_charges.reserved_microusd", "provider_charges.actual_microusd"]).where("provider_charges.budget_id", "=", budget.id)
+          .where((row) => row.or([row("provider_attempts.run_id", "is", null), row("provider_attempts.run_id", "not in", runningIds)])).execute())
+        const usedByFinishedRuns = charges.reduce((sum, charge) => sum + (charge.actual_microusd ?? charge.reserved_microusd), 0)
+        let runningCaps = Math.floor(before.configuration.spendingCapUsd * 1_000_000)
+        for (const running of runningRows) runningCaps += Math.floor((yield* decodeRun(running)).configuration.spendingCapUsd * 1_000_000)
+        if (!Number.isSafeInteger(usedByFinishedRuns + runningCaps) || usedByFinishedRuns + runningCaps > input.budget.authorizedMicrousd) return null
+      }
       const run = yield* decode(Run, { ...before, state: { _tag: "running", startedAt: iso(now), progress: { stage: "extraction", completedUnits: 0, totalUnits: null } } }, "claim")
       yield* saveRun(connection, run, { claim_token: token, worker_id: input.workerId, lease_expires_at: now + input.leaseMilliseconds })
       return { document, run, claimToken: token, leaseExpiresAt: now + input.leaseMilliseconds, recovered: false }
@@ -320,13 +352,18 @@ export const makeDocumentStore = Effect.fn("makeDocumentStore")(function* (optio
   }, reconciliation.withPermit)
   yield* reconcile()
   return DocumentStore.of({
-    admit, list, detail, claimNext, renewClaim, updateRun, recoverExpiredClaims, delete: removeDocument, reconcile,
+    admit, list, listExamples, readableOwner, detail, claimNext,
+    uploadCount: (ownerId) => countUploads(db, ownerId), renewClaim, updateRun, recoverExpiredClaims, delete: removeDocument, reconcile,
     status: (ownerId, documentId) => detail(ownerId, documentId).pipe(Effect.map((value) => value.latestRun)),
     original: Effect.fn("DocumentStore.original")(function* (ownerId, documentId) {
       const { document } = yield* detail(ownerId, documentId)
       const bytes = yield* files.read(document)
       yield* detail(ownerId, documentId)
       return { document, bytes }
+    }),
+    originalFile: Effect.fn("DocumentStore.originalFile")(function* (ownerId, documentId) {
+      const { document } = yield* detail(ownerId, documentId)
+      return { document, privatePath: yield* files.sourcePath(document) }
     }),
   })
 })

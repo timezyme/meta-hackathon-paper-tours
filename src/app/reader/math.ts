@@ -1,5 +1,8 @@
 export const normalizeMathDelimiters = (source: string): string => source.split(/(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`]*`)/gu).map((part) => part.startsWith("`") || part.startsWith("~~~") ? part : part.replace(/\\\[([\s\S]*?)\\\]/gu, (_match: string, math: string) => `\n$$\n${math}\n$$\n`).replace(/\\\(([\s\S]*?)\\\)/gu, (_match: string, math: string) => `$${math}$`)).join("")
 
+export const escapeCurrency = (text: string): string => text.replace(/\\[\s\S]|\$\$[\s\S]*?\$\$|\$(?=[^\s$])[^$\n]*?[^\s$\\]\$(?!\d)|\$(?=[^\s$])[^$\n]?\$(?!\d)|\$/gu,
+  (match) => match === "$" ? "\\$" : match)
+
 interface HtmlNode {
   type: string
   value?: string

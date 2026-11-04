@@ -17,6 +17,7 @@ export const Admission = Schema.Struct({
   pageCount: PositiveInt.check(Schema.isLessThanOrEqualTo(PdfLimits.maxPages)),
   pipelineVersion: NonBlank,
   configuration: RunConfiguration,
+  uploadLimit: Schema.optionalKey(PositiveInt),
 })
 export type Admission = typeof Admission.Type
 
@@ -25,6 +26,7 @@ export interface StorageOptions {
   readonly queueLimit: number
   readonly retentionMilliseconds?: number
   readonly maxUploadBytes?: number
+  readonly examplesOwnerId?: UserId | undefined
 }
 
 export const documentRetentionMilliseconds = 7 * 24 * 60 * 60 * 1000
@@ -40,10 +42,14 @@ export interface DispatchClaim {
 export class DocumentStore extends Context.Service<DocumentStore, {
   readonly admit: (input: Admission) => Effect.Effect<typeof AcceptedRun.Type, StorageFailure>
   readonly list: (ownerId: UserId) => Effect.Effect<ReadonlyArray<typeof DocumentDetail.Type>, StorageFailure>
+  readonly listExamples: (readerId: UserId) => Effect.Effect<ReadonlyArray<typeof DocumentDetail.Type> | null, StorageFailure>
+  readonly readableOwner: (readerId: UserId, documentId: DocumentId) => Effect.Effect<UserId, StorageFailure>
+  readonly uploadCount: (ownerId: UserId) => Effect.Effect<number, StorageFailure>
   readonly detail: (ownerId: UserId, documentId: DocumentId) => Effect.Effect<typeof DocumentDetail.Type, StorageFailure>
   readonly status: (ownerId: UserId, documentId: DocumentId) => Effect.Effect<Run, StorageFailure>
   readonly original: (ownerId: UserId, documentId: DocumentId) => Effect.Effect<{ readonly document: Document; readonly bytes: Uint8Array }, StorageFailure>
-  readonly claimNext: (input: { readonly workerId: string; readonly leaseMilliseconds: number }) => Effect.Effect<DispatchClaim | null, StorageFailure>
+  readonly originalFile: (ownerId: UserId, documentId: DocumentId) => Effect.Effect<{ readonly document: Document; readonly privatePath: string }, StorageFailure>
+  readonly claimNext: (input: { readonly workerId: string; readonly leaseMilliseconds: number; readonly budget?: { readonly id: string; readonly authorizedMicrousd: number | null } }) => Effect.Effect<DispatchClaim | null, StorageFailure>
   readonly renewClaim: (claim: DispatchClaim, leaseMilliseconds: number) => Effect.Effect<DispatchClaim, StorageFailure>
   readonly updateRun: (claim: DispatchClaim, state: RunState) => Effect.Effect<Run, StorageFailure>
   readonly recoverExpiredClaims: () => Effect.Effect<number, StorageFailure>
@@ -57,6 +63,10 @@ export const storageFailure = (operation: string, cause: unknown) => new Storage
 
 export const storageConflict = (operation: string, message: string) => new StorageFailure({
   code: "conflict", operation, message, cause: undefined,
+})
+
+export const uploadLimitReached = (limit: number) => new StorageFailure({
+  code: "forbidden", operation: "admit", message: `You've used your ${limit} uploads. You can still read the examples and your documents.`, cause: undefined,
 })
 
 export const documentNotFound = () => new StorageFailure({

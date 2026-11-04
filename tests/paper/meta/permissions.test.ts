@@ -31,7 +31,7 @@ describe("Meta agent permissions", () => {
         }
       }
     }
-    expect(calls).toHaveBeenCalledTimes(4)
+    expect(calls).toHaveBeenCalledTimes(11)
   }))
 
   it.effect("rejects cross-agent, serialized, spent and revoked permissions while permitting shallow identity copies", () => Effect.gen(function* () {

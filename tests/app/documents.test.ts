@@ -2,10 +2,16 @@ import { describe, expect, it } from "@effect/vitest"
 import { Effect, Schema } from "effect"
 import { RunState, UploadPolicy } from "../../src/domain/index.ts"
 import { newSubmissionKey } from "../../src/app/client/documents.ts"
-import { activeRun, formatBytes, formatExpiry, runSummary, validateSelection } from "../../src/app/documents.ts"
+import {
+  activeRun, canChooseFile, elapsedLabel, formatBytes, formatExpiry, processingEstimate, processingSteps,
+  progressHeadline, runSummary, validateSelection,
+} from "../../src/app/documents.ts"
 
 const policy = Schema.decodeUnknownSync(UploadPolicy)({ maxBytes: 50 * 1024 * 1024, maxPages: 50, mediaType: "application/pdf", mode: "fixture", availability: { _tag: "enabled" } })
 const state = Schema.decodeUnknownSync(RunState)
+
+const at = (stage: string, completedUnits: number, totalUnits: number | null) =>
+  progressHeadline({ stage: stage as "extraction", completedUnits, totalUnits })
 
 describe("document presentation and selection", () => {
   it("accepts one nonempty file up to the exact server ceiling", () => {
@@ -16,15 +22,48 @@ describe("document presentation and selection", () => {
     expect(validateSelection([], policy)).toContain("one PDF")
     expect(validateSelection([{ size: 12 }, { size: 12 }], policy)).toContain("No files were uploaded")
   })
+  it("lets a refused file be replaced without a reload, but not an upload that may be saved", () => {
+    const open = { ready: true, uploading: false, attempt: null, allowance: undefined }
+    expect(canChooseFile(open)).toBe(true)
+    expect(canChooseFile({ ...open, attempt: { state: "rejected" } })).toBe(true)
+    expect(canChooseFile({ ...open, attempt: { state: "uncertain" } })).toBe(false)
+    expect(canChooseFile({ ...open, attempt: { state: "pending" }, uploading: true })).toBe(false)
+    expect(canChooseFile({ ...open, ready: false })).toBe(false)
+    expect(canChooseFile({ ...open, allowance: { limit: 3, used: 2 } })).toBe(true)
+    expect(canChooseFile({ ...open, attempt: { state: "rejected" }, allowance: { limit: 3, used: 3 } })).toBe(false)
+  })
   it("uses only actual saved state and progress", () => {
     const queued = { state: state({ _tag: "queued" }) }
     const running = { state: state({ _tag: "running", startedAt: "2026-10-27T12:00:00.000Z", progress: { stage: "page-check", completedUnits: 1, totalUnits: 3 } }) }
     const failed = { state: state({ _tag: "failed", finishedAt: "2026-10-27T12:00:00.000Z", failure: { code: "provider-failed", message: "Saved failure reason", retryable: false, stage: "extraction", pageId: null, figureId: null } }) }
     expect(activeRun(queued)).toBe(true)
-    expect(runSummary(queued).title).toBe("Queued")
-    expect(runSummary(running)).toEqual({ title: "Checking pages", description: "1 of 3 units completed.", failed: false })
+    expect(runSummary(queued).title).toBe("Waiting for Muse to start")
+    expect(runSummary(running))
+      .toEqual({ title: "Muse is checking page 2 of 3", description: processingEstimate, failed: false })
     expect(activeRun(failed)).toBe(false)
-    expect(runSummary(failed)).toEqual({ title: "Processing failed", description: "Saved failure reason", failed: true })
+    expect(runSummary(failed))
+      .toEqual({ title: "Processing stopped", description: "Saved failure reason", failed: true })
+    const tooLong = { state: state({ _tag: "failed", finishedAt: "2026-10-27T12:00:00.000Z", failure: { code: "limit-exceeded", message: "The run spending allowance is exhausted", retryable: false, stage: "figures", pageId: null, figureId: null } }) }
+    expect(runSummary(tooLong).title).toBe("This document is too long for one run")
+    expect(runSummary(tooLong).description).not.toContain("allowance")
+  })
+  it("says a running document usually takes several minutes and can be left to finish", () => {
+    expect(processingEstimate).toBe("This usually takes several minutes. You can leave this page;"
+      + " your guide will be in your library when it’s ready.")
+  })
+  it("describes live progress in plain words from saved stage and units only", () => {
+    expect(at("extraction", 0, 4)).toBe("Muse is reading page 1 of 4")
+    expect(at("page-check", 4, 4)).toBe("Muse is checking the pages · all 4 done")
+    expect(at("figures", 0, 0)).toBe("Looking for figures to describe")
+    expect(at("guide", 0, 1)).toBe("Muse is writing your reading guide")
+    const configuration = { guide: undefined }
+    const running = { configuration, state: state({ _tag: "running", startedAt: "2026-10-27T12:00:00.000Z", progress: { stage: "headings", completedUnits: 0, totalUnits: 1 } }) }
+    const steps = processingSteps(running as unknown as Parameters<typeof processingSteps>[0])
+    expect(steps.map((step) => step.state)).toEqual(["done", "done", "now", "next", "next", "next"])
+    expect(steps.some((step) => step.stage === "guide")).toBe(false)
+    expect(elapsedLabel("2026-10-27T12:00:00.000Z", Date.parse("2026-10-27T12:04:07.000Z"))).toBe("4 min 07 s")
+    expect(elapsedLabel("2026-10-27T12:00:00.000Z", Date.parse("2026-10-27T11:00:00.000Z"))).toBeNull()
+    expect(elapsedLabel("2026-10-27T12:00:00.000Z", Date.parse("2026-10-27T14:05:00.000Z"))).toBe("2 h 05 min")
   })
   it("formats bytes and expiry without hiding the timezone", () => {
     expect(formatBytes(1025)).toBe("2 KiB")

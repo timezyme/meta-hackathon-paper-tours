@@ -35,7 +35,7 @@ describe("processing shutdown order", () => {
     const config: ServerConfig = {
       port: 0, origin: "http://127.0.0.1:4180", secret: Redacted.make("test-only-shutdown-secret-with-thirty-two-characters"),
       dataDirectory: path.join(directory, "data"), appDirectory: path.resolve(".mastra/output/app"), pythonBin: path.resolve("data/python/.venv/bin/python"), queueLimit: 1,
-      admissionConfiguration: { _tag: "disabled", reason: "Cancellation test" },
+      host: "127.0.0.1" as const, judgeSignIn: undefined, examplesOwnerId: undefined, uploadsPerUser: undefined, admissionConfiguration: { _tag: "disabled", reason: "Cancellation test" },
       processing: { configuration: fixture.run.configuration, pipelineVersion: "amuseme-1", pipeline: {
         policy: disabledGuardPolicy, temporaryDirectory: path.join(directory, "processing"), metaCredential: Redacted.make("fixture"), mineruToken: Redacted.make("fixture"), mineruEndpoint: "https://amuseme-fixture.invalid",
       } },

@@ -4,7 +4,7 @@ import { MastraStorageExporter, Observability } from "@mastra/observability"
 import { Effect, Schema } from "effect"
 
 const Identifier = Schema.String.check(Schema.isPattern(/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/u))
-const components = new Set(["normalize-document", "extract-document", "check-pages", "restore-headings", "describe-figures", "assemble-document", "publish-document", "page-check", "headings", "figures"])
+const components = new Set(["normalize-document", "extract-document", "check-pages", "restore-headings", "describe-figures", "assemble-document", "write-reading-guide", "publish-document", "page-check", "headings", "figures", "guide"])
 const correlationKeys = ["documentId", "documentRunId", "providerAttemptId", "runId", "resourceId"] as const
 
 export const redactTraceSpan = (span: AnyExportedSpan): AnyExportedSpan => {

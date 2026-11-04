@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="AmuseMe favicon"><title>AmuseMe favicon</title><style>@media(prefers-color-scheme:dark){.tile{fill:#b8cfa9}.muse{fill:#243629}}</style><rect class="tile" width="64" height="64" rx="14" fill="#303f33"/><g class="muse" transform="translate(1 1) scale(.96)" fill="#f7f7f4"><path d="M11 20C10 10 23 5 34 6c14 1 20 10 20 23v14c0 5 2 8 6 10 1 1 0 2-3 2-11 1-19-2-26-7-6-4-8-8-5-13 2-3 5-4 10-5 3-1 3-3 0-5l2-2-4-4c-3-3-2-7-5-9-4-3-10 0-11 6l-1 4c-1 4-6 4-6 0Z"/><path d="M26 30C15 34 7 40 7 48c0 10 12 13 25 7l2-2c-10 1-17-1-17-7 0-5 6-10 9-16Z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="AmuseMe">
+  <title>AmuseMe</title>
+  <rect width="64" height="64" rx="14" fill="#243629"/>
+  <path fill="#f7f7f4" fill-rule="evenodd" transform="translate(3.2 3.2) scale(1.8)" d="M16 4H21L28 11V28H22V25.8C20.2 27.3 18.1 28 15.5 28C8.7 28 4 23 4 16C4 9 8.8 4 16 4ZM16 10C12.4 10 10 12.4 10 16C10 19.6 12.4 22 16 22C19.6 22 22 19.6 22 16V10H16Z"/>
+</svg>

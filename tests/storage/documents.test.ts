@@ -85,6 +85,7 @@ describe("durable private document storage", () => {
       for (const extra of [
         { originalFilename: "different.pdf" }, { bytes: new Uint8Array([1, 2, 3]) }, { pageCount: 2 },
         { pipelineVersion: "2" }, { configuration: { ...configuration, spendingCapUsd: 1 } },
+        { configuration: { ...configuration, guide: { ...configuration.headings, promptName: "reading-guide" } } },
       ]) {
         const result = yield* store.admit({ ...request, ...extra }).pipe(Effect.result)
         expect(Result.isFailure(result) && result.failure.code).toBe("conflict")
@@ -127,14 +128,13 @@ describe("durable private document storage", () => {
       const claimed = yield* claim
       yield* store.admit(second)
       expect((yield* store.admit(third).pipe(Effect.flip)).code).toBe("queue-full")
-      expect(yield* store.claimNext({ workerId: "worker-two", leaseMilliseconds: 10000 })).toBeNull()
+      expect((yield* store.claimNext({ workerId: "worker-two", leaseMilliseconds: 10000 }))?.document.ownerId).toBe(two)
       yield* store.updateRun(claimed, yield* failedState)
-      expect((yield* claim).document.ownerId).toBe(two)
       expect(yield* counts).toEqual({ documents: 2, runs: 2, requests: 2, jobs: 1 })
     }).pipe(Effect.provide(makeDocumentStoreLayer(options)))
   }).pipe(Effect.provide(NodeServices.layer)))
 
-  it.effect("grants one concurrent global claim and rejects stale or terminal updates", () => Effect.gen(function* () {
+  it.effect("grants at most two concurrent claims and rejects stale or terminal updates", () => Effect.gen(function* () {
     const options = yield* fixture()
     const requests = yield* Effect.all([admission(), admission(two), admission(three)])
     yield* Effect.gen(function* () {
@@ -142,7 +142,7 @@ describe("durable private document storage", () => {
       yield* Effect.forEach(requests, store.admit)
       const results = yield* Effect.all(Array.from({ length: 8 }, (_, index) => store.claimNext({ workerId: `worker-${index}`, leaseMilliseconds: 10000 })), { concurrency: "unbounded" })
       const claims = results.filter((value): value is DispatchClaim => value !== null)
-      expect(claims).toHaveLength(1)
+      expect(claims).toHaveLength(2)
       const current = claims[0]
       if (current === undefined) return yield* Effect.die("Missing unique claim")
       const forged = { ...current, claimToken: "different-fence" }
@@ -334,24 +334,6 @@ describe("durable private document storage", () => {
         { attempt_id: "spent-attempt", budget_id: "authorized-budget", reserved_microusd: 1000, actual_microusd: 900 },
         { attempt_id: "uncertain-attempt", budget_id: "authorized-budget", reserved_microusd: 2000, actual_microusd: null },
       ])
-    }).pipe(Effect.provide(makeDocumentStoreLayer(options)))
-  }).pipe(Effect.provide(NodeServices.layer)))
-
-  it.effect("enforces global running uniqueness in SQLite even when callers bypass the store methods", () => Effect.gen(function* () {
-    const options = yield* fixture()
-    const first = yield* admission()
-    const second = yield* admission(two)
-    yield* Effect.gen(function* () {
-      const store = yield* DocumentStore
-      const { db, query } = yield* StorageDatabase
-      yield* store.admit(first)
-      yield* store.admit(second)
-      const current = yield* claim
-      const other = yield* query("fixture", () => db.selectFrom("runs").selectAll().where("state", "=", "queued").executeTakeFirstOrThrow())
-      const error = yield* query("fixture", () => db.updateTable("runs").set({ state: "running", claim_token: "bypassed", worker_id: "other-worker", lease_expires_at: current.leaseExpiresAt }).where("id", "=", other.id).execute()).pipe(Effect.flip)
-      expect(error.code).toBe("storage-failed")
-      expect(String(error.cause)).toContain("UNIQUE")
-      expect((yield* query("fixture", () => db.selectFrom("runs").select("id").where("state", "=", "running").execute()))).toHaveLength(1)
     }).pipe(Effect.provide(makeDocumentStoreLayer(options)))
   }).pipe(Effect.provide(NodeServices.layer)))
 

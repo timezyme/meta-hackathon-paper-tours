@@ -9,9 +9,9 @@ import { makeMetaAgentBoundary, makeMetaRequest, metaEffort, type MetaStage, typ
 export const output = Schema.Struct({ text: Schema.String })
 export const outputJson: Schema.Json = { type: "object", properties: { text: { type: "string" } }, required: ["text"], additionalProperties: false }
 const spec = { instructions: "Repair extraction damage. Preserve source meaning.", promptName: "paper_check", promptVersion: "1", schema: outputJson }
-export const specs: MetaStageSpecs = { extraction: { ...spec, promptName: "paper_extraction" }, "page-check": spec, headings: { ...spec, promptName: "paper_headings" }, figures: { ...spec, promptName: "paper_figures" } }
+export const specs: MetaStageSpecs = { extraction: { ...spec, promptName: "paper_extraction" }, "page-check": spec, headings: { ...spec, promptName: "paper_headings" }, figures: { ...spec, promptName: "paper_figures" }, guide: { ...spec, promptName: "paper_guide" } }
 const validate: MetaValidators["page-check"] = (value) => Schema.decodeUnknownEffect(output)(value, { onExcessProperty: "error" }).pipe(Effect.mapError(() => executionFailure("invalid-provider-response", "The output shape is invalid")), Effect.asVoid)
-export const validators: MetaValidators = { extraction: validate, "page-check": validate, headings: validate, figures: validate }
+export const validators: MetaValidators = { extraction: validate, "page-check": validate, headings: validate, figures: validate, guide: validate }
 export const policy: GuardPolicy = {
   mode: "fixture", enabled: true, metaCredentialConfigured: false, mineruCredentialConfigured: false, mineruEndpoint: null,
   budgetId: "meta-offline", authorizedBudgetMicrousd: 10_000_000, maximumCostMicrousd: { extraction: 1, "page-check": 1, headings: 1, figures: 1 },

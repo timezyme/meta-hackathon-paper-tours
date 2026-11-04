@@ -66,7 +66,8 @@ const fixture = Effect.fnUntraced(function* (text = encoder.encode("Exact UTF-8:
   const manifest = yield* Schema.decodeUnknownEffect(ArtifactManifest)({ schemaVersion: "1", scope: { documentId, revisionId, runId: "zip-run" }, entries })
   const reads: string[] = []
   const store = OutputStore.of({
-    publish: () => Effect.fail(storageFailure("unused", undefined)), rate: () => Effect.void, rating: () => Effect.succeed(null),
+    publish: () => Effect.fail(storageFailure("unused", undefined)), publishRepair: () => Effect.fail(storageFailure("unused", undefined)),
+    rate: () => Effect.void, rating: () => Effect.succeed(null),
     manifest: (user, document, revision) => user === owner && document === documentId && revision === revisionId ? Effect.succeed(manifest) : Effect.fail(documentNotFound()),
     read: (user, document, revision, name) => Effect.gen(function* () {
       if (user !== owner || document !== documentId || revision !== revisionId) return yield* documentNotFound()

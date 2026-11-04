@@ -11,15 +11,22 @@ const policy: GuardPolicy = { mode: "fixture", enabled: true, metaCredentialConf
 const model = { provider: "fixture", model: "offline", reasoning: "high", promptName: "check", promptVersion: "1", maxOutputTokens: 1000 }
 const admission = (ownerId = "repair-reader") => Schema.decodeUnknownEffect(Admission)({ ownerId, idempotencyKey: "upload", originalFilename: "source.pdf", bytes: new TextEncoder().encode("%PDF-1.7 offline"), pageCount: 2, pipelineVersion: "1", configuration: { extractionProvider: "fixture", extractionVersion: "1", pageCheck: model, headings: model, figures: model, maxProviderAttempts: 3, deadlineMilliseconds: 100_000, spendingCapUsd: 1 } })
 const input = (page = "page-1") => Schema.decodeUnknownEffect(AttemptInput)({ stage: "page-check", pageIds: [page], figureId: null, inputHashes: ["a".repeat(64)], request: { page, text: "Retained François α" }, supportsIdempotency: false, retry: { _tag: "none" } })
+const cropInput = Schema.decodeUnknownEffect(AttemptInput)({
+  stage: "figures", task: "figure-crop", pageIds: ["page-1"], figureId: "figure-page-1-block-3",
+  inputHashes: ["a".repeat(64), "b".repeat(64)], request: { figure: "figure-page-1-block-3", round: 1 },
+  supportsIdempotency: false, retry: { _tag: "none" },
+})
 const stop = (claim: Parameters<DocumentStore["Service"]["updateRun"]>[0]) => Effect.gen(function* () { return yield* (yield* DocumentStore).updateRun(claim, { _tag: "failed", finishedAt: DateTime.formatIso(yield* DateTime.now), failure: { code: "invalid-provider-response", message: "Old validator rejected a valid join", retryable: false, stage: "page-check", pageId: null, figureId: null } }) })
 const accept: ValidateRepair = ({ response, receipt }) => response !== null && receipt.stage === "page-check" ? Result.succeed(undefined) : Result.fail(executionFailure("invalid-provider-response", "Still invalid"))
-const fixture = (extraInFlight = false) => Effect.gen(function* () {
+const acceptCrop: ValidateRepair = ({ receipt }) => receipt.task === "figure-crop"
+  ? Result.succeed(undefined) : Result.fail(executionFailure("invalid-provider-response", "Still invalid"))
+const fixture = (extraInFlight = false, attempt = input()) => Effect.gen(function* () {
   const store = yield* DocumentStore
   yield* store.admit(yield* admission())
   const claim = yield* store.claimNext({ workerId: "repair-worker", leaseMilliseconds: 10_000 })
   if (claim === null) return yield* Effect.die("Expected work")
   const guard = yield* ProviderGuard
-  const submitted = yield* input()
+  const submitted = yield* attempt
   expect(yield* Effect.result(guard.execute(claim, submitted))).toMatchObject({ _tag: "Failure", failure: { code: "invalid-provider-response" } })
   if (extraInFlight) yield* guard.prepare(claim, yield* input("page-2"))
   yield* stop(claim)
@@ -37,6 +44,7 @@ const snapshot = Effect.gen(function* () {
     charges: yield* query("fixture", () => db.selectFrom("provider_charges").selectAll().orderBy("attempt_id").execute()),
     runs: yield* query("fixture", () => db.selectFrom("runs").selectAll().orderBy("id").execute()),
     documents: yield* query("fixture", () => db.selectFrom("documents").selectAll().orderBy("id").execute()),
+    policies: yield* query("fixture", () => db.selectFrom("document_policies").selectAll().execute()),
     audits: yield* query("fixture", () => db.selectFrom("validator_repairs").selectAll().execute()),
     retries: yield* query("fixture", () => db.selectFrom("retry_requests").selectAll().execute()),
     grants: yield* query("fixture", () => db.selectFrom("retry_authorizations").selectAll().execute()),
@@ -57,10 +65,10 @@ const withFixture = <A, E>(work: Effect.Effect<A, E, DocumentStore | ProviderGua
 }).pipe(Effect.provide(NodeServices.layer))
 
 describe("local saved-response validator repair", () => {
-  it.effect("atomically audits a repair, deduplicates concurrent requests, and replays without a new call or charge", () => withFixture(Effect.gen(function* () {
+  for (const withGuidePolicy of [false, true]) it.effect(`atomically audits and replays a repair without a new call or charge under ${withGuidePolicy ? "new guide-capable" : "historical"} policy`, () => withFixture(Effect.gen(function* () {
     const saved = yield* fixture()
     const before = yield* snapshot
-    const helper = yield* makeValidatorRepair(policy, 5)
+    const helper = yield* makeValidatorRepair(withGuidePolicy ? { ...policy, maximumCostMicrousd: { ...policy.maximumCostMicrousd, guide: 100_000 } } : policy, 5)
     let validations = 0
     const validator: ValidateRepair = (evidence) => { validations += 1; expect(evidence.receipt).toEqual(saved.receipt); expect(evidence.intent.request).toEqual(saved.submitted.request); return accept(evidence) }
     const results = yield* Effect.all(Array.from({ length: 5 }, () => helper.repair(saved.request, validator)), { concurrency: "unbounded" })
@@ -69,6 +77,7 @@ describe("local saved-response validator repair", () => {
     expect(validations).toBe(1)
     const after = yield* snapshot
     expect(after.charges).toEqual(before.charges)
+    expect(after.policies).toEqual(before.policies)
     expect(after.grants).toEqual([])
     expect(after.attempts).toHaveLength(1)
     expect(after.attempts[0]).toMatchObject({ response_json: saved.row.response_json, intent_json: saved.row.intent_json, fingerprint: saved.row.fingerprint, actual_microusd: 70_000, reserved_microusd: 100_000, validation_state: "accepted" })
@@ -138,6 +147,21 @@ describe("local saved-response validator repair", () => {
     const helper = yield* makeValidatorRepair(policy, 5)
     expect(yield* helper.repair(saved.request, () => Result.fail(executionFailure("invalid-provider-response", "Still invalid"))).pipe(Effect.result)).toMatchObject({ _tag: "Failure", failure: { code: "invalid-provider-response" } })
     expect(yield* snapshot).toEqual(before)
+  })))
+
+  it.effect("repairs a rejected figure-crop review, keyed by its task", () => withFixture(Effect.gen(function* () {
+    const saved = yield* fixture(false, cropInput)
+    expect(saved.receipt.task).toBe("figure-crop")
+    const helper = yield* makeValidatorRepair(policy, 5)
+    const accepted = yield* helper.repair(saved.request, acceptCrop)
+    const after = yield* snapshot
+    expect(after.attempts).toMatchObject([{ id: saved.row.id, validation_state: "accepted" }])
+    expect(after.audits).toMatchObject([{ attempt_id: saved.row.id, request_fingerprint: saved.row.fingerprint }])
+    expect(after.audits[0]?.run_id).toBe(accepted.runId)
+    const current = yield* (yield* DocumentStore).claimNext({ workerId: "new-worker", leaseMilliseconds: 10_000 })
+    if (current === null) return yield* Effect.die("Expected repaired run")
+    const replayed = yield* (yield* ProviderGuard).execute(current, saved.submitted)
+    expect(replayed).toMatchObject({ delivery: "reused", receipt: { id: saved.receipt.id, task: "figure-crop" } })
   })))
 
   it.effect("rolls back receipt and run writes when the audit cannot be persisted", () => withFixture(Effect.gen(function* () {

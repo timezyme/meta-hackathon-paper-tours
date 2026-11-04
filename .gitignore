@@ -12,11 +12,10 @@ CLAUDE.md
 .memsearch/
 .audit/
 
-# Internal plans, research, and verification records
-/docs/plans/
-/docs/research/
-/docs/verification/
-/brand/
+# Local working files
+/docs/
+/video/
+/.build/
 
 # Local configuration and credentials
 .env
@@ -36,7 +35,7 @@ dist/
 src/mastra/public/
 
 # Private runtime data and verification output
-qa/
+qa
 playwright-report/
 test-results/
 coverage/

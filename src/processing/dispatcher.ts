@@ -25,7 +25,7 @@ export const makeRunDispatcher = Effect.fn("makeRunDispatcher")(function* (polic
     const availability = processingAvailability(policy)
     if (!availability.available) return yield* executionFailure("processing-unavailable", availability.reason ?? "Processing is unavailable")
     const starter = yield* RunStarter
-    const claim = yield* store.claimNext({ workerId, leaseMilliseconds })
+    const claim = yield* store.claimNext({ workerId, leaseMilliseconds, budget: { id: policy.budgetId, authorizedMicrousd: policy.authorizedBudgetMicrousd } })
     if (claim === null) return null
     const started = yield* Clock.currentTimeMillis
     const deadline = claim.run.state._tag === "running" ? DateTime.toEpochMillis(DateTime.makeUnsafe(claim.run.state.startedAt)) + claim.run.configuration.deadlineMilliseconds : started

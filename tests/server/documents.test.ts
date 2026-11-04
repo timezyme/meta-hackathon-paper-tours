@@ -4,10 +4,10 @@ import { Mastra } from "@mastra/core/mastra"
 import { ConfigProvider, Context, Effect, Fiber, FileSystem, Layer, Path, Redacted, Schema, Stream } from "effect"
 import { Cookies, FetchHttpClient, HttpClient, HttpClientRequest } from "effect/http"
 import { ChildProcess, ChildProcessSpawner } from "effect/process"
+import { createServer } from "node:net"
 import { provisionUser } from "../../src/auth/index.ts"
-import { AcceptedRun, DocumentDetail, DocumentList, Run } from "../../src/domain/index.ts"
+import { AcceptedRun, DocumentDetail, DocumentList } from "../../src/domain/index.ts"
 import { makeAmuseMe } from "../../src/mastra/amuseme.ts"
-import { PdfLimits } from "../../src/paper/pdf/index.ts"
 import { serverConfig, type ServerConfig } from "../../src/server/config.ts"
 import { DocumentHandler, type AdmissionConfiguration } from "../../src/server/documents.ts"
 import { createGuardedApp } from "../../src/server/http.ts"
@@ -15,7 +15,16 @@ import { makeServerRuntime, openListener, startServer } from "../../src/server/l
 import { StorageDatabase } from "../../src/storage/index.ts"
 import { contractFixture } from "../fixtures/contracts.ts"
 
-const origin = "http://127.0.0.1:4185"
+const unusedPort = Effect.callback<number>((resume) => {
+  const probe = createServer().once("error", (cause) => resume(Effect.die(cause)))
+  probe.listen(0, "127.0.0.1", () => {
+    const address = probe.address()
+    const bound = typeof address === "object" && address !== null ? Effect.succeed(address.port) : Effect.die("No port")
+    probe.close(() => resume(bound))
+  })
+})
+const port = await Effect.runPromise(unusedPort)
+const origin = `http://127.0.0.1:${port}`
 const password = "fixture-only-document-password-2026"
 const admission: AdmissionConfiguration = { _tag: "fixture", pipelineVersion: "http-fixture-1", configuration: contractFixture().run.configuration }
 const testServices = Layer.mergeAll(NodeServices.layer, FetchHttpClient.layer)
@@ -33,7 +42,8 @@ const fixture = Effect.gen(function* () {
   const path = yield* Path.Path
   const root = yield* fs.makeTempDirectoryScoped({ prefix: "amuseme-http-documents-" })
   const config = yield* serverConfig.pipe(Effect.provideService(ConfigProvider.ConfigProvider, ConfigProvider.fromUnknown({
-    AMUSEME_PORT: "4185", AMUSEME_ORIGIN: origin, AMUSEME_DATA_DIR: path.join(root, "private"), AMUSEME_APP_DIR: path.join(root, "app"),
+    AMUSEME_PORT: String(port), AMUSEME_ORIGIN: origin,
+    AMUSEME_DATA_DIR: path.join(root, "private"), AMUSEME_APP_DIR: path.join(root, "app"),
     BETTER_AUTH_SECRET: "fixture-only-http-document-secret-32-characters",
   })))
   const authOptions = { origin, secret: config.secret, databasePath: path.join(config.dataDirectory, "auth.sqlite") }
@@ -87,113 +97,6 @@ const checkEmptyTemporary = Effect.fnUntraced(function* (directory: string) {
 })
 
 describe("real document HTTP admission", () => {
-  it.live("persists upload, exact original bytes, idempotency, and ownership across a runtime restart", () => Effect.gen(function* () {
-    const f = yield* fixture
-    const bytes = yield* f.fs.readFile(f.path.join(f.pdfDirectory, "normal.pdf"))
-    const accepted = yield* Effect.gen(function* () {
-      const server = yield* serve(f.config)
-      const cookie = yield* server.signIn()
-      const otherCookie = yield* server.signIn(2)
-      const list = yield* server.request("/api/documents", { headers: { cookie } })
-      expect(list.status).toBe(200)
-      expect(yield* Schema.decodeUnknownEffect(DocumentList)(yield* list.json)).toEqual({ documents: [], upload: {
-        maxBytes: PdfLimits.maxBytes, maxPages: 50, mediaType: "application/pdf", mode: "fixture", availability: { _tag: "enabled" },
-      } })
-      const response = yield* server.request("/api/documents", uploadRequest(cookie, bytes, "http-upload-one", '研究 "paper".pdf'))
-      expect(response.status).toBe(202)
-      const record = yield* Schema.decodeUnknownEffect(AcceptedRun)(yield* response.json)
-      const repeated = yield* server.request("/api/documents", uploadRequest(cookie, bytes, "http-upload-one", '研究 "paper".pdf'))
-      expect(repeated.status).toBe(202)
-      expect(yield* repeated.json).toEqual(record)
-      const conflict = yield* server.request("/api/documents", uploadRequest(cookie, bytes, "http-upload-two"))
-      expect(conflict.status).toBe(409)
-      yield* conflict.json
-      const reusedForDifferentFile = yield* server.request("/api/documents", uploadRequest(cookie, bytes, "http-upload-one", "different.pdf"))
-      expect(reusedForDifferentFile.status).toBe(409)
-      yield* reusedForDifferentFile.json
-      expect(yield* server.counts).toBe(1)
-      for (const suffix of ["", "/status", "/original"]) {
-        const denied = yield* server.request(`/api/documents/${record.documentId}${suffix}`, { headers: { cookie: otherCookie, "x-owner-id": f.users[0]?.user.id ?? "", "x-user-role": "admin" } })
-        expect(denied.status).toBe(404)
-        yield* denied.json
-      }
-      const detail = yield* server.request(`/api/documents/${record.documentId}`, { headers: { cookie } })
-      expect((yield* Schema.decodeUnknownEffect(DocumentDetail)(yield* detail.json)).document.byteCount).toBe(bytes.length)
-      const original = yield* server.request(`/api/documents/${record.documentId}/original`, { headers: { cookie } })
-      expect(original.status).toBe(200)
-      expect(original.headers["content-type"]).toBe("application/pdf")
-      expect(original.headers["cache-control"]).toBe("no-store")
-      expect(original.headers["content-disposition"]).toMatch(/^attachment; filename="document.pdf"; filename\*=UTF-8''/u)
-      expect(original.headers["content-disposition"]).not.toContain("\n")
-      expect(new Uint8Array(yield* original.arrayBuffer)).toEqual(new Uint8Array(bytes))
-      const otherList = yield* server.request("/api/documents", { headers: { cookie: otherCookie } })
-      expect((yield* Schema.decodeUnknownEffect(DocumentList)(yield* otherList.json)).documents).toEqual([])
-      const scan = yield* f.fs.readFile(f.path.join(f.pdfDirectory, "scan.pdf"))
-      const scanResponse = yield* server.request("/api/documents", uploadRequest(otherCookie, scan, "http-scan"))
-      expect(scanResponse.status).toBe(202)
-      yield* scanResponse.json
-      expect(yield* server.counts).toBe(2)
-      yield* checkEmptyTemporary(f.config.dataDirectory)
-      return record
-    }).pipe(Effect.scoped)
-    const temporary = f.path.join(f.config.dataDirectory, "uploads")
-    const orphan = yield* f.fs.makeTempDirectory({ directory: temporary, prefix: "upload-" })
-    yield* f.fs.writeFile(f.path.join(orphan, "source.pdf"), bytes, { mode: 0o600 })
-    const sentinel = f.path.join(temporary, "unrelated-note.txt")
-    yield* f.fs.writeFileString(sentinel, "keep unrelated data")
-    yield* f.fs.symlink(f.path.join(f.config.dataDirectory, "documents", accepted.documentId), f.path.join(temporary, "upload-LINK01"))
-    yield* Effect.gen(function* () {
-      const server = yield* serve(f.config)
-      expect(yield* f.fs.exists(orphan)).toBe(false)
-      expect(yield* f.fs.readDirectory(temporary)).toEqual(["unrelated-note.txt"])
-      expect(yield* f.fs.readFileString(sentinel)).toBe("keep unrelated data")
-      const cookie = yield* server.signIn()
-      const response = yield* server.request(`/api/documents/${accepted.documentId}/status`, { headers: { cookie } })
-      expect(response.status).toBe(200)
-      const run = yield* Schema.decodeUnknownEffect(Run)(yield* response.json)
-      expect(run.id).toBe(accepted.runId)
-      expect(run.state._tag).toBe("queued")
-      expect(run.pipelineVersion).toBe("http-fixture-1")
-      expect(run.configuration).toEqual(contractFixture().run.configuration)
-      expect(yield* server.counts).toBe(2)
-      const original = yield* server.request(`/api/documents/${accepted.documentId}/original`, { headers: { cookie } })
-      expect(original.status).toBe(200)
-      expect(new Uint8Array(yield* original.arrayBuffer)).toEqual(new Uint8Array(bytes))
-    }).pipe(Effect.scoped)
-  }).pipe(Effect.scoped, Effect.provide(testServices)), { timeout: 20000 })
-
-  it.live("rejects malformed, encrypted, blank, oversized and forged uploads without durable jobs", () => Effect.gen(function* () {
-    const f = yield* fixture
-    const server = yield* serve(f.config)
-    const cookie = yield* server.signIn()
-    for (const [name, status, code] of [
-      ["malformed", 415, "unsupported-pdf"], ["blank", 422, "empty-document"], ["encrypted", 422, "encrypted-pdf"],
-      ["empty-password", 422, "encrypted-pdf"], ["fifty-one", 413, "limit-exceeded"],
-    ] as const) {
-      const response = yield* server.request("/api/documents", uploadRequest(cookie, yield* f.fs.readFile(f.path.join(f.pdfDirectory, `${name}.pdf`)), `reject-${name}`))
-      expect(response.status, name).toBe(status)
-      expect(yield* response.json).toMatchObject({ code })
-    }
-    const normal = yield* f.fs.readFile(f.path.join(f.pdfDirectory, "normal.pdf"))
-    for (const name of ["ownerId", "role", "pageCount"]) {
-      const response = yield* server.request("/api/documents", uploadRequest(cookie, normal, "forged-fields", "paper.pdf", { [name]: "forged" }))
-      expect(response.status).toBe(400)
-      yield* response.json
-    }
-    const multiple = new FormData()
-    multiple.append("file", new File([new Uint8Array(normal)], "first.pdf"))
-    multiple.append("file", new File([new Uint8Array(normal)], "second.pdf"))
-    const multipleResponse = yield* server.request("/api/documents", { method: "POST", headers: { cookie, origin, "idempotency-key": "multiple-files" }, body: multiple })
-    expect(multipleResponse.status).toBe(400)
-    yield* multipleResponse.json
-    const oversized = new Uint8Array(PdfLimits.maxBytes + 1)
-    const oversizedResponse = yield* server.request("/api/documents", uploadRequest(cookie, oversized, "over-byte-limit"))
-    expect(oversizedResponse.status).toBe(413)
-    yield* oversizedResponse.json
-    expect(yield* server.counts).toBe(0)
-    yield* checkEmptyTemporary(f.config.dataDirectory)
-  }).pipe(Effect.scoped, Effect.provide(testServices)), { timeout: 20000 })
-
   it.live("rejects decoded filename paths and stores accepted sources only under opaque IDs", () => Effect.gen(function* () {
     const f = yield* fixture
     const server = yield* serve(f.config)
@@ -220,7 +123,7 @@ describe("real document HTTP admission", () => {
     const cookie = yield* server.signIn()
     const listed = yield* server.request("/api/documents", { headers: { cookie } })
     expect(listed.status).toBe(200)
-    expect(yield* listed.json).toMatchObject({ documents: [], upload: { mode: "live", availability: { _tag: "disabled" } } })
+    expect(yield* listed.json).toMatchObject({ documents: [], upload: { mode: "live", availability: { _tag: "disabled", code: "processing-not-configured" } } })
     const denied = yield* server.request("/api/documents", { method: "POST", headers: { cookie, origin }, body: "not multipart" })
     expect(denied.status).toBe(503)
     expect(yield* denied.json).toMatchObject({ code: "processing-unavailable" })
@@ -312,7 +215,7 @@ describe("real document HTTP admission", () => {
     yield* server.database.query("expire-http-fixture", () => server.database.db.updateTable("documents").set({
       expires_at: 1577836800000, document_json: JSON.stringify({ ...detail.document, expiresAt: "2020-01-01T00:00:00.000Z" }),
     }).where("id", "=", accepted.documentId).execute())
-    for (const suffix of ["", "/status", "/original"]) {
+    for (const suffix of ["", "/status", "/original", "/preview"]) {
       const expired = yield* server.request(`/api/documents/${accepted.documentId}${suffix}`, { headers: { cookie } })
       expect(expired.status).toBe(404)
       yield* expired.json

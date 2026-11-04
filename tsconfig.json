@@ -88,7 +88,6 @@
     ]
   },
   "include": [
-    "cli/spark-extraction/**/*.ts",
     "src/**/*.ts",
     "tests/**/*.ts",
     "scripts/**/*.ts",

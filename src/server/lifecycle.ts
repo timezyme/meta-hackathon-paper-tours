@@ -12,7 +12,6 @@ import { FetchHttpClient } from "effect/http"
 import { makeNormalizationBoundary } from "../mastra/normalize-workflow.ts"
 import { stageSpecs } from "../paper/correction/index.ts"
 import { makeMetaAgentBoundary } from "../paper/providers/meta/index.ts"
-import { MineruArchiveReader } from "../paper/providers/mineru/index.ts"
 import { disabledGuardPolicy } from "../processing/config.ts"
 import { NormalizationStages } from "../processing/pipeline.ts"
 import { makeProviderGuardLayer, makeRunRecoveryLayer, makeRunDispatcherLayer, RunDispatcher, RunStarter } from "../processing/index.ts"
@@ -43,7 +42,7 @@ const closeListener = Effect.fnUntraced(function* (server: ServerType, state: Se
   )
 })
 
-export const openListener = Effect.fnUntraced(function* (app: Hono, port: number, state: ServerState) {
+export const openListener = Effect.fnUntraced(function* (app: Hono, port: number, state: ServerState, host: "127.0.0.1" | "0.0.0.0" = "127.0.0.1") {
   const server = yield* Effect.acquireRelease(
     Effect.try({
       try: () => createAdaptorServer({
@@ -58,7 +57,7 @@ export const openListener = Effect.fnUntraced(function* (app: Hono, port: number
   yield* Effect.callback<void, ServerError>((resume) => {
     const onError = (cause: Error) => resume(Effect.fail(new ServerError({ operation: "listen", cause })))
     server.once("error", onError)
-    server.listen(port, "127.0.0.1", () => resume(Effect.void))
+    server.listen(port, host, () => resume(Effect.void))
     return Effect.sync(() => { server.off("error", onError) })
   })
   state.phase = "ready"
@@ -71,17 +70,20 @@ export const makeServerRuntime = Effect.fnUntraced(function* (config: ServerConf
   yield* fs.makeDirectory(config.dataDirectory, { recursive: true, mode: 0o700 })
   yield* fs.chmod(config.dataDirectory, 0o700)
   yield* fs.makeDirectory(path.join(config.dataDirectory, "archives"), { recursive: true, mode: 0o700 })
-  const authLayer = makeAuthLayer({ origin: config.origin, secret: config.secret, databasePath: path.join(config.dataDirectory, "auth.sqlite") })
+  const authLayer = makeAuthLayer({
+    origin: config.origin, secret: config.secret, databasePath: path.join(config.dataDirectory, "auth.sqlite"),
+    judgeSignIn: config.judgeSignIn, trustedProxy: config.trustedProxy,
+  })
   const documents = makeDocumentStoreLayer(config)
   const artifacts = makeArtifactStoreLayer(config.dataDirectory).pipe(Layer.provideMerge(documents))
   const outputs = makeOutputStoreLayer.pipe(Layer.provideMerge(artifacts))
   const policy = config.processing?.pipeline.policy ?? disabledGuardPolicy
   const guarded = Layer.merge(makeProviderGuardLayer(policy), makeRunRecoveryLayer(policy, config.queueLimit)).pipe(Layer.provideMerge(outputs))
-  const infrastructure = Layer.mergeAll(authLayer, guarded, PdfInspector.layer({ pythonBin: config.pythonBin }), PdfRenderer.layer({ pythonBin: config.pythonBin }), MineruArchiveReader.layer({ pythonBin: config.pythonBin, tempDirectory: path.join(config.dataDirectory, "archives") }), FetchHttpClient.layer)
+  const infrastructure = Layer.mergeAll(authLayer, guarded, PdfInspector.layer({ pythonBin: config.pythonBin }), PdfRenderer.layer({ pythonBin: config.pythonBin }), FetchHttpClient.layer)
   const stages = NormalizationStages.layer(meta, config.processing?.pipeline).pipe(Layer.provideMerge(infrastructure))
   const dependencies = makeRunDispatcherLayer(policy, "amuseme-local", 60_000).pipe(Layer.provideMerge(stages))
   const services = Layer.merge(DocumentHandler.layer({
-    origin: config.origin, temporaryDirectory: path.join(config.dataDirectory, "uploads"), admissionConfiguration: config.admissionConfiguration,
+    origin: config.origin, temporaryDirectory: path.join(config.dataDirectory, "uploads"), admissionConfiguration: config.admissionConfiguration, uploadsPerUser: config.uploadsPerUser,
   }), OutputHandler.layer(config.origin)).pipe(Layer.provideMerge(dependencies), Layer.provide(NodeServices.layer))
   const runtime = yield* Effect.acquireRelease(
     Effect.sync(() => ManagedRuntime.make(services)),
@@ -159,10 +161,10 @@ export const startServer = Effect.fnUntraced(function* (mastra: Mastra, config: 
     try: () => mastra.startWorkers(),
     catch: (cause) => new ServerError({ operation: "start workers", cause }),
   })
-  const listener = yield* openListener(app, config.port, state)
+  const listener = yield* openListener(app, config.port, state, config.host)
   const maintenance = yield* makeDocumentMaintenance({
     purge: makeDocumentRetention(storage, () => mastra.observability.flush()).purge,
-    mineru: config.processing === null ? null : { endpoint: config.processing.pipeline.mineruEndpoint, token: config.processing.pipeline.mineruToken },
+    mineru: config.processing?.pipeline.mineruEndpoint === undefined || config.processing.pipeline.mineruToken === undefined ? null : { endpoint: config.processing.pipeline.mineruEndpoint, token: config.processing.pipeline.mineruToken },
   }).pipe(Effect.provide(yield* runtime.contextEffect))
   yield* Effect.forkScoped(Effect.gen(function* () {
     while (true) {
@@ -173,12 +175,12 @@ export const startServer = Effect.fnUntraced(function* (mastra: Mastra, config: 
   if (config.processing != null) {
     const context = yield* runtime.contextEffect
     yield* Effect.flatMap(RunDispatcher, (dispatcher) => dispatcher.recover()).pipe(Effect.provide(context))
-    yield* Effect.forkScoped(Effect.gen(function* () {
+    yield* Effect.forEach([0, 1], () => Effect.forkScoped(Effect.gen(function* () {
       while (true) {
         yield* Effect.flatMap(RunDispatcher, (dispatcher) => dispatcher.dispatchOne()).pipe(Effect.provideService(RunStarter, normalization.starter), Effect.provide(context), Effect.catch((error) => Effect.logError("Document dispatcher stopped this attempt", error)))
         yield* Effect.sleep("1 second")
       }
-    }))
+    })), { discard: true })
   }
   yield* Effect.logInfo("AmuseMe ready", { origin: config.origin, port: config.port })
   return { listener, state, runtime }

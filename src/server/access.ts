@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import { AuthService } from "../auth/index.ts"
+import { authRoutes } from "../auth/routes.ts"
 import { Session } from "../domain/api.ts"
 import { documentRouteDefinitions } from "../mastra/document-routes.ts"
 import { outputRouteDefinitions } from "../mastra/output-routes.ts"
@@ -8,9 +9,7 @@ import { isStudioInspectionRequest, studioInspectionRoutes } from "./studio-acce
 export const gatewayRoutes = [
   { method: "GET", path: "/health", access: "public" },
   { method: "GET", path: "/health/ready", access: "public" },
-  { method: "GET", path: "/auth/get-session", access: "public" },
-  { method: "POST", path: "/auth/sign-in/email", access: "public" },
-  { method: "POST", path: "/auth/sign-out", access: "public" },
+  ...authRoutes.map((route) => ({ method: route.method, path: `/auth${route.path}`, access: "public" as const })),
   { method: "GET", path: "/api/session", access: "session" },
   ...documentRouteDefinitions.map((route) => ({ method: route.method, path: route.path, access: "session" as const })),
   ...outputRouteDefinitions.map((route) => ({ method: route.method, path: route.path, access: "session" as const })),

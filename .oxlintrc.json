@@ -35,8 +35,7 @@
     {
       "files": [
         "src/**",
-        "scripts/**",
-        "cli/spark-extraction/**"
+        "scripts/**"
       ],
       "rules": {
         "amuseme/comments": "error"
@@ -46,8 +45,7 @@
       "files": [
         "src/**",
         "scripts/**",
-        "tests/**",
-        "cli/spark-extraction/**"
+        "tests/**"
       ],
       "rules": {
         "amuseme/boundaries": "error"
@@ -59,7 +57,6 @@
     ".mastra/**",
     "dist/**",
     "src/mastra/public/**",
-    "prototype/**",
     "skills/**",
     ".agents/**",
     ".claude/**",
