@@ -1,4 +1,0 @@
-interface:
-  display_name: "Live paid run"
-  short_description: "Run authorized paid uploads and report spend"
-  default_prompt: "Use $live-paid-run to process the documents the user authorized and report reservations separately from measured billing."

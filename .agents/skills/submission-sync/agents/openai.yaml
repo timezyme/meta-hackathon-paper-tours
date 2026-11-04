@@ -1,4 +1,0 @@
-interface:
-  display_name: "Submission sync"
-  short_description: "Regenerate submission inventory and prove reconstruction"
-  default_prompt: "Use $submission-sync to bring this submission in line with the amuseme-app checkout and verify the reconstruction."

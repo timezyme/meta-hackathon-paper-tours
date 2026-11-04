@@ -1,4 +1,0 @@
-interface:
-  display_name: "Guide accuracy review"
-  short_description: "Independently check guide quotes, figures and numbers"
-  default_prompt: "Use $guide-accuracy-review to check this generated reading guide against its source pages and figures."

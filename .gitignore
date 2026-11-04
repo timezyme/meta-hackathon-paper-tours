@@ -3,3 +3,13 @@ foundation.zip
 build/
 data/
 node_modules/
+
+# Local agent tooling and working files, not part of the submission
+/AGENTS.md
+/CLAUDE.md
+/.agents/
+/.claude/
+/skills/
+/docs/
+/video/
+/.build/
