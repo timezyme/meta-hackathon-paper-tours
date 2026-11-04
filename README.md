@@ -6,15 +6,15 @@ Turn a PDF into a reading guide you can check. Every explanation quotes the docu
 
 ## How it works
 
-Meta **Muse Spark 1.3** (`muse-spark-1.3`, Meta Model API) does every model step. It reads each page image, checks its own transcription and figure crops, restores headings, describes figures and writes the guide. Each step is a Mastra agent, and an answer that fails a check goes to a Muse reviewer agent for correction. A guide is published only if every quotation matches its cited passage exactly. No other model is used. The app is TypeScript (React, Mastra, Effect) and is hosted on Modal. `deploy/modal/` runs the judges' site there and loads the ten examples.
+Meta **Muse Spark 1.3** (`muse-spark-1.3`, Meta Model API) does every model step, and no other model is used. Reviewer agents correct answers that fail a check. A guide is published only if every quotation matches its cited passage exactly. The app is TypeScript (React, Mastra, Effect), hosted on Modal.
 
 ## Built during the hackathon
 
-The foundation snapshot, [`fa40c24`](https://github.com/timezyme/meta-hackathon-paper-tours/commit/fa40c24e14e59c31a6abd86fdab8997f44bb515f), is our earlier PDF-to-text foundation as of October 28. It covers page rendering, basic Muse Spark stages, the reader, ZIP export and accounts. [Everything after it](https://github.com/timezyme/meta-hackathon-paper-tours/compare/fa40c24e14e59c31a6abd86fdab8997f44bb515f...main) was built during the hackathon, including the reading guide, the quotation check, the document map, the reviewer agents, figure crop review, parallel processing, token-based charging and the judges' site.
+Everything after the October 28 foundation, [`fa40c24`](https://github.com/timezyme/meta-hackathon-paper-tours/commit/fa40c24e14e59c31a6abd86fdab8997f44bb515f), was built during the hackathon. See [NEW-WORK.md](NEW-WORK.md) and the [full diff](https://github.com/timezyme/meta-hackathon-paper-tours/compare/fa40c24e14e59c31a6abd86fdab8997f44bb515f...main).
 
 ## Run it
 
-You need Python 3.14.5, Node 24.19.0, pnpm 10.33.0 and uv. It's tested on macOS and Linux.
+You need Python 3.14.5, Node 24.19.0, pnpm 10.33.0 and uv.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -24,6 +24,6 @@ cp .env.example .env.local    # set BETTER_AUTH_SECRET and the AMUSEME_INVITE_* 
 pnpm build && pnpm provision:user && pnpm start    # open http://127.0.0.1:4180
 ```
 
-To process uploads, also set `META_API_KEY`, `AMUSEME_PROCESSING_BUDGET_USD`, `AMUSEME_BUDGET_ID` and `AMUSEME_PROCESSING_ENABLED=true`. Each document is capped at $30, and a 4-page paper costs about $0.45.
+To process uploads, also set `META_API_KEY` and the processing and budget variables in `.env.example`. A 4-page paper costs about $0.45.
 
 [Example credits](CREDITS.md) · [License: AGPL-3.0-only](LICENSE)
