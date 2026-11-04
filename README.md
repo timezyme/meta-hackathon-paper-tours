@@ -26,4 +26,4 @@ pnpm build && pnpm provision:user && pnpm start    # open http://127.0.0.1:4180
 
 To process uploads, also set `META_API_KEY`, `AMUSEME_PROCESSING_BUDGET_USD`, `AMUSEME_BUDGET_ID` and `AMUSEME_PROCESSING_ENABLED=true`. Each document is capped at $30, and a 4-page paper costs about $0.45.
 
-[Example credits](CREDITS.md) · [License: AGPL-3.0-only](LICENSING.md)
+[Example credits](CREDITS.md) · [License: AGPL-3.0-only](LICENSE)
