@@ -52,6 +52,7 @@ it.live("overlaps extraction without changing serial receipts, retries, crop dec
       let peak = 0
       let counts = 0
       const overlapping = yield* Deferred.make<void>()
+      const othersFinished = yield* Deferred.make<void>()
       const finished: Array<number> = []
       const http = HttpClient.make((request, url) => Effect.gen(function* () {
         if (url.href === countEndpoint) {
@@ -70,8 +71,9 @@ it.live("overlaps extraction without changing serial receipts, retries, crop dec
           active += 1; peak = Math.max(peak, active)
           if (active === 3) yield* Deferred.succeed(overlapping, undefined)
           if (maxConcurrentCalls > 1) yield* Deferred.await(overlapping)
-          yield* Effect.sleep(pageNumber === 1 ? "10 millis" : "1 millis")
+          if (maxConcurrentCalls > 1 && pageNumber === 1) yield* Deferred.await(othersFinished)
           active -= 1; finished.push(pageNumber)
+          if (finished.length === 2) yield* Deferred.succeed(othersFinished, undefined)
         }
         const figures = pageNumber === 3 ? [] : Array.from({ length: pageNumber === 1 ? 2 : 1 }, (_, blockIndex) => ({ blockIndex, captionBlockIndices: [], box: { x: blockIndex * 40, y: 0, width: 30, height: 30 } }))
         const result = "figureCropReview" in context ? { verdict: "confirmed", box: null } : {
