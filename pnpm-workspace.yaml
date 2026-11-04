@@ -15,4 +15,3 @@ packageExtensions:
 autoInstallPeers: false
 onlyBuiltDependencies:
   - esbuild
-  - lefthook
