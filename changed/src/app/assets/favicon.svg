@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="AmuseMe">
+  <title>AmuseMe</title>
+  <rect width="64" height="64" rx="14" fill="#243629"/>
+  <path fill="#f7f7f4" fill-rule="evenodd" transform="translate(3.2 3.2) scale(1.8)" d="M16 4H21L28 11V28H22V25.8C20.2 27.3 18.1 28 15.5 28C8.7 28 4 23 4 16C4 9 8.8 4 16 4ZM16 10C12.4 10 10 12.4 10 16C10 19.6 12.4 22 16 22C19.6 22 22 19.6 22 16V10H16Z"/>
+</svg>

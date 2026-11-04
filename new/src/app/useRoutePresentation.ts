@@ -1,10 +1,10 @@
-import { useEffect, useRef, useSyncExternalStore } from "react"
-import { presentRoute, readLocation, subscribeLocation } from "./client/browser.ts"
+import { useLocation } from "./Location.tsx"
+import { useEffect, useRef } from "react"
+import { presentRoute } from "./client/browser.ts"
 
 export const useRoutePresentation = (ready: boolean, title: string) => {
   const main = useRef<HTMLElement>(null)
-  const location = useSyncExternalStore(subscribeLocation, readLocation)
-  const pathname = location.split("?")[0] ?? location
+  const { pathname } = useLocation()
   useEffect(() => {
     if (ready && main.current !== null) presentRoute(main.current, pathname, title)
   }, [ready, title, pathname])

@@ -1,0 +1,12 @@
+diff --git a/docs/runbooks/mastra-upgrade.md b/docs/runbooks/mastra-upgrade.md
+--- a/docs/runbooks/mastra-upgrade.md
++++ b/docs/runbooks/mastra-upgrade.md
+@@ -46,7 +46,7 @@
+ 
+ `pnpm build` regenerates React output, `.mastra/output/app`, bundled `.mastra/output/studio` and `dist/server.mjs`. Inspect actual output and package identities; do not retain an old Studio bundle or edit generated HTML/CSS to hide incompatible controls. Serve with `pnpm start` using a separate absolute data directory and port. Confirm readiness, auth, product deep links, artifact routes and the admin entry use that build.
+ 
+-Complete direct Chrome verification on the frozen candidate using the [development harness](development-harness.md#verify-in-chrome). Inspect registered agents, workflow graph/run details and traces in stock Studio, plus ordinary-user/anonymous denial and direct API restrictions. Exercise reader, downloads/copy, ratings, retries, deletion and reconnect. Record errors, versions, command results, artifact hashes and serving URL. Any live-provider check retains its separate authorization.
++Complete direct Chrome verification on the frozen candidate using the [development harness](development-harness.md#verify-in-a-browser). Inspect registered agents, workflow graph/run details and traces in stock Studio, plus ordinary-user/anonymous denial and direct API restrictions. Exercise reader, downloads/copy, ratings, retries, deletion and reconnect. Record errors, versions, command results, artifact hashes and serving URL. Any live-provider check retains its separate authorization.
+ 
+ ## Cutover and rollback
+ 

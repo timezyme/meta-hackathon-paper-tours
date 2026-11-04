@@ -1,0 +1,137 @@
+import { museSparkModel, isMuseModel } from "../../../domain/meta-policy.ts"
+import { Agent } from "@mastra/core/agent"
+import { RequestContext } from "@mastra/core/request-context"
+import { Effect, Predicate, Redacted, Schema } from "effect"
+import { HttpClient } from "effect/http"
+import { z } from "zod"
+import { ProviderAdapter, ProviderFailure, type ProviderCall } from "../../../processing/contracts.ts"
+import { decodeMetaOutput, figureCropReviewAgentId, invalidMeta, metaEffort, MetaRequest, museReviewAgentId, museReviewSpec, stableJson, strictSchema, type MetaAgentId, type MetaStage, type MetaStageSpec, type MetaStageSpecs, type MetaValidators } from "./contracts.ts"
+import { pageCheckSpec, pageCheckSpecV2 } from "../../correction/page-check.ts"
+import { extractionSpec } from "../../extraction/index.ts"
+import { figureCropReviewSpec, figureCropReviewSpecs } from "../../figures/crop.ts"
+import { makeMetaModel, metaProviderOptions, type MetaBinding } from "./transport.ts"
+
+const permitKey = "amusemeMetaPermit"
+export const makeMetaAgentBoundary = (supplied: MetaStageSpecs) => {
+  const copy = (stage: MetaStage) => ({ ...supplied[stage], schema: Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Json))(stableJson(supplied[stage].schema)) })
+  const specs: MetaStageSpecs = { extraction: copy("extraction"), "page-check": copy("page-check"), headings: copy("headings"), figures: copy("figures"), guide: copy("guide") }
+  const selectedSpec = (stage: MetaStage, version: string | undefined) => {
+    if (stage === "extraction" && version === "1" && specs.extraction.promptName === extractionSpec.promptName && specs.extraction.promptVersion === "2") return extractionSpec
+    if (stage === "page-check" && version === pageCheckSpecV2.promptVersion && specs["page-check"].promptName === pageCheckSpec.promptName && specs["page-check"].promptVersion === pageCheckSpec.promptVersion) return pageCheckSpecV2
+    return specs[stage]
+  }
+  const reviewSpecs: Readonly<Record<MetaStage, MetaStageSpec>> = {
+    extraction: museReviewSpec("extraction", specs.extraction), "page-check": museReviewSpec("page-check", specs["page-check"]),
+    headings: museReviewSpec("headings", specs.headings), figures: museReviewSpec("figures", specs.figures), guide: museReviewSpec("guide", specs.guide),
+  }
+  const permits = new WeakMap<object, MetaBinding>()
+  const models = new WeakMap<object, ReturnType<typeof makeMetaModel>>()
+  const metadataModel = makeMetaModel()
+  const permitted = (agentId: MetaAgentId, value: unknown) => {
+    if (!Predicate.isObject(value)) return false
+    const binding = permits.get(value)
+    return binding !== undefined && binding.active && !binding.signal.aborted && binding.agentId === agentId
+  }
+  const roles = {
+    stage: { name: (stage: MetaStage) => `AmuseMe ${stage}`, description: "Document normalization through the durable processing guard" },
+    review: { name: (stage: MetaStage) => `AmuseMe ${stage} review`, description: "Muse review: corrects a rejected stage answer through the durable processing guard" },
+    crop: { name: () => "AmuseMe figures crop review", description: "Muse crop review: confirms or corrects a figure's crop box before it is described, through the durable processing guard" },
+  } as const
+  const createAgent = (stage: MetaStage, role: keyof typeof roles) => {
+    const id: MetaAgentId = role === "review" ? museReviewAgentId(stage) : role === "crop" ? figureCropReviewAgentId : stage
+    const fallbackInstructions = role === "review" ? reviewSpecs[stage].instructions : role === "crop" ? figureCropReviewSpec.instructions : specs[stage].instructions
+    const permission = Schema.Unknown.check(Schema.makeFilter((value) => permitted(id, value) || "A current guarded Meta call is required"))
+    return new Agent({
+      id, name: roles[role].name(stage), instructions: ({ requestContext }) => {
+        const token = requestContext.getRaw(permitKey)
+        const binding = Predicate.isObject(token) && permitted(id, token) ? permits.get(token) : undefined
+        return binding?.request.messages[0].content ?? fallbackInstructions
+      },
+      description: roles[role].description,
+      model: ({ requestContext }) => {
+        const token = requestContext.getRaw(permitKey)
+        return Predicate.isObject(token) && permitted(id, token) ? models.get(token) ?? metadataModel : metadataModel
+      },
+      requestContextSchema: z.object({ amusemeMetaPermit: z.unknown().refine(Schema.is(permission), "A current guarded Meta call is required") }),
+      maxRetries: 0, maxProcessorRetries: 0,
+      defaultOptions: { maxSteps: 1, modelSettings: { maxRetries: 0 }, maxProcessorRetries: 0, activeTools: [], toolChoice: "none" },
+    })
+  }
+  const agents = {
+    extraction: createAgent("extraction", "stage"), "page-check": createAgent("page-check", "stage"), headings: createAgent("headings", "stage"), figures: createAgent("figures", "stage"), guide: createAgent("guide", "stage"),
+    "extraction-review": createAgent("extraction", "review"), "page-check-review": createAgent("page-check", "review"), "headings-review": createAgent("headings", "review"), "figures-review": createAgent("figures", "review"), "guide-review": createAgent("guide", "review"),
+    [figureCropReviewAgentId]: createAgent("figures", "crop"),
+  } satisfies Record<MetaAgentId, Agent>
+  const makeAdapter = Effect.fn("makeMetaAdapter")(function* (options: {
+    readonly credential: Redacted.Redacted<string>
+    readonly validators: MetaValidators
+    readonly getAgent?: (agentId: MetaAgentId) => typeof agents[MetaAgentId]
+  }) {
+    const context = yield* Effect.context<HttpClient.HttpClient>()
+    const run = Effect.runPromiseWith(context)
+    const invoke = Effect.fn("MetaAdapter.invoke")(function* (call: ProviderCall) {
+      const stage = call.receipt.stage
+      const request = yield* Schema.decodeUnknownEffect(MetaRequest)(call.intent.request, { onExcessProperty: "error" }).pipe(Effect.mapError(() => new ProviderFailure({ certainty: "not-submitted", message: "The Meta request is invalid" })))
+      const saved = call.receipt.configuration
+      const configuration = stage === "extraction" ? saved._tag === "extraction" && saved.provider === "meta" && saved.version === request.model ? saved.model : undefined : saved._tag === "model" ? saved : undefined
+      const stageSpec = selectedSpec(stage, configuration?.promptVersion)
+      const schemaName = request.response_format.json_schema.name
+      const review = schemaName === reviewSpecs[stage].promptName && configuration?.promptVersion !== "1"
+      const crop = stage === "figures" && schemaName === figureCropReviewSpec.promptName && call.receipt.task === "figure-crop"
+      const agentId: MetaAgentId = review ? museReviewAgentId(stage) : crop ? figureCropReviewAgentId : stage
+      const cropSpec = Object.values(figureCropReviewSpecs).find((candidate) => candidate.instructions === request.messages[0].content) ?? figureCropReviewSpec
+      const spec = review ? museReviewSpec(stage, stageSpec) : crop ? cropSpec : stageSpec
+      if (configuration === undefined || configuration.provider !== "meta" || configuration.model !== request.model || configuration.reasoning !== request.reasoning_effort || request.reasoning_effort !== metaEffort(stage) || configuration.maxOutputTokens !== request.max_completion_tokens || call.intent.maxOutputTokens !== request.max_completion_tokens || configuration.promptName !== stageSpec.promptName || configuration.promptVersion !== stageSpec.promptVersion || request.messages[0].content !== spec.instructions || request.response_format.json_schema.name !== spec.promptName || stableJson(request.response_format.json_schema.schema) !== stableJson(spec.schema) || !strictSchema(spec.schema) || call.intent.clientIdempotencyKey !== null || request.messages[1].content.filter((part) => part.type === "image_url").length > 50) {
+        return yield* new ProviderFailure({ certainty: "not-submitted", message: "The Meta request does not match its authorized stage" })
+      }
+      const token = {}
+      let binding: MetaBinding | undefined
+      let controller: AbortController | undefined
+      const requestContext = new RequestContext()
+      const agent = options.getAgent?.(agentId) ?? agents[agentId]
+      const stopped = () => new ProviderFailure({ certainty: binding?.sent ? "unknown" : "not-submitted", message: binding?.sent ? "Meta execution ended without a complete response" : "The guarded Meta agent rejected the request" })
+      const result = yield* Effect.result(Effect.callback<void, ProviderFailure>((resume) => {
+        controller = new AbortController()
+        const signal = controller.signal
+        binding = { stage, agentId, call, request, credential: options.credential, run, signal, active: true, sent: false, captured: null, pending: new Set() }
+        permits.set(token, binding)
+        models.set(token, makeMetaModel(binding))
+        requestContext.setRaw(permitKey, token)
+        const completion = run(Effect.tryPromise({ try: () => agent.generate([{ role: "user", content: request.messages[1].content.map((part) => part.type === "text" ? { type: "text" as const, text: part.text } : { type: "image" as const, image: part.image_url.url, mediaType: part.image_url.url.slice(5, part.image_url.url.indexOf(";")) }) }], {
+          requestContext, maxSteps: 1, maxProcessorRetries: 0, activeTools: [], toolChoice: "none", abortSignal: signal,
+          runId: call.attemptId,
+          tracingOptions: { metadata: { documentId: call.receipt.scope.documentId, documentRunId: call.receipt.scope.runId, providerAttemptId: call.attemptId, resourceId: call.receipt.ownerId }, hideInput: true, hideOutput: true },
+          modelSettings: { maxRetries: 0, maxOutputTokens: request.max_completion_tokens },
+          providerOptions: metaProviderOptions(request),
+        }), catch: stopped }))
+        completion.then(() => resume(Effect.void), () => resume(Effect.fail(stopped())))
+        return Effect.sync(() => { if (binding !== undefined) binding.active = false; controller?.abort() }).pipe(
+          Effect.andThen(Effect.promise(() => completion.then(() => undefined, () => undefined))),
+        )
+      }).pipe(Effect.ensuring(Effect.sync(() => {
+        if (binding !== undefined) binding.active = false
+        controller?.abort()
+        permits.delete(token)
+        models.delete(token)
+      }).pipe(Effect.andThen(Effect.promise(() => Promise.all(binding?.pending ?? [])))))))
+      if (binding?.captured !== null && binding?.captured !== undefined) return binding.captured
+      if (result._tag === "Failure") return yield* result.failure
+      return yield* new ProviderFailure({ certainty: binding?.sent ? "unknown" : "not-submitted", message: "The Meta agent returned no captured provider response" })
+    })
+    const validate = Effect.fn("MetaAdapter.validate")(function* (response: Schema.Json, receipt: ProviderCall["receipt"]) {
+      const saved = receipt.configuration
+      const configuration = receipt.stage === "extraction"
+        ? saved._tag === "extraction" && saved.provider === "meta" && saved.version === museSparkModel ? saved.model : undefined
+        : saved._tag === "model" ? saved : undefined
+      const spec = selectedSpec(receipt.stage, configuration?.promptVersion)
+      if (configuration === undefined || !isMuseModel(configuration)
+        || configuration.reasoning !== metaEffort(receipt.stage)
+        || configuration.promptName !== spec.promptName || configuration.promptVersion !== spec.promptVersion) {
+        return yield* invalidMeta()
+      }
+      yield* options.validators[receipt.stage](yield* decodeMetaOutput(response), receipt)
+    })
+    return ProviderAdapter.of({ invoke, validate })
+  })
+  return { agents, makeAdapter }
+}

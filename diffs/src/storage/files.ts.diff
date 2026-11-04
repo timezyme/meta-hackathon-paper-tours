@@ -1,0 +1,36 @@
+diff --git a/src/storage/files.ts b/src/storage/files.ts
+--- a/src/storage/files.ts
++++ b/src/storage/files.ts
+@@ -37,10 +37,14 @@
+       yield* syncDirectory(root)
+     }).pipe(Effect.mapError(mapError), Effect.onError(() => remove(id).pipe(Effect.catch(() => Effect.logWarning("Private source cleanup deferred until reconciliation")))))
+   })
++  const sourcePath = Effect.fn("SourceFiles.sourcePath")(function* (document: Document) {
++    if ((yield* fs.realPath(directory(document.id)).pipe(Effect.mapError(mapError))) !== directory(document.id)) return yield* mapError("Document storage cannot follow a symlink")
++    return path.join(directory(document.id), "source.pdf")
++  })
+   const read = Effect.fn("SourceFiles.read")(function* (document: Document) {
+-    if ((yield* fs.realPath(directory(document.id)).pipe(Effect.mapError(mapError))) !== directory(document.id)) return yield* mapError("Document storage cannot follow a symlink")
++    const source = yield* sourcePath(document)
+     const bytes = yield* Effect.gen(function* () {
+-      const file = yield* fs.open(path.join(directory(document.id), "source.pdf"), { flag: "r", noFollow: true })
++      const file = yield* fs.open(source, { flag: "r", noFollow: true })
+       const info = yield* file.stat
+       if (info.type !== "File" || info.size !== BigInt(document.byteCount) || document.byteCount > maxUploadBytes) {
+         return yield* storageFailure("source-file", "Source size does not match its durable record")
+@@ -60,7 +64,7 @@
+   const entries = () => fs.readDirectory(root).pipe(Effect.mapError(mapError))
+   const cleanupTemporary = Effect.fn("SourceFiles.cleanupTemporary")(function* () {
+     for (const [folder, pattern] of [
+-      ["uploads", /^upload-[A-Za-z0-9]{6}$/u],
++      ["uploads", /^(?:upload|preview)-[A-Za-z0-9]{6}$/u],
+       ["processing", /^render-[A-Za-z0-9]{6}$/u],
+       ["archives", /^mineru-[A-Za-z0-9]{6}$/u],
+     ] as const) {
+@@ -88,5 +92,5 @@
+       }
+     }
+   }, (effect) => effect.pipe(Effect.mapError(mapError)))
+-  return { root, hash, identifier, write, read, remove, entries, cleanupTemporary }
++  return { root, hash, identifier, write, read, sourcePath, remove, entries, cleanupTemporary }
+ })

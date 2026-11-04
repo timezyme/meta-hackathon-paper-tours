@@ -3,12 +3,12 @@ import { APIError, createAuthEndpoint } from "better-auth/api"
 import { setSessionCookie } from "better-auth/cookies"
 import { Effect, Redacted, Schema } from "effect"
 import { EmailAddress, normalizeEmail } from "../domain/index.ts"
+import { judgeSignInPath } from "./routes.ts"
 
 export interface JudgeSignInOptions {
   readonly accessCode: Redacted.Redacted<string> | null
 }
 
-export const judgeSignInPath = "/sign-in/judge"
 const JudgeSignInBody = Schema.Struct({ email: Schema.String.check(Schema.isMaxLength(512)), accessCode: Schema.optionalKey(Schema.String.check(Schema.isMaxLength(256))) })
 const sameCode = (given: string, expected: string) => {
   let difference = given.length ^ expected.length

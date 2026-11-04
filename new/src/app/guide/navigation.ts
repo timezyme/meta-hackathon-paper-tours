@@ -15,7 +15,7 @@ export type GuideRoute = {
   readonly n: number
   readonly source: number | null
   readonly node: number | null
-  readonly view: "text" | "original" | "clean"
+  readonly view: typeof View.Type
 }
 
 const queryValidators: Readonly<Record<string, (value: string) => boolean>> = {
@@ -41,8 +41,7 @@ export const validDocumentQuery = (query: string): boolean => {
   return params.toString() === query
 }
 
-export const guideRouteFromLocation = (location: string): GuideRoute => {
-  const params = new URLSearchParams(location.split("?")[1] ?? "")
+export const guideRouteFromParams = (params: URLSearchParams): GuideRoute => {
   const mode = params.get("mode")
   const goal = params.get("goal")
   const view = params.get("view")
@@ -58,6 +57,17 @@ export const guideRouteFromLocation = (location: string): GuideRoute => {
     view: Schema.is(View)(view) ? view : "text",
   }
 }
+
+export const documentQuery = (params: URLSearchParams) => {
+  const raw = params.get("p")
+  return {
+    guide: guideRouteFromParams(params),
+    page: raw !== null && /^\d+$/u.test(raw) ? Number(raw) : 1,
+  }
+}
+
+export const guideRouteFromLocation = (location: string): GuideRoute =>
+  documentQuery(new URLSearchParams(location.split("?")[1] ?? "")).guide
 
 export const selectedGoal = (route: Pick<GuideRoute, "mode" | "goal">): ReadingGoal | null => {
   if (route.goal !== null) return route.goal

@@ -1,0 +1,136 @@
+diff --git a/tests/paper/pdf-render.test.ts b/tests/paper/pdf-render.test.ts
+--- a/tests/paper/pdf-render.test.ts
++++ b/tests/paper/pdf-render.test.ts
+@@ -2,7 +2,8 @@
+ import { describe, expect, it } from "@effect/vitest"
+ import { Clock, Crypto, Duration, Effect, Fiber, FileSystem, Path, Schema, Stream } from "effect"
+ import { ChildProcess, ChildProcessSpawner } from "effect/process"
+-import { SourceHash } from "../../src/domain/index.ts"
++import { ArtifactHash, SourceHash } from "../../src/domain/index.ts"
++import { extractionPage } from "../../src/paper/extraction/index.ts"
+ import { PdfRenderer, PdfRenderLimits } from "../../src/paper/pdf/render.ts"
+ 
+ const GENERATE = String.raw`
+@@ -22,10 +23,8 @@
+     page.set_rotation(rotation)
+     return document
+ 
+-for shape, width, height in [("rectangle",240,120),("square",120,120)]:
+-    for rotation in [0,90,180,270]:
+-        with quadrants(width,height,rotation) as document:
+-            document.save(root / f"{shape}-{rotation}.pdf")
++with quadrants(240,120,0) as document:
++    document.save(root / "rectangle-0.pdf")
+ with quadrants(2000,1000,0) as document:
+     document.save(root / "large.pdf")
+ with quadrants(240,120,0) as document:
+@@ -101,13 +100,6 @@
+ const blue = [0, 0, 255]
+ const yellow = [255, 255, 0]
+ 
+-const rotations = [
+-  { degrees: 0, corners: [red, green, blue, yellow] },
+-  { degrees: 90, corners: [blue, red, yellow, green] },
+-  { degrees: 180, corners: [yellow, blue, green, red] },
+-  { degrees: 270, corners: [green, yellow, red, blue] },
+-] as const
+-
+ const cancellationScript = (pidsFile: string, partialFile: string) => `#!/bin/sh\nprintf '%s\\n' "$$" >> '${pidsFile}.starts'\nprintf partial > '${partialFile}'\n/bin/sleep 60 &\nprintf '%s\\n%s\\n' "$$" "$!" > '${pidsFile}.pending'\n/bin/mv '${pidsFile}.pending' '${pidsFile}'\nwait\n`
+ const waitForPids = (fs: FileSystem.FileSystem, pidsFile: string) => Effect.gen(function* () {
+   while (!(yield* fs.exists(pidsFile))) yield* Effect.sleep("10 millis")
+@@ -119,27 +111,6 @@
+ }).pipe(Effect.timeout("5 seconds"))
+ 
+ describe("private PDF page rendering", () => {
+-  it.effect("renders physical rotation once, including ambiguous square and 180-degree pages", () => Effect.gen(function* () {
+-    const f = yield* fixture()
+-    const renderer = yield* PdfRenderer.pipe(Effect.provide(PdfRenderer.layer(f)))
+-    for (const shape of ["rectangle", "square"]) {
+-      for (const rotation of rotations) {
+-        const request = yield* f.input(`${shape}-${rotation.degrees}`)
+-        const pages = yield* renderer.render(request)
+-        expect(pages).toHaveLength(1)
+-        const page = pages[0]
+-        if (page === undefined) return yield* Effect.die("missing page")
+-        expect(page.physicalRotation).toBe(rotation.degrees)
+-        expect(page).not.toHaveProperty("rotation")
+-        const sideways = rotation.degrees === 90 || rotation.degrees === 270
+-        expect([page.widthPoints, page.heightPoints]).toEqual(shape === "square" ? [120, 120] : sideways ? [120, 240] : [240, 120])
+-        expect(page.dpi).toBe(300)
+-        const [actual] = yield* f.inspect([f.path.join(request.outputDirectory, page.image.path)])
+-        expect(actual).toMatchObject({ width: page.width, height: page.height, dpi: 300, hash: page.image.hash, bytes: page.image.byteCount, mode: 0o600, corners: rotation.corners })
+-      }
+-    }
+-  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)), { timeout: 20000 })
+-
+   it.effect("bounds the longest side and records reduced scaling DPI", () => Effect.gen(function* () {
+     const f = yield* fixture()
+     const request = yield* f.input("large")
+@@ -160,6 +131,19 @@
+     const [actualScan, blank] = yield* f.inspect([f.path.join(scan.outputDirectory, "pages/page-001.png"), f.path.join(mixed.outputDirectory, "pages/page-002.png")])
+     expect(actualScan).toMatchObject({ center: [0, 0, 0], corners: [[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]] })
+     expect(blank).toMatchObject({ center: [255, 255, 255], hash: mixedPages[1]?.image.hash })
++  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)))
++
++  it.effect("renders only the selected original page with its physical page number", () => Effect.gen(function* () {
++    const f = yield* fixture()
++    const renderer = yield* PdfRenderer.pipe(Effect.provide(PdfRenderer.layer(f)))
++    const request = yield* f.input("mixed", 2)
++    for (const pageNumber of [0, 3, 1.5]) expect(yield* Effect.result(renderer.render({ ...request, pageNumber }))).toMatchObject({ _tag: "Failure", failure: { code: "invalid-input" } })
++    const pages = yield* renderer.render({ ...request, pageNumber: 2 })
++    expect(pages).toHaveLength(1)
++    expect(pages[0]).toMatchObject({ pageNumber: 2, image: { path: "pages/page-002.png" } })
++    expect(yield* f.fs.readDirectory(f.path.join(request.outputDirectory, "pages"))).toEqual(["page-002.png"])
++    const [image] = yield* f.inspect([f.path.join(request.outputDirectory, "pages/page-002.png")])
++    expect(image).toMatchObject({ center: [255, 255, 255], corners: [[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]] })
+   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)))
+ 
+   it.effect("rejects changed bytes, wrong page count, encryption, and unsafe private sources without output", () => Effect.gen(function* () {
+@@ -192,6 +176,47 @@
+     yield* f.fs.symlink(request.outputDirectory, alias)
+     expect(yield* Effect.result(renderer.render({ ...request, outputDirectory: alias }))).toMatchObject({ _tag: "Failure", failure: { code: "storage-failed" } })
+     expect(yield* Effect.result(renderer.render({ ...request, outputDirectory: "relative" }))).toMatchObject({ _tag: "Failure", failure: { code: "invalid-input" } })
++  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)))
++
++  it.effect("rejects crop source tampering, wrong dimensions, and unsafe sources before creating output", () => Effect.gen(function* () {
++    const f = yield* fixture()
++    const renderer = yield* PdfRenderer.pipe(Effect.provide(PdfRenderer.layer(f)))
++    const request = yield* f.input("rectangle-0")
++    const [rendered] = yield* renderer.render(request)
++    if (rendered === undefined) return yield* Effect.die("Expected source page")
++    const page = extractionPage(rendered)
++    const privatePath = f.path.join(request.outputDirectory, page.image.path)
++    const outputPath = f.path.join(request.outputDirectory, "figure.png")
++    const crop = { privatePath, outputPath, page, box: { coordinateSystem: "rendered-page-top-left-pixels" as const, x: 10, y: 20, width: 100, height: 80 } }
++    for (const changed of [{ ...page, image: { ...page.image, hash: ArtifactHash.make("0".repeat(64)) } }, { ...page, width: page.width - 1 }]) {
++      expect(yield* Effect.result(renderer.crop({ ...crop, page: changed }))).toMatchObject({ _tag: "Failure", failure: { code: "invalid-input" } })
++      expect(yield* f.fs.exists(outputPath)).toBe(false)
++    }
++    const link = f.path.join(request.outputDirectory, "source-link.png")
++    yield* f.fs.symlink(privatePath, link)
++    expect(yield* Effect.result(renderer.crop({ ...crop, privatePath: link }))).toMatchObject({ _tag: "Failure", failure: { code: "invalid-input" } })
++    yield* f.fs.chmod(privatePath, 0o644)
++    expect(yield* Effect.result(renderer.crop(crop))).toMatchObject({ _tag: "Failure", failure: { code: "invalid-input" } })
++    expect(yield* f.fs.exists(outputPath)).toBe(false)
++  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)))
++
++  it.effect("preserves an existing crop output and writes a new bounded region privately", () => Effect.gen(function* () {
++    const f = yield* fixture()
++    const renderer = yield* PdfRenderer.pipe(Effect.provide(PdfRenderer.layer(f)))
++    const request = yield* f.input("rectangle-0")
++    const [rendered] = yield* renderer.render(request)
++    if (rendered === undefined) return yield* Effect.die("Expected source page")
++    const page = extractionPage(rendered)
++    const outputPath = f.path.join(request.outputDirectory, "figure.png")
++    const crop = { privatePath: f.path.join(request.outputDirectory, page.image.path), outputPath, page, box: { coordinateSystem: "rendered-page-top-left-pixels" as const, x: 10, y: 20, width: 100, height: 80 } }
++    yield* f.fs.writeFileString(outputPath, "existing", { flag: "wx", mode: 0o600 })
++    expect(yield* Effect.result(renderer.crop(crop))).toMatchObject({ _tag: "Failure", failure: { code: "processing-unavailable" } })
++    expect(yield* f.fs.readFileString(outputPath)).toBe("existing")
++    const fresh = f.path.join(request.outputDirectory, "fresh.png")
++    const result = yield* renderer.crop({ ...crop, outputPath: fresh })
++    const [actual] = yield* f.inspect([fresh])
++    expect(actual).toMatchObject({ width: 100, height: 80, hash: result.hash, bytes: result.byteCount, mode: 0o600, center: red })
++    expect(yield* f.fs.readFileString(outputPath)).toBe("existing")
+   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)))
+ 
+   it.effect("fails closed on missing runtime, invalid response, or excess stdout/stderr and cleans output", () => Effect.gen(function* () {

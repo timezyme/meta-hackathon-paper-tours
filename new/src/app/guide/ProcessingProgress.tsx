@@ -15,7 +15,7 @@ const stepState = { done: "Done", now: "In progress", next: "Up next" } as const
 
 export function ProcessingProgress({ record, compact = false }: { readonly record: DocumentRecord; readonly compact?: boolean }) {
   const run = record.latestRun
-  const summary = runSummary(run, record.document.pageCount)
+  const summary = runSummary(run)
   if (!activeRun(run)) return null
   const steps = processingSteps(run)
   const startedAt = run.state._tag === "running" ? run.state.startedAt : null
@@ -29,6 +29,7 @@ export function ProcessingProgress({ record, compact = false }: { readonly recor
       <span className="progress-label">{step.label}<span className="visually-hidden"> · {stepState[step.state]}</span></span>
       {step.detail !== null && <span className="progress-detail">{step.detail}</span>}
     </li>)}</ol>}
-    {!compact && <p className="progress-note">You can leave this page. Muse keeps working, and your library shows when the guide is ready.</p>}
+    {!compact && startedAt === null && <p className="progress-note">
+      You can leave this page. Muse keeps working, and your library shows when the guide is ready.</p>}
   </section>
 }

@@ -1,0 +1,12 @@
+diff --git a/tests/paper/meta/permissions.test.ts b/tests/paper/meta/permissions.test.ts
+--- a/tests/paper/meta/permissions.test.ts
++++ b/tests/paper/meta/permissions.test.ts
+@@ -31,7 +31,7 @@
+         }
+       }
+     }
+-    expect(calls).toHaveBeenCalledTimes(4)
++    expect(calls).toHaveBeenCalledTimes(11)
+   }))
+ 
+   it.effect("rejects cross-agent, serialized, spent and revoked permissions while permitting shallow identity copies", () => Effect.gen(function* () {

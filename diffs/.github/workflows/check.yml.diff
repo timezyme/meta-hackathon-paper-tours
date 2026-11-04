@@ -1,0 +1,18 @@
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -21,8 +21,14 @@
+       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+         with:
+           python-version: '3.14.5'
++      # Offline suites: Modal, the Meta API and curl are all faked, so nothing here is paid or networked.
++      - run: python -I -m unittest discover -s tests/submission -v
++      - run: python -I -m unittest discover -s tests/deploy -v
++      - run: python -I -m unittest discover -s cli/muse -p 'test_*.py' -v
++      - run: python -I -m unittest discover -s cli/semantic-scholar -p 'test_*.py' -v
+       - run: python -m venv data/python/.venv
+       - run: data/python/.venv/bin/python -m pip install -r python/requirements.txt
+       - run: pnpm install --frozen-lockfile --strict-peer-dependencies
+       - run: pnpm check
+       - run: pnpm test
++      - run: pnpm build

@@ -1,0 +1,33 @@
+diff --git a/src/mastra/normalize-workflow.ts b/src/mastra/normalize-workflow.ts
+--- a/src/mastra/normalize-workflow.ts
++++ b/src/mastra/normalize-workflow.ts
+@@ -49,7 +49,19 @@
+     .then(step("restore-headings", "headings", Corrected, Hierarchy))
+     .then(step("describe-figures", "figures", Hierarchy, Described))
+     .then(step("assemble-document", "assembly", Described, Assembled))
++    .then(step("write-reading-guide", "guide", Assembled, Assembled))
+     .then(step("publish-document", "export", Assembled, Published)).commit()
++
++  const isUnstartedSnapshot = (snapshot: unknown, claim: DispatchClaim) => {
++    const parsed = Schema.decodeUnknownResult(UnstartedSnapshot)(snapshot, { onExcessProperty: "error" })
++    const acceptedStepGraphs = [JSON.stringify(workflow.serializedStepGraph)]
++    if (claim.run.configuration.guide === undefined) {
++      acceptedStepGraphs.push(JSON.stringify(workflow.serializedStepGraph.filter((entry) =>
++        entry.type !== "step" || entry.step.id !== "write-reading-guide")))
++    }
++    return Result.isSuccess(parsed) && parsed.success.runId === claim.run.mastraRunId
++      && acceptedStepGraphs.includes(JSON.stringify(parsed.success.serializedStepGraph))
++  }
+ 
+   const starter = RunStarter.of({ startOrReconnect: Effect.fn("Normalization.startOrReconnect")(function* (claim: DispatchClaim) {
+     if (claim.run.mastraRunId === null) return yield* executionFailure("conflict", "The accepted document has no workflow association")
+@@ -69,8 +81,7 @@
+           let unstarted = false
+           if (saved?.status === "pending") {
+             const snapshot = yield* Effect.tryPromise({ try: () => workflow.mastra?.getStorage()?.getStore("workflows").then((store) => store?.loadWorkflowSnapshot({ workflowName: "normalize-document", runId: claim.run.mastraRunId! })) ?? Promise.resolve(undefined), catch: () => executionFailure("provider-unknown-completion", "The initial workflow snapshot could not be read") })
+-            const parsed = Schema.decodeUnknownResult(UnstartedSnapshot)(snapshot, { onExcessProperty: "error" })
+-            unstarted = Result.isSuccess(parsed) && parsed.success.runId === claim.run.mastraRunId && JSON.stringify(parsed.success.serializedStepGraph) === JSON.stringify(workflow.serializedStepGraph)
++            unstarted = isUnstartedSnapshot(snapshot, claim)
+             if (!unstarted) return yield* executionFailure("provider-unknown-completion", "The pending workflow contains prior execution and cannot be started again")
+           }
+           const run = yield* Effect.tryPromise({ try: () => workflow.createRun({ runId: claim.run.mastraRunId!, resourceId: claim.run.ownerId, disableScorers: true }), catch: () => executionFailure("provider-unknown-completion", "The workflow could not be opened") })

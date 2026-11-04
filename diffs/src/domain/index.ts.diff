@@ -1,0 +1,9 @@
+diff --git a/src/domain/index.ts b/src/domain/index.ts
+--- a/src/domain/index.ts
++++ b/src/domain/index.ts
+@@ -4,3 +4,5 @@
+ export * from "./artifacts.ts"
+ export * from "./api.ts"
+ export * from "./validation.ts"
++export * from "./guide.ts"
++export * from "./furniture.ts"

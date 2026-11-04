@@ -1,5 +1,51 @@
 # Verification and limits
 
+## Submission sync to application commit `16cfdbe` — November 3, 2026
+
+The submission was regenerated from application commit `16cfdbe`. Since `76f7d43` it adds:
+- the code-review refactors: the processing pipeline split into one file per stage, the server's sign-in routes, shared-document read rule and page previews moved into their own modules, the reader and guide screens split into smaller parts, and simpler packaging scripts;
+- parallel processing: pages and Muse calls run side by side within each document's limits, and documents from two different owners process at once;
+- a page limit on live uploads. A PDF with more pages than the $30 cap can cover is refused at upload instead of failing during extraction. Under the shipped settings that is 48 pages;
+- fixes for the three faults the paid upload found (below);
+- an explicit `{"deleted": true}` entry in `changes.json` for a foundation file the application removed. Two files are recorded this way: `tests/guards/lint.test.ts` and `tests/paper/mineru/archive-fixtures.py`;
+- the `changed/` and `diffs/` folders, which show each changed foundation file in its event version and as a diff.
+
+Tests that took a second or more were deleted, and the suite now runs on two workers. That is why it has 745 tests rather than 793.
+
+A fresh clone of the submission was rebuilt with `foundation-2026-10-28`. It reproduces all 503 selected paths: 140 changed, 115 new and 248 preserved. The 2 deleted files are absent. Every path matches application commit `16cfdbe` by bytes and executable mode.
+
+These ran on the application at `e5f4d0c`, after the refactors, and passed:
+- `pnpm check`;
+- `pnpm test` (745 of 745 in 83 files);
+- `pnpm build`;
+- the Python suites: submission 39, deploy 10, Muse CLI 21 and Semantic Scholar CLI 23.
+
+The later commits change only the submission scripts, the upload page limit and the duration note. For those, `pnpm check`, the 40 submission tests, the 78 server tests, the page-limit test and the 16 tests of the two changed screens passed.
+
+At `2d29974`, the README's "Run it" steps were followed in a new directory with a clean `pnpm install` and a new Python environment. Every step passed: rebuild, build, account creation, start and sign-in, then `pnpm check` and the submission tests. That run did not include the page limit.
+
+### Deployed to the judges' copy and timed
+
+On November 3, `7ddcb39` was deployed to the judges' copy as app `ap-nVVkraRzZEC1pT4dyMdh00`, replacing `ap-LPfwPcnF84Df7OnKgMzglj`. The volume was kept, not re-seeded.
+
+After the deploy:
+- `/health/ready` returned `ready`, and the page loaded;
+- the documents API returned 401 without a session, and a cross-origin judge sign-in returned 403;
+- the logs showed no errors.
+
+The same QA judge account then signed in and uploaded the same 4-page faer PDF again (same SHA-256), through the site's API:
+- the library listed the 10 examples, and the upload limit read 48 pages;
+- all ten example covers returned 200 when requested at once;
+- the run went from upload, at 03:25:47Z, to `succeeded` in **7 min 14 s**, against 12 min 49 s before the speed fix. Extraction took about 2 minutes and page checking about 4;
+- the account's upload count went from 1 to 2 of 3.
+
+This run's cost was not read from the ledger, and the guide was not reviewed again.
+
+Because a short paper took 7 minutes, `16cfdbe` changes the duration note from "usually takes a few minutes" to "usually takes several minutes", in both the processing status and the upload area. It was deployed the same night as app `ap-40AfaAllnvgDi19NkcZ80Q`, replacing `ap-nVVkraRzZEC1pT4dyMdh00`, again without re-seeding:
+- `/health/ready`, the page, the 401 and the 403 checks gave the same results;
+- the logs showed no errors;
+- the served page script contains the new wording.
+
 ## Submission syncs to application commits `38fd2f8` and `76f7d43` — November 3, 2026
 
 The submission was regenerated twice on November 3: first from application commit `38fd2f8` (pushed as `563e307`), then from `76f7d43` (pushed as `546a453`). Together they add:
@@ -44,6 +90,25 @@ A separate agent followed a written judge checklist on https://guided-tours--amu
   - Offline behavior, because neither browser driver can cut the network.
   - Refusing a fourth upload. That rule is covered by `tests/server/shared-examples.test.ts`.
 - **Open:** the README's demo video link downloads a file instead of playing, because GitHub serves release files as attachments.
+
+### One paid upload on the judges' copy
+
+On November 3, from 23:00 to 23:25Z, a separate agent signed in as a QA judge and uploaded one PDF to the judges' copy (app `ap-LPfwPcnF84Df7OnKgMzglj`, application `76f7d43`). The user set a $10 cap.
+
+The paper was *faer: A linear algebra library for the Rust programming language* (JOSS, [doi:10.21105/joss.06099](https://doi.org/10.21105/joss.06099), CC BY 4.0). It has 4 pages, and its SHA-256 matched the copy the user approved.
+
+- **Refusals.** A text file renamed `.pdf`, a 51-page PDF and a file over 50 MiB were each refused with a plain message, and the upload count stayed at 3. A direct POST of the large file got 413.
+- **Processing.** The run finished as `succeeded-with-issues` in 12 min 49 s, with 3 figures extracted. Its one issue was a figure crop that Muse could not confirm. On inspection, that crop is complete. The guide has 5 steps, 3 claims and 17 cited passages. The walkthrough, source drawer, original page, claims, map and reader all worked on it.
+- **Downloads.** The ZIP holds the text, document JSON, image list, processing report and the 3 figure images, all for the same revision. The text download equals the ZIP's text, and the original PDF download is byte-identical to the source.
+- **Access.** Signed out, every link to the document returned 401. A second judge's library stayed empty, and all ten of its links returned 404.
+- **Cost.** All 18 Meta calls completed and were settled. They reserved $5.90 at worst case and were charged **$0.47** at reported tokens. Every earlier ledger row was unchanged.
+- **Accuracy.** A separate agent's review found all 30 quotes verbatim, each occurring once in its cited block and page. It found no high-severity faults, 3 medium and 7 low. All three medium faults are in how the guide reads the benchmark charts: one claim rates its support from the text alone, its limits miss where the figures contradict "matches or surpasses", and one figure description misplaces faer between 1,000 and 3,000.
+- **Found:**
+  - the time estimate was far too low;
+  - the file input stayed disabled after a refused file;
+  - the text download was still named `normalized.txt`.
+
+  The sync at the top of this file fixes the file input and renames the text download to `amuseme-<id>.txt`. For the time, it adds parallel processing and changes the note to "usually takes several minutes". After the deploy, the same paper took 7 min 14 s.
 
 ### Completed Meta calls are charged their reported tokens
 
@@ -147,7 +212,7 @@ The application gained email-only judge sign-in, shared read-only examples, a pe
   - The page loads.
   - The documents API refuses requests without a session (401).
   - A cross-origin sign-in request is refused (403).
-- **Hosted judge test:** signing in and opening the examples were tested on November 3 (see above). Processing an upload there has not been tested.
+- **Hosted judge test:** signing in, opening the examples and one paid upload were tested on November 3 (see above).
 - **Re-seeded and redeployed on November 3.** Before the change, the volume still had no accounts, provider attempts or charges, and only the examples owner's 7 documents. The app was stopped, and the volume was given the ten reviewed examples: the seven above plus NASA `dfc4a546`, the patent `82703425` and Panda `15ce6a85`. That is 10 documents, 11 runs and 11 outputs, with no charges. The superseded NASA and OSHA runs were left out. The app was then redeployed from application commit `11ebdd1`. `/health/ready` returned `ready`, sign-in options reported email only, the page loaded, the documents API returned 401 without a session, a cross-origin sign-in returned 403, and the logs showed no errors.
 
 The submission was regenerated from application commit `15a0856` with Python 3.14.5 and Node 24.19.0. Reconstruction from this repository reproduced all 463 selected files: 121 changed, 73 new and 269 preserved. All 377 files outside `prototype/` match the commit by bytes and executable mode; the 86 inherited prototype files keep their exact foundation bytes and modes. In the reconstructed tree, after `git init`, a clean `pnpm install --frozen-lockfile --strict-peer-dependencies` and a fresh `uv` environment from `python/requirements.txt` (PyMuPDF 1.28.2), these passed: the 8 submission unit tests, the 5 offline deployment tests (`python3 -I -m unittest discover -s tests/deploy`), `pnpm check`, `pnpm test` (74 files, 751 tests) and `pnpm build`.

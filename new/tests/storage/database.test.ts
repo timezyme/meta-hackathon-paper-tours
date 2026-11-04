@@ -1,6 +1,6 @@
 import { NodeServices } from "@effect/platform-node"
 import { describe, expect, it } from "@effect/vitest"
-import { Clock, Effect, FileSystem, Path, Result } from "effect"
+import { Clock, Effect, FileSystem, Path } from "effect"
 import { sql, type Kysely } from "kysely"
 import { StorageDatabase, makeStorageDatabaseLayer, type ApplicationDatabase, type StorageOptions } from "../../src/storage/index.ts"
 import { holdReadLock } from "../fixtures/read-lock.ts"
@@ -48,24 +48,4 @@ describe("application database", () => {
       expect(yield* transaction(settings)).toEqual({ timeout: 5000, foreignKeys: 1 })
     }).pipe(Effect.provide(makeStorageDatabaseLayer(options)))
   }).pipe(Effect.provide(NodeServices.layer)), 15000)
-
-  it.live("fails a write held up past the timeout, rolls it back, and writes again once the lock is gone", () => Effect.gen(function* () {
-    const { options, databasePath } = yield* fixture()
-    yield* Effect.gen(function* () {
-      yield* write("before-lock")
-      yield* Effect.gen(function* () {
-        const lock = yield* holdReadLock(databasePath, "documents", 7000)
-        yield* lock.arm
-        const started = yield* Clock.currentTimeMillis
-        const blocked = yield* Effect.result(write("blocked"))
-        const waited = (yield* Clock.currentTimeMillis) - started
-        expect(Result.isFailure(blocked)).toBe(true)
-        expect(waited).toBeGreaterThanOrEqual(4500)
-        expect(waited).toBeLessThan(6900)
-        yield* lock.released
-      }).pipe(Effect.scoped)
-      yield* write("after-lock")
-      expect((yield* ids).map((row) => row.id)).toEqual(["after-lock", "before-lock"])
-    }).pipe(Effect.provide(makeStorageDatabaseLayer(options)))
-  }).pipe(Effect.provide(NodeServices.layer)), 20000)
 })

@@ -1,0 +1,43 @@
+diff --git a/src/storage/database.ts b/src/storage/database.ts
+--- a/src/storage/database.ts
++++ b/src/storage/database.ts
+@@ -1,4 +1,5 @@
+-import { LibsqlDialect } from "@libsql/kysely-libsql"
++import { createClient } from "@libsql/client"
++import { LibsqlDialect, type libsql } from "@libsql/kysely-libsql"
+ import { Context, Effect, FileSystem, Layer, Path, Schema, Semaphore } from "effect"
+ import { Kysely, sql } from "kysely"
+ import { StorageFailure, storageFailure, type StorageOptions } from "./service.ts"
+@@ -83,7 +84,7 @@
+       OR (state!='running' AND claim_token IS NULL AND worker_id IS NULL AND lease_expires_at IS NULL))
+   )`,
+   "CREATE UNIQUE INDEX IF NOT EXISTS one_active_run_per_owner ON runs(owner_id) WHERE state IN ('queued','running')",
+-  "CREATE UNIQUE INDEX IF NOT EXISTS one_running_run_globally ON runs((1)) WHERE state='running'",
++  "DROP INDEX IF EXISTS one_running_run_globally",
+   "CREATE INDEX IF NOT EXISTS document_owner ON documents(owner_id,lifecycle,expires_at)",
+   `CREATE TABLE IF NOT EXISTS admission_requests (
+     owner_id TEXT NOT NULL, request_key TEXT NOT NULL, fingerprint TEXT NOT NULL,
+@@ -162,9 +163,12 @@
+   }).pipe(Effect.scoped, Effect.mapError((cause) => storageFailure("initialize", cause)))
+   const url = yield* path.toFileUrl(databasePath).pipe(Effect.mapError((cause) => storageFailure("configuration", cause)))
+   const db = yield* Effect.acquireRelease(
+-    Effect.try({ try: () => new Kysely<ApplicationDatabase>({ dialect: new LibsqlDialect({ url: url.href }) }), catch: (cause) => storageFailure("initialize", cause) }),
+-    (database) => storageQuery("close", () => database.destroy()).pipe(Effect.orDie),
+-  )
++    Effect.try({ try: () => {
++      const client = createClient({ url: url.href, timeout: 5000 })
++      return { client, database: new Kysely<ApplicationDatabase>({ dialect: new LibsqlDialect({ client: client as unknown as libsql.Client }) }) }
++    }, catch: (cause) => storageFailure("initialize", cause) }),
++    ({ client, database }) => storageQuery("close", () => database.destroy()).pipe(Effect.andThen(Effect.sync(() => client.close())), Effect.orDie),
++  ).pipe(Effect.map(({ database }) => database))
+   const gate = yield* Semaphore.make(1)
+   const transaction = <A, E, R>(work: (database: Kysely<ApplicationDatabase>) => Effect.Effect<A, E, R>) => gate.withPermit(
+     Effect.gen(function* () {
+@@ -178,7 +182,6 @@
+     }).pipe(Effect.scoped, Effect.uninterruptible),
+   )
+   yield* storageQuery("configure", () => sql`PRAGMA foreign_keys=ON`.execute(db))
+-  yield* storageQuery("configure", () => sql`PRAGMA busy_timeout=5000`.execute(db))
+   yield* storageQuery("configure", () => sql`PRAGMA synchronous=FULL`.execute(db))
+   const version = yield* storageQuery("migration", () => sql<{ user_version: number }>`PRAGMA user_version`.execute(db))
+   const currentVersion = yield* Schema.decodeUnknownEffect(Schema.Int)(version.rows[0]?.user_version).pipe(Effect.mapError((cause) => storageFailure("migration", cause)))

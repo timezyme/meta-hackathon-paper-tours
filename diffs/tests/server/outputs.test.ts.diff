@@ -1,0 +1,71 @@
+diff --git a/tests/server/outputs.test.ts b/tests/server/outputs.test.ts
+--- a/tests/server/outputs.test.ts
++++ b/tests/server/outputs.test.ts
+@@ -26,13 +26,19 @@
+   it.effect("downloads exact published bytes and round-trips one replaceable rating", () => Effect.gen(function* () {
+     const options = yield* directory
+     yield* Effect.gen(function* () {
+-      const { request, publication } = yield* fixture(options.dataDirectory)
++      const { request, publication, claim } = yield* fixture(options.dataDirectory)
+       const response = yield* request("text")
+       expect(response.status).toBe(200)
+       expect(response.headers.get("cache-control")).toBe("no-store")
++      const textName = `amuseme-${claim.document.id.slice(0, 8)}.txt`
++      expect(response.headers.get("content-disposition")).toBe(`attachment; filename="${textName}"`)
+       expect(new Uint8Array(yield* Effect.promise(() => response.arrayBuffer()))).toEqual(text)
+-      for (const [operation, expected] of [["canonical", publication.canonical], ["report", publication.report]] as const) {
++      const files = [
++        ["canonical", publication.canonical, "document.json"], ["report", publication.report, "processing-report.json"],
++      ] as const
++      for (const [operation, expected, filename] of files) {
+         const result = yield* request(operation)
++        expect(result.headers.get("content-disposition")).toBe(`attachment; filename="${filename}"`)
+         expect(yield* Effect.promise(() => result.json())).toEqual(expected)
+       }
+       for (const value of ["up", "down"] as const) {
+@@ -51,7 +57,7 @@
+     yield* Effect.gen(function* () {
+       const started = yield* Deferred.make<void>()
+       let finalized = false
+-      const { request } = yield* fixture(options.dataDirectory, () => Effect.gen(function* () {
++      const { request, claim } = yield* fixture(options.dataDirectory, () => Effect.gen(function* () {
+         yield* Deferred.succeed(started, undefined)
+         return yield* Effect.never
+       }).pipe(Effect.ensuring(Effect.sync(() => { finalized = true }))))
+@@ -59,6 +65,7 @@
+       const response = yield* request("zip", { signal: controller.signal })
+       expect(response.status).toBe(200)
+       expect(response.headers.get("content-type")).toBe("application/zip")
++      expect(response.headers.get("content-disposition")).toBe(`attachment; filename="amuseme-${claim.document.id.slice(0, 8)}.zip"`)
+       const body = yield* Effect.tryPromise(() => response.arrayBuffer()).pipe(Effect.result, Effect.forkChild)
+       yield* Deferred.await(started)
+       controller.abort()
+@@ -84,4 +91,28 @@
+       expect((yield* request("text")).status).toBe(404)
+     }).pipe(Effect.provide(makeDocumentStoreLayer(options)))
+   }).pipe(Effect.provide(NodeServices.layer)))
++
++  it.effect("lets every signed-in reader download a shared example while ratings stay with each owner", () => Effect.gen(function* () {
++    const options = yield* directory
++    yield* Effect.gen(function* () {
++      const { request, publication, documents, claim } = yield* fixture(options.dataDirectory)
++      const asOther = { headers: { cookie: "other" } }
++      const response = yield* request("text", asOther)
++      expect(response.status).toBe(200)
++      expect(new Uint8Array(yield* Effect.promise(() => response.arrayBuffer()))).toEqual(text)
++      const canonical = yield* request("canonical", asOther)
++      expect(yield* Effect.promise(() => canonical.json())).toEqual(publication.canonical)
++      expect((yield* request("report", asOther)).status).toBe(200)
++      expect((yield* request("zip", asOther)).status).toBe(200)
++      expect((yield* request("rate", { method: "PUT", headers: { origin, "content-type": "application/json" }, body: '{"value":"up"}' })).status).toBe(200)
++      const otherRating = yield* request("readRating", asOther)
++      expect(yield* Effect.promise(() => otherRating.json())).toEqual({ value: null })
++      expect((yield* request("rate", { method: "PUT", headers: { cookie: "other", origin, "content-type": "application/json" }, body: '{"value":"down"}' })).status).toBe(404)
++      expect((yield* request("clearRating", { method: "DELETE", headers: { cookie: "other", origin } })).status).toBe(404)
++      const ownerRating = yield* request("readRating")
++      expect(yield* Effect.promise(() => ownerRating.json())).toEqual({ value: "up" })
++      yield* documents.delete(owner, claim.document.id)
++      expect((yield* request("text", asOther)).status).toBe(404)
++    }).pipe(Effect.provide(makeDocumentStoreLayer({ ...options, examplesOwnerId: owner })))
++  }).pipe(Effect.provide(NodeServices.layer)))
+ })

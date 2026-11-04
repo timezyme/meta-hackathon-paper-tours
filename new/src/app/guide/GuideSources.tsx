@@ -1,9 +1,11 @@
-import { useEffect, useRef, type RefObject } from "react"
+import { useFocusOnChange } from "../useFocusOnChange.ts"
+import { useRef, type RefObject } from "react"
 import type { CanonicalDocument, SourceQuote } from "../../domain/index.ts"
 import { focusSourceQuote } from "../client/browser.ts"
 import { OriginalPreview } from "../reader/OriginalPreview.tsx"
 import { displayQuote, evidencePage, highlightedSource, readableSource, sourceForQuote, sourcePages } from "./presentation.ts"
 import { MathText, QuoteText } from "./QuoteText.tsx"
+import { GlyphText } from "../GlyphText.tsx"
 
 const sourceText = (pages: ReadonlyArray<number>): string =>
   pages.length === 0 ? "Source" : `Source · ${pages.length === 1 ? "page" : "pages"} ${pages.join(", ")}`
@@ -85,9 +87,9 @@ export function GuideEvidence({ canonical, source, requestedPage, original, onPa
   const page = evidencePage(canonical, source, requestedPage)
   const block = sourceForQuote(canonical, source)
   const pages = block === undefined ? [] : sourcePages(block)
-  useEffect(() => {
+  useFocusOnChange(original, () => {
     if (!original && selected.current !== null) focusSourceQuote(selected.current)
-  }, [original])
+  }, { onMount: true })
   return <section className="guide-evidence" aria-label="Evidence from the uploaded document">
     <EvidenceControls pages={pages} page={page} original={original} onPage={onPage} onView={onView} />
     <figure className="guide-exact-quote"><figcaption className="guide-kicker">Exact quote · page {page}</figcaption>
@@ -97,7 +99,7 @@ export function GuideEvidence({ canonical, source, requestedPage, original, onPa
       <OriginalPreview documentId={canonical.scope.documentId} page={page} />
     </> : <>
       <p className="guide-note">Highlighted below in the page’s saved text. <button type="button" className="reader-text-link"
-        onClick={() => onView(true)}>Compare with the original page →</button></p>
+        onClick={() => onView(true)}><GlyphText after="→">Compare with the original page</GlyphText></button></p>
       <SourceTextPage canonical={canonical} source={source} page={page} selected={selected} />
     </>}
   </section>

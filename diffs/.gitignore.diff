@@ -1,0 +1,22 @@
+diff --git a/.gitignore b/.gitignore
+--- a/.gitignore
++++ b/.gitignore
+@@ -18,6 +18,9 @@
+ /docs/verification/
+ /brand/
+ 
++# Historical prototypes
++/prototype/
++
+ # Local configuration and credentials
+ .env
+ .env.*
+@@ -36,7 +39,7 @@
+ src/mastra/public/
+ 
+ # Private runtime data and verification output
+-qa/
++qa
+ playwright-report/
+ test-results/
+ coverage/

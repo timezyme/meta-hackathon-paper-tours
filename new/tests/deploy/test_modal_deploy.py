@@ -19,6 +19,13 @@ DEPLOY = pathlib.Path(__file__).resolve().parents[2] / "deploy/modal"
 
 def fake_modal():
     class Image:
+        def __init__(self):
+            self.environment = {}
+
+        def env(self, values):
+            self.environment.update(values)
+            return self
+
         def __getattr__(self, name):
             return lambda *args, **kwargs: self
 
@@ -120,6 +127,28 @@ class Snapshot(unittest.TestCase):
         self.app.snapshot()
         self.assertFalse(os.path.exists(os.path.join(self.remote, "documents", "kept")))
 
+    def test_document_deleted_before_its_files_are_copied_keeps_the_previous_snapshot(self):
+        self.admit("first")
+        self.app.snapshot()
+        self.admit("uncopied")
+        real = self.app.sync_documents
+
+        def delete_then_sync(*args):
+            self.purge("uncopied")
+            real(*args)
+
+        with mock.patch.object(self.app, "sync_documents", delete_then_sync), self.assertRaises(Exception) as raised:
+            self.app.snapshot()
+        snapshot = os.path.join(self.remote, "application.sqlite")
+        documents = lambda: rows(snapshot, "SELECT id, lifecycle FROM documents ORDER BY id")
+        self.assert_snapshot_consistent()
+        self.assertEqual(documents(), [("first", "active")])
+        self.assertIsInstance(raised.exception, self.app.IncompleteSnapshot)
+        self.app.snapshot()
+        self.assert_snapshot_consistent()
+        self.assertEqual(documents(), [("first", "active"), ("uncopied", "deleted")])
+        self.assertFalse(os.path.exists(os.path.join(self.remote, "documents", "uncopied")))
+
     def test_ledger_write_is_snapshotted_within_seconds(self):
         snapshots = threading.Event()
         instance = object.__new__(self.app.AmuseMe)
@@ -139,6 +168,65 @@ class Snapshot(unittest.TestCase):
             finally:
                 instance.stopping.set()
                 worker.join(2)
+
+
+class Environment(unittest.TestCase):
+    def test_container_trusts_only_the_modal_proxy_for_client_addresses(self):
+        environment = load("app").image.environment
+        self.assertEqual(environment["AMUSEME_TRUSTED_PROXY"], "modal")
+        self.assertEqual((environment["AMUSEME_HOST"], environment["NODE_ENV"]), ("0.0.0.0", "production"))
+
+
+class Watcher(unittest.TestCase):
+    def setUp(self):
+        self.app = load("app")
+        self.instance = object.__new__(self.app.AmuseMe)
+        self.instance.lock, self.instance.stopping = threading.Lock(), threading.Event()
+        self.snapshots, self.exits = [], []
+        for name, value in (("LEDGER_POLL_SECONDS", 0.01), ("SNAPSHOT_SECONDS", 0), ("ledger_watermark", lambda: None),
+                            ("snapshot", lambda: self.snapshots.append(time.monotonic()))):
+            patcher = mock.patch.object(self.app, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        patcher = mock.patch.object(self.app.os, "_exit", self.exits.append)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def watch(self, seconds=2):
+        output = io.StringIO()
+        worker = threading.Thread(target=self.instance.snapshots, daemon=True)
+        with contextlib.redirect_stdout(output):
+            worker.start()
+            worker.join(seconds)
+        self.instance.stopping.set()
+        worker.join(2)
+        return output.getvalue()
+
+    def test_node_exit_saves_a_final_snapshot_and_exits_the_container_nonzero(self):
+        self.instance.server = SimpleNamespace(poll=lambda: 137)
+        log = self.watch()
+        self.assertEqual(len(self.snapshots), 1)
+        self.assertEqual(self.exits, [1])
+        self.assertIn("exited with code 137", log)
+
+    def test_node_stopped_by_container_shutdown_does_not_exit_the_container(self):
+        self.instance.server = SimpleNamespace(poll=lambda: 0)
+        self.instance.stopping.set()
+        self.watch(0.2)
+        self.assertEqual((self.snapshots, self.exits), ([], []))
+
+    def test_snapshot_failure_logs_its_message_without_secrets(self):
+        self.instance.server = SimpleNamespace(poll=lambda: None)
+        secret = "meta-fixture-key-0123456789"
+
+        def fail():
+            raise sqlite3.OperationalError(f"disk I/O error near {secret}")
+
+        with mock.patch.object(self.app, "snapshot", fail), mock.patch.dict(os.environ, {"META_API_KEY": secret}):
+            log = self.watch(0.2)
+        self.assertIn("AmuseMe snapshot failed: OperationalError: disk I/O error near [redacted]", log)
+        self.assertNotIn(secret, log)
+        self.assertEqual(self.exits, [])
 
 
 class Seed(unittest.TestCase):

@@ -1,11 +1,12 @@
+import { useFocusOnChange } from "../useFocusOnChange.ts"
 import { useEffect, useEffectEvent, useMemo, useRef } from "react"
 import type { CanonicalDocument, ReadingGuide, SourceQuote } from "../../domain/index.ts"
 import type { DocumentRecord } from "../documents.ts"
 import { activeRun } from "../documents.ts"
 import { focusReadingPage, navigate, subscribeGuideKeys } from "../client/browser.ts"
 import { ReaderDrawer } from "../reader/Panels.tsx"
-import { outputUrl } from "../client/outputs.ts"
-import { GoalChoices } from "./GoalChoices.tsx"
+import { outputUrl, textDownloadName } from "../client/outputs.ts"
+import { chooseGoal, GoalChoices } from "./GoalChoices.tsx"
 import { PaperStatus } from "./PaperStatus.tsx"
 import { GuideComplete, GuideOverview, GuidePath } from "./GuidePath.tsx"
 import { GuideEvidence } from "./GuideSources.tsx"
@@ -49,7 +50,6 @@ export function GuideWorkspace({ record, canonical, route, page }: Props) {
   const number = guide === undefined ? 1 : boundedGuideStep(route, guide)
   const total = mode === "claims" ? guide?.claims.length ?? 0 : guide?.steps.length ?? 0
   const screen = `${mode}-${number}`
-  const previousScreen = useRef(screen)
   const body = useRef<HTMLElement>(null)
   const map = useMemo(() => paperMap(canonical), [canonical])
   const citations = guide === undefined ? [] : routeCitations(guide, map, route)
@@ -70,20 +70,21 @@ export function GuideWorkspace({ record, canonical, route, page }: Props) {
   const closeEvidence = () => go({ ...route, source: null, view: "text" })
   const finishedClaims = mode === "done-claims"
   const identity = { documentId, revisionId: canonical.scope.revisionId }
-  const downloads = { zip: outputUrl(identity, "zip"), text: outputUrl(identity, "text") }
+  const downloads = {
+    zip: outputUrl(identity, "zip"), text: outputUrl(identity, "text"), textName: textDownloadName(documentId),
+  }
   const pathMode = mode === "walk" || mode === "claims" ? mode : null
-  useEffect(() => {
-    if (previousScreen.current === screen) return
-    previousScreen.current = screen
+  useFocusOnChange(screen, () => {
     const heading = body.current?.querySelector<HTMLElement>("h1")
     if (heading) focusReadingPage(heading)
-  }, [screen])
+  })
   const keysActive = pathMode !== null && evidence === undefined
   useEffect(() => keysActive ? subscribeGuideKeys((delta) => onKey(delta)) : undefined, [keysActive])
   return <section className="guide-workspace" ref={body} tabIndex={-1} aria-label="Reading guide">
     {mode === "choices" ? <div className="guide-choice-layout">
       <GoalChoices {...(guide === undefined ? {} : { guide })} paperTitle={title} selected={selectedGoal(route)}
-        processing={activeRun(record.latestRun)} ready onSelect={choose} onOpen={open} />
+        processing={activeRun(record.latestRun)} ready onSelect={(goal) => chooseGoal(documentId, goal, page)}
+        onOpen={open} />
       <PaperStatus record={record} onOriginal={() => navigate(guideLocation(documentId, { mode: "read", goal: "read", view: "original" }, 1))} />
     </div> : guide !== undefined && <>
       <RunningHead title={title} mode={mode} onChoose={choose} onOpen={open} />
@@ -95,7 +96,7 @@ export function GuideWorkspace({ record, canonical, route, page }: Props) {
         onOther={() => open(finishedClaims ? "walk" : "claims")} onMap={() => open("map")}
         onChoices={() => choose(returnGoal[mode])} onRead={() => open("read")} />}
     </>}
-    {evidence !== undefined && <ReaderDrawer title="Evidence in the document" side="source" focusEvidence onClose={closeEvidence}>
+    {evidence !== undefined && <ReaderDrawer title="Evidence in the document" side="source" onClose={closeEvidence}>
       <GuideEvidence key={`${route.source}-${page}`} canonical={canonical} source={evidence} requestedPage={page}
         original={route.view === "original"} onPage={(sourcePage) => navigate(guideLocation(documentId, route, sourcePage))}
         onView={(original) => go({ ...route, view: original ? "original" : "text" })} />

@@ -4,6 +4,7 @@ import { SourceLinks } from "./GuideSources.tsx"
 import { countLabel } from "../text.ts"
 import { QuoteText } from "./QuoteText.tsx"
 import { citedBlockCount } from "../map/graph.ts"
+import { GlyphText } from "../GlyphText.tsx"
 
 type OnSource = (source: SourceQuote) => void
 const strengthLabel = { strong: "Strong support", partial: "Partial support", limited: "Limited support" } as const
@@ -55,9 +56,55 @@ function ClaimDetail({ item, sources }: {
   </div>
 }
 
-const nextLabel = (mode: "walk" | "claims", last: boolean): string => {
-  if (last) return "Finish"
-  return mode === "walk" ? "Next step" : "Next claim"
+type PathMode = "walk" | "claims"
+type PathItem = {
+  readonly title: string | undefined
+  readonly passage: ReadingGuide["steps"][number]["explanation"] | undefined
+  readonly explanation: string | undefined
+  readonly claim: ReadingGuide["claims"][number] | undefined
+}
+type PathModel = {
+  readonly kicker: string
+  readonly unit: string
+  readonly next: string
+  readonly nav: string
+  readonly titleClass: string | undefined
+  readonly item: (guide: ReadingGuide, index: number) => PathItem
+  readonly covered: (guide: ReadingGuide) => ReadonlyArray<string>
+  readonly doneTitle: string
+  readonly doneSummary: (total: number) => string
+  readonly otherTitle: string
+  readonly otherSummary: (guide: ReadingGuide) => string
+  readonly otherAction: string
+}
+
+const guidePaths: Record<PathMode, PathModel> = {
+  walk: {
+    kicker: "Walk-through", unit: "Step", next: "Next step", nav: "Walk-through steps", titleClass: undefined,
+    item: (guide, index) => {
+      const step = guide.steps[index]
+      return { title: step?.title, passage: step?.explanation, explanation: step?.explanation.text, claim: undefined }
+    },
+    covered: (guide) => guide.steps.map((step) => step.title),
+    doneTitle: "You finished the walk-through.",
+    doneSummary: (total) => `All ${total} steps, from the question to the conclusion.`,
+    otherTitle: "Claims and limits",
+    otherSummary: (guide) => `${guide.claims.length} claims, with their support and limits.`,
+    otherAction: "Start claims and limits",
+  },
+  claims: {
+    kicker: "Claims and limits", unit: "Claim", next: "Next claim", nav: "Claims", titleClass: "guide-claim-title",
+    item: (guide, index) => {
+      const claim = guide.claims[index]
+      return { title: claim?.claim.text, passage: claim?.claim, explanation: undefined, claim }
+    },
+    covered: (guide) => guide.claims.map((item) => item.claim.text),
+    doneTitle: "You went through every claim.",
+    doneSummary: (total) => `All ${total} claims, their supporting evidence, and their limits.`,
+    otherTitle: "Walk me through it",
+    otherSummary: (guide) => `${guide.steps.length} short steps through the document.`,
+    otherAction: "Start the walk-through",
+  },
 }
 
 export function GuidePath({ canonical, guide, mode, number, onSource, onTurn }: {
@@ -68,29 +115,31 @@ export function GuidePath({ canonical, guide, mode, number, onSource, onTurn }: 
   readonly onSource: OnSource
   readonly onTurn: (delta: number) => void
 }) {
-  const step = guide.steps[number - 1]
-  const item = guide.claims[number - 1]
-  const total = mode === "walk" ? guide.steps.length : guide.claims.length
-  const label = mode === "walk" ? "Step" : "Claim"
+  const path = guidePaths[mode]
+  const item = path.item(guide, number - 1)
+  const total = path.covered(guide).length
+  const label = path.unit
   const sources = (values: ReadonlyArray<SourceQuote>) => <SourceLinks canonical={canonical} sources={values} onSource={onSource} />
-  const passage = mode === "walk" ? step?.explanation : item?.claim
+  const passage = item.passage
   return <div className="guide-path"><article className="guide-leaf" aria-labelledby="guide-screen-title">
-    <header className="guide-leaf-head"><p className="guide-kicker">{mode === "walk" ? "Walk-through" : "Claims and limits"}</p>
+    <header className="guide-leaf-head"><p className="guide-kicker">{path.kicker}</p>
       <div className="guide-progress"><span>{label} {number} of {total}</span><GuideRail total={total} at={number} /></div>
     </header>
     <div className="guide-spread"><div className="guide-leaf-body">
-      <h1 id="guide-screen-title" className={mode === "claims" ? "guide-claim-title" : undefined} tabIndex={-1}>
-        {mode === "walk" ? step?.title : item?.claim.text}
+      <h1 id="guide-screen-title" className={path.titleClass} tabIndex={-1}>
+        {item.title}
       </h1>
-      {mode === "walk" && step !== undefined && <p className="guide-prose">{step.explanation.text}</p>}
+      {item.explanation !== undefined && <p className="guide-prose">{item.explanation}</p>}
     </div>
     {passage !== undefined && <PaperExcerpt key={`${mode}-${number}`} canonical={canonical} sources={passage.sources} onSource={onSource} />}
-    {mode === "claims" && item !== undefined && <ClaimDetail item={item} sources={sources} />}
+    {item.claim !== undefined && <ClaimDetail item={item.claim} sources={sources} />}
     </div>
-  </article><nav className="guide-turn" aria-label={mode === "walk" ? "Walk-through steps" : "Claims"}>
-    <button type="button" className="reader-text-link" onClick={() => onTurn(-1)}>← {number === 1 ? "Your goal" : "Back"}</button>
+  </article><nav className="guide-turn" aria-label={path.nav}>
+    <button type="button" className="reader-text-link" onClick={() => onTurn(-1)}>
+      <GlyphText before="←">{number === 1 ? "Your goal" : "Back"}</GlyphText></button>
     <p className="guide-turn-hint">Use <kbd>←</kbd> and <kbd>→</kbd> to turn the page.</p>
-    <button type="button" className="button primary" onClick={() => onTurn(1)}>{nextLabel(mode, number === total)} →</button>
+    <button type="button" className="button primary" onClick={() => onTurn(1)}>
+      <GlyphText after="→">{number === total ? "Finish" : path.next}</GlyphText></button>
   </nav></div>
 }
 
@@ -104,7 +153,8 @@ export function GuideOverview({ canonical, guide, onSource, onWalk }: {
     <p className="guide-kicker">A short overview</p>
     <div className="guide-spread"><div className="guide-leaf-body">
       <h1 id="guide-screen-title" tabIndex={-1}>{guide.title}</h1><p className="guide-prose">{guide.overview.text}</p>
-      <button className="button primary" type="button" onClick={onWalk}>Walk me through it →</button>
+      <button className="button primary" type="button" onClick={onWalk}>
+        <GlyphText after="→">Walk me through it</GlyphText></button>
     </div>
       <PaperExcerpt canonical={canonical} sources={guide.overview.sources} onSource={onSource} />
     </div>
@@ -113,7 +163,7 @@ export function GuideOverview({ canonical, guide, onSource, onWalk }: {
 
 type CompleteProps = {
   readonly guide: ReadingGuide
-  readonly downloads: { readonly zip: string; readonly text: string }
+  readonly downloads: { readonly zip: string; readonly text: string; readonly textName: string }
   readonly claims: boolean
   readonly onOther: () => void
   readonly onMap: () => void
@@ -121,23 +171,26 @@ type CompleteProps = {
   readonly onRead: () => void
 }
 
-function CompletedHero({ claims, total, passages }: { readonly claims: boolean; readonly total: number; readonly passages: number }) {
+function CompletedHero({ path, total, passages }: { readonly path: PathModel; readonly total: number; readonly passages: number }) {
   return <div className="guide-done-hero"><span className="guide-done-check" aria-hidden="true">✓</span>
     <p className="guide-kicker">You reached the end</p>
-    <h1 id="guide-screen-title" tabIndex={-1}>{claims ? "You went through every claim." : "You finished the walk-through."}</h1>
-    <p>{claims ? `All ${total} claims, their supporting evidence, and their limits.` : `All ${total} steps, from the question to the conclusion.`}
+    <h1 id="guide-screen-title" tabIndex={-1}>{path.doneTitle}</h1>
+    <p>{path.doneSummary(total)}
       {" "}The guide rests on {countLabel(passages, "quoted passage")} you can open in the document.</p>
     <GuideRail total={total} at={total + 1} />
   </div>
 }
 
-function AnotherWayIn({ guide, claims, onOther, onMap, onRead }: Omit<CompleteProps, "onChoices" | "downloads">) {
+function AnotherWayIn({ guide, path, onOther, onMap, onRead }: Omit<CompleteProps, "onChoices" | "downloads" | "claims"> & { readonly path: PathModel }) {
   return <section className="guide-done-card guide-another"><p className="guide-kicker">Another way in</p>
-    <h2>{claims ? "Walk me through it" : "Claims and limits"}</h2>
-    <p>{claims ? `${guide.steps.length} short steps through the document.` : `${guide.claims.length} claims, with their support and limits.`}</p>
-    <button type="button" className="button primary" onClick={onOther}>{claims ? "Start the walk-through" : "Start claims and limits"} →</button>
-    <button type="button" className="reader-text-link" onClick={onMap}>See the document map →</button>
-    <button type="button" className="reader-text-link" onClick={onRead}>Read the full document →</button>
+    <h2>{path.otherTitle}</h2>
+    <p>{path.otherSummary(guide)}</p>
+    <button type="button" className="button primary" onClick={onOther}>
+      <GlyphText after="→">{path.otherAction}</GlyphText></button>
+    <button type="button" className="reader-text-link" onClick={onMap}>
+      <GlyphText after="→">See the document map</GlyphText></button>
+    <button type="button" className="reader-text-link" onClick={onRead}>
+      <GlyphText after="→">Read the full document</GlyphText></button>
   </section>
 }
 
@@ -145,23 +198,26 @@ function KeepIt({ downloads }: Pick<CompleteProps, "downloads">) {
   return <section className="guide-done-card guide-keep"><p className="guide-kicker">Keep it</p>
     <h2>Take the clean document with you</h2>
     <p>The ZIP holds the clean text, its images and document.json with this guide and every citation. The text file is ready for notes or an agent.</p>
-    <div className="guide-keep-actions"><a className="button" href={downloads.zip} download>↓ Download ZIP</a>
-      <a className="reader-text-link" href={downloads.text} download>Download text only</a></div>
+    <div className="guide-keep-actions">
+      <a className="button" href={downloads.zip} download><GlyphText before="↓">Download ZIP</GlyphText></a>
+      <a className="reader-text-link" href={downloads.text} download={downloads.textName}>Download text only</a></div>
   </section>
 }
 
 export function GuideComplete({ onChoices, downloads, ...props }: CompleteProps) {
   const { guide, claims } = props
-  const total = claims ? guide.claims.length : guide.steps.length
-  const covered = claims ? guide.claims.map((item) => item.claim.text) : guide.steps.map((step) => step.title)
+  const path = guidePaths[claims ? "claims" : "walk"]
+  const covered = path.covered(guide)
+  const total = covered.length
   return <section className="guide-complete" aria-labelledby="guide-screen-title">
-    <CompletedHero claims={claims} total={total} passages={citedBlockCount(guide)} />
+    <CompletedHero path={path} total={total} passages={citedBlockCount(guide)} />
     <div className="guide-done-grid">
       <div className="guide-done-side"><section className="guide-done-card"><h2>What you covered</h2><ol>{covered.map((title, index) => <li key={index}>{title}</li>)}</ol>
         <p className="guide-note">The guide is AI-written. Check the source for anything you rely on.</p>
       </section><KeepIt downloads={downloads} /></div>
-      <AnotherWayIn {...props} />
+      <AnotherWayIn {...props} path={path} />
     </div>
-    <button type="button" className="reader-text-link" onClick={onChoices}>← Choose how to read</button>
+    <button type="button" className="reader-text-link" onClick={onChoices}>
+      <GlyphText before="←">Choose how to read</GlyphText></button>
   </section>
 }

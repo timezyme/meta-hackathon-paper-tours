@@ -1,0 +1,34 @@
+diff --git a/src/paper/providers/meta/transport.ts b/src/paper/providers/meta/transport.ts
+--- a/src/paper/providers/meta/transport.ts
++++ b/src/paper/providers/meta/transport.ts
+@@ -1,9 +1,10 @@
++import { museSparkModel } from "../../../domain/meta-policy.ts"
+ import type { JSONValue, LanguageModelV2, LanguageModelV2CallOptions, LanguageModelV2Prompt, LanguageModelV2StreamPart } from "@ai-sdk/provider"
+ import { Clock, Crypto, Effect, Redacted, Result, Schema, Stream } from "effect"
+ import { Base64 } from "effect/encoding"
+ import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/http"
+ import { ExecutionFailure, ProviderFailure, executionFailure, type GuardError, type ProviderCall, type ProviderResponse } from "../../../processing/contracts.ts"
+-import { readMetaCompletion, readMetaMetadata, stableJson, type MetaEnvelope, type MetaRequest, type MetaStage } from "./contracts.ts"
++import { readMetaCompletion, readMetaMetadata, stableJson, type MetaEnvelope, type MetaAgentId, type MetaRequest, type MetaStage } from "./contracts.ts"
+ 
+ export const metaEndpoint = "https://api.meta.ai/v1/chat/completions"
+ export const countEndpoint = "https://api.meta.ai/v1/responses/input_tokens"
+@@ -43,6 +44,7 @@
+ ))
+ export interface MetaBinding {
+   readonly stage: MetaStage
++  readonly agentId: MetaAgentId
+   readonly call: ProviderCall
+   readonly request: MetaRequest
+   readonly credential: Redacted.Redacted<string>
+@@ -166,5 +168,9 @@
+     settled.then(() => binding.pending.delete(settled))
+     return completion
+   }
+-  return { specificationVersion: "v2", provider: "meta", modelId: "muse-spark-1.3", supportedUrls: { "image/*": [/^data:image\/(?:png|jpeg|webp);base64,/u] }, doGenerate: generate, doStream: (options) => generate(options).then(asStream) }
++  return {
++    specificationVersion: "v2", provider: "meta", modelId: museSparkModel,
++    supportedUrls: { "image/*": [/^data:image\/(?:png|jpeg|webp);base64,/u] },
++    doGenerate: generate, doStream: (options) => generate(options).then(asStream),
++  }
+ }

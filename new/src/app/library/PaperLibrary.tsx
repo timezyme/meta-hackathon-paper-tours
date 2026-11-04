@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { OutputRevisionId } from "../../domain/index.ts"
-import { originalUrl, outputUrl, previewUrl } from "../client/outputs.ts"
+import { afterDelay } from "../client/browser.ts"
+import { originalUrl, outputUrl, previewUrl, textDownloadName } from "../client/outputs.ts"
 import { activeRun, formatBytes, formatExpiry, runSummary, type DocumentRecord } from "../documents.ts"
 import { guideLocation } from "../guide/navigation.ts"
 import { ProcessingProgress } from "../guide/ProcessingProgress.tsx"
@@ -8,7 +9,8 @@ import { DeleteDocumentControl } from "../reader/DeleteDocument.tsx"
 import { RetryDocumentControl } from "../reader/RetryDocument.tsx"
 import { countLabel } from "../text.ts"
 import { InternalLink } from "../links.tsx"
-import { featuredPaper } from "./presentation.ts"
+import { coverFailed, coverRetried, coverRetryDelay, featuredPaper, firstCoverLoad } from "./presentation.ts"
+import type { CoverLoad } from "./presentation.ts"
 import { usePaperPreview, type PaperPreview } from "./usePaperPreview.ts"
 
 type Controls = {
@@ -27,8 +29,9 @@ function FileActions({ record }: { readonly record: DocumentRecord }) {
   const id = record.document.id
   const name = record.document.originalFilename
   return <div className="library-file-actions">
-    {record.currentRevisionId !== null && <a className="reader-text-link" href={outputUrl({ documentId: id, revisionId: record.currentRevisionId }, "text")}
-      download="normalized.txt" aria-label={`Download text for ${name}`}>Download text</a>}
+    {record.currentRevisionId !== null && <a className="reader-text-link"
+      href={outputUrl({ documentId: id, revisionId: record.currentRevisionId }, "text")} download={textDownloadName(id)}
+      aria-label={`Download text for ${name}`}>Download text</a>}
     <a className="reader-text-link" href={originalUrl(id)} download aria-label={`Download original PDF ${name}`}>Download original PDF</a>
   </div>
 }
@@ -44,7 +47,7 @@ function PaperDetails({ record, controls }: Props) {
 }
 
 function RunNotice({ record, controls }: Props) {
-  const summary = runSummary(record.latestRun, record.document.pageCount)
+  const summary = runSummary(record.latestRun)
   if (summary.failed) return <div className="library-run-notice failed">
     <p><strong>{summary.title}.</strong> {summary.description}{record.currentRevisionId !== null && " Your saved copy is still available."}</p>
     {controls.retryEnabled && controls.readOnly !== true && <RetryDocumentControl record={record} onRefresh={controls.onRefresh} onUnauthenticated={controls.onUnauthenticated} />}
@@ -57,13 +60,16 @@ function RunNotice({ record, controls }: Props) {
 }
 
 function PaperCover({ record }: { readonly record: DocumentRecord }) {
-  const [failed, setFailed] = useState(false)
+  const [load, setLoad] = useState<CoverLoad>(firstCoverLoad)
+  useEffect(() => {
+    if (load._tag === "retrying") return afterDelay(coverRetryDelay, () => setLoad(coverRetried))
+  }, [load])
   const path = guideLocation(record.document.id, { mode: "read", view: "original" }, 1)
   const label = `View the first page of ${record.document.originalFilename}`
   return <InternalLink className="library-cover" href={path} aria-label={label}>
-    {failed
+    {load._tag === "unavailable"
       ? <span className="library-cover-fallback"><b>PDF</b><span>Preview unavailable</span></span>
-      : <img src={previewUrl(record.document.id, 1)} alt="" onError={() => setFailed(true)} />}
+      : <img key={load.attempt} src={previewUrl(record.document.id, 1)} alt="" onError={() => setLoad(coverFailed)} />}
     <span className="library-page-label">Original PDF <span aria-hidden="true">↗</span></span>
   </InternalLink>
 }

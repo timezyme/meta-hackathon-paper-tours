@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import { GoalChoices } from "../../src/app/guide/GoalChoices.tsx"
+import { chooseGoal, GoalChoices } from "../../src/app/guide/GoalChoices.tsx"
 import { GuideComplete, GuidePath } from "../../src/app/guide/GuidePath.tsx"
 import { GuideEvidence, QuotedSourceText, SourceLinks } from "../../src/app/guide/GuideSources.tsx"
 import { boundedGuideStep, displayQuote, turnRoute, evidencePage, paperHeading, quotedParts, visibleGuideSources } from "../../src/app/guide/presentation.ts"
@@ -71,12 +71,16 @@ describe("goal selection and saved-guide reading", () => {
     const route = guideRouteFromLocation("/documents/example?mode=walk&n=99")
     expect(boundedGuideStep(route, appGuide)).toBe(3)
     expect(visibleGuideSources(appGuide, route)).toEqual(appGuide.steps[2]!.explanation.sources)
-    const complete = renderToStaticMarkup(createElement(GuideComplete, { guide: appGuide, claims: false, downloads: { zip: "/zip", text: "/text" }, onOther: ignore, onMap: ignore, onChoices: ignore, onRead: ignore }))
+    const downloads = { zip: "/zip", text: "/text", textName: "amuseme-0123abcd.txt" }
+    const complete = renderToStaticMarkup(createElement(GuideComplete, {
+      guide: appGuide, claims: false, downloads, onOther: ignore, onMap: ignore, onChoices: ignore, onRead: ignore,
+    }))
     expect(complete).toContain("You finished the walk-through")
     expect(complete).toContain("Start claims and limits")
     expect(complete).toContain("Read the full document")
     expect(complete).toContain("Choose how to read")
     expect(complete).toContain('href="/zip"')
+    expect(complete).toContain('href="/text" download="amuseme-0123abcd.txt"')
     expect(complete).toMatch(/rests on \d+ quoted passage/u)
   })
 })
@@ -184,5 +188,19 @@ describe("turning guide pages", () => {
     expect(selectedGoal({ mode: "choices", goal: "read" })).toBe("read")
     expect(selectedGoal({ mode: "map", goal: null })).toBe("map")
     expect(selectedGoal({ mode: "overview", goal: null })).toBeNull()
+  })
+})
+
+describe("reading goal selection", () => {
+  afterEach(() => vi.unstubAllGlobals())
+  it("replaces the current history entry instead of adding one per radio change", () => {
+    const history = { pushState: vi.fn(), replaceState: vi.fn() }
+    vi.stubGlobal("window", { history, dispatchEvent: vi.fn() })
+    vi.stubGlobal("PopStateEvent", Event)
+    chooseGoal("example", "claims", 2)
+    chooseGoal("example", "map", 2)
+    expect(history.pushState).not.toHaveBeenCalled()
+    expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "/documents/example?mode=choices&goal=map&p=2")
+    expect(history.replaceState).toHaveBeenCalledTimes(2)
   })
 })

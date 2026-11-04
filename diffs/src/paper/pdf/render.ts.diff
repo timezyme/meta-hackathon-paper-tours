@@ -1,0 +1,98 @@
+diff --git a/src/paper/pdf/render.ts b/src/paper/pdf/render.ts
+--- a/src/paper/pdf/render.ts
++++ b/src/paper/pdf/render.ts
+@@ -1,7 +1,8 @@
+ import { Context, Effect, Exit, FileSystem, Layer, Path, Schema, Stream } from "effect"
+ import type { PlatformError } from "effect/PlatformError"
+ import { ChildProcess, ChildProcessSpawner } from "effect/process"
+-import { Page, SourceHash } from "../../domain/index.ts"
++import { ArtifactHash, Page, PixelBox, SourceHash } from "../../domain/index.ts"
++import { CROP_SCRIPT } from "./crop-script.ts"
+ import { PdfLimits } from "./limits.ts"
+ import { PdfRenderLimits, RENDER_SCRIPT } from "./render-script.ts"
+ 
+@@ -30,6 +31,7 @@
+   sourceHash: SourceHash,
+   pageCount: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: PdfLimits.maxPages })),
+   outputDirectory: Schema.String.check(Schema.isMinLength(1)),
++  pageNumber: Schema.optional(Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: PdfLimits.maxPages }))),
+ })
+ export type PdfRenderInput = typeof PdfRenderInput.Type
+ 
+@@ -45,10 +47,8 @@
+ })
+ export type RenderedPdfPage = typeof RenderedPdfPage.Type
+ 
+-const Answer = Schema.Union([
+-  Schema.TaggedStruct("Rendered", { pages: Schema.NonEmptyArray(RenderedPdfPage) }),
+-  Schema.TaggedStruct("Rejected", { code: FailureCode }),
+-])
++const Rejected = Schema.TaggedStruct("Rejected", { code: FailureCode })
++const Answer = Schema.Union([Schema.TaggedStruct("Rendered", { pages: Schema.NonEmptyArray(RenderedPdfPage) }), Rejected])
+ 
+ const collect = (stream: Stream.Stream<Uint8Array, PlatformError>) => stream.pipe(
+   Stream.runFoldEffect(() => new Uint8Array(), (collected, chunk) => {
+@@ -61,7 +61,17 @@
+   Effect.map((bytes) => new TextDecoder().decode(bytes)),
+ )
+ 
++export const PdfCropInput = Schema.Struct({
++  privatePath: Schema.String,
++  outputPath: Schema.String,
++  page: Page,
++  box: PixelBox,
++})
++const CropOutput = Schema.Struct({ width: Schema.Int, height: Schema.Int, byteCount: Schema.Int, hash: ArtifactHash })
++const CropAnswer = Schema.Union([Schema.TaggedStruct("Cropped", CropOutput.fields), Rejected])
++
+ export class PdfRenderer extends Context.Service<PdfRenderer, {
++  readonly crop: (input: typeof PdfCropInput.Type) => Effect.Effect<typeof CropOutput.Type, PdfRenderError>
+   readonly render: (input: PdfRenderInput) => Effect.Effect<ReadonlyArray<RenderedPdfPage>, PdfRenderError>
+ }>()("amuseme/paper/PdfRenderer") {
+   static readonly layer = (options: { readonly pythonBin: string }) => Layer.effect(PdfRenderer, Effect.gen(function* () {
+@@ -71,6 +81,7 @@
+ 
+     const render = Effect.fn("PdfRenderer.render")(function* (input: PdfRenderInput) {
+       const request = yield* Schema.decodeUnknownEffect(PdfRenderInput)(input, { onExcessProperty: "error" }).pipe(Effect.mapError(() => failure("invalid-input")))
++      if (request.pageNumber !== undefined && request.pageNumber > request.pageCount) return yield* failure("invalid-input")
+       if (![request.privatePath, request.outputDirectory].every((value) => path.isAbsolute(value) && !value.includes("\0"))) return yield* failure("invalid-input")
+       if (!path.isAbsolute(options.pythonBin)) return yield* failure("processing-unavailable")
+       yield* Effect.scoped(Effect.gen(function* () {
+@@ -91,12 +102,35 @@
+           if (result.exitCode !== 0) return yield* failure("processing-unavailable")
+           const answer = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(Answer))(result.stdout, { onExcessProperty: "error" }).pipe(Effect.mapError(() => failure("processing-unavailable")))
+           if (answer._tag === "Rejected") return yield* failure(answer.code)
+-          if (answer.pages.length !== request.pageCount || answer.pages.some((page, index) => page.pageNumber !== index + 1 || page.image.path !== `pages/page-${String(index + 1).padStart(3, "0")}.png` || page.image.byteCount > PdfRenderLimits.maxImageBytes || Math.abs(page.width - page.widthPoints * page.dpi / 72) > 1 || Math.abs(page.height - page.heightPoints * page.dpi / 72) > 1) || answer.pages.reduce((total, page) => total + page.image.byteCount, 0) > PdfRenderLimits.maxTotalImageBytes) return yield* failure("processing-unavailable")
++          if (answer.pages.length !== (request.pageNumber === undefined ? request.pageCount : 1) || answer.pages.some((page, index) => page.pageNumber !== (request.pageNumber ?? index + 1) || page.image.path !== `pages/page-${String(request.pageNumber ?? index + 1).padStart(3, "0")}.png` || page.image.byteCount > PdfRenderLimits.maxImageBytes || Math.abs(page.width - page.widthPoints * page.dpi / 72) > 1 || Math.abs(page.height - page.heightPoints * page.dpi / 72) > 1) || answer.pages.reduce((total, page) => total + page.image.byteCount, 0) > PdfRenderLimits.maxTotalImageBytes) return yield* failure("processing-unavailable")
+           return answer.pages
+         })).pipe(Effect.timeoutOrElse({ duration: PdfRenderLimits.timeoutMs, orElse: () => Effect.fail(failure("limit-exceeded")) })),
+         (_, exit) => Exit.isSuccess(exit) ? Effect.void : fs.remove(pagesDirectory, { recursive: true, force: true }).pipe(Effect.orDie),
+       )
+     })
+-    return PdfRenderer.of({ render })
++    const crop = Effect.fn("PdfRenderer.crop")(function* (input: typeof PdfCropInput.Type) {
++      const request = yield* Schema.decodeUnknownEffect(PdfCropInput)(input, { onExcessProperty: "error" }).pipe(Effect.mapError(() => failure("invalid-input")))
++      const { box, page } = request
++      const safePaths = [request.privatePath, request.outputPath].every((value) => path.isAbsolute(value) && !value.includes("\0")) && path.isAbsolute(options.pythonBin)
++      const integerBox = [box.x, box.y, box.width, box.height].every(Number.isSafeInteger)
++      if (!safePaths || !integerBox || box.x + box.width > page.width || box.y + box.height > page.height) return yield* failure("invalid-input")
++      return yield* Effect.scoped(Effect.gen(function* () {
++        const process = yield* spawner.spawn(ChildProcess.make(options.pythonBin, ["-I", "-c", CROP_SCRIPT, JSON.stringify(request)], {
++          stdin: "ignore", env: {}, extendEnv: false, forceKillAfter: "100 millis",
++        })).pipe(Effect.mapError(() => failure("processing-unavailable")))
++        const result = yield* Effect.all({ stdout: collect(process.stdout), stderr: collect(process.stderr), exitCode: process.exitCode }, { concurrency: "unbounded" })
++          .pipe(Effect.mapError(() => failure("processing-unavailable")))
++        if (result.exitCode !== 0) return yield* failure("processing-unavailable")
++        const answer = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(CropAnswer))(result.stdout, { onExcessProperty: "error" })
++          .pipe(Effect.mapError(() => failure("invalid-input")))
++        if (answer._tag === "Rejected") return yield* failure(answer.code)
++        const { _tag, ...output } = answer
++        if (output.width !== box.width || output.height !== box.height || output.byteCount <= 0 || output.byteCount > PdfRenderLimits.maxImageBytes) {
++          return yield* failure("invalid-input")
++        }
++        return output
++      })).pipe(Effect.timeoutOrElse({ duration: "20 seconds", orElse: () => Effect.fail(failure("limit-exceeded")) }))
++    })
++    return PdfRenderer.of({ render, crop })
+   }))
+ }

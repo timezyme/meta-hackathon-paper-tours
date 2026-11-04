@@ -10,8 +10,11 @@ SQLite and the process lock need a local POSIX filesystem, so the app runs on
 container disk. Startup restores the volume snapshot to local disk; a
 background thread and container exit write a consistent snapshot back
 (SQLite online backups first, then document files, then the databases, then
-removals the backed-up databases no longer need). The thread also snapshots
-within seconds of any provider ledger change.
+removals the backed-up databases no longer need). A candidate whose backed-up
+active documents were deleted before their files were copied is discarded, so
+the previous complete snapshot stays. The thread also snapshots within seconds
+of any provider ledger change. If Node exits on its own, the thread saves a
+last snapshot and exits the container nonzero so Modal replaces it.
 """
 
 import os
@@ -41,6 +44,7 @@ LOCAL_DATA = "/srv/amuseme-data"
 SNAPSHOT_SECONDS = 60
 LEDGER_POLL_SECONDS = 2
 DATABASES = ("application.sqlite", "auth.sqlite", "mastra.sqlite")
+SECRET_NAME_PARTS = ("SECRET", "KEY", "TOKEN", "PASSWORD", "ACCESS_CODE")
 TRANSIENT = ("uploads", "processing", "archives")
 REPO = pathlib.Path(__file__).resolve().parents[2] if modal.is_local() else pathlib.Path(APP_ROOT)
 
@@ -88,6 +92,7 @@ image = (
     .env({
         "AMUSEME_PORT": str(PORT), "AMUSEME_HOST": "0.0.0.0", "AMUSEME_DATA_DIR": LOCAL_DATA,
         "AMUSEME_PYTHON_BIN": f"{PYTHON_ENV}/bin/python", "AMUSEME_JUDGE_SIGN_IN": "true", "AMUSEME_PROCESSING_ENABLED": "true",
+        "AMUSEME_TRUSTED_PROXY": "modal",
         "MASTRA_STUDIO_PATH": ".mastra/output/studio", "MASTRA_TELEMETRY_DISABLED": "true", "MASTRA_AGENT_SIGNALS": "false",
         "NODE_ENV": "production", **deploy_settings(),
     })
@@ -156,6 +161,14 @@ def active_documents(database):
         return {row[0] for row in connection.execute("SELECT id FROM documents WHERE lifecycle = 'active'")}
 
 
+def describe(error):
+    message = f"{type(error).__name__}: {error}"
+    for name, value in os.environ.items():
+        if len(value) >= 8 and any(part in name.upper() for part in SECRET_NAME_PARTS):
+            message = message.replace(value, "[redacted]")
+    return message
+
+
 def ledger_watermark():
     database = os.path.join(LOCAL_DATA, "application.sqlite")
     if not os.path.exists(database):
@@ -167,10 +180,16 @@ def ledger_watermark():
         ).fetchone()
 
 
+class IncompleteSnapshot(Exception):
+    pass
+
+
 def snapshot():
     # The app writes document files before committing the rows that reference
-    # them and removes files only after the row leaves 'active', so files
-    # copied after the backups cover every active row in those backups.
+    # them and removes files only after the row leaves 'active'. A document
+    # active in the backups and still active after the copy kept its files
+    # throughout, so they were copied. One that left 'active' in between may
+    # have lost files before the copy, so that candidate is not promoted.
     os.makedirs(REMOTE_DATA, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="amuseme-snapshot-") as staging:
         staged = []
@@ -180,11 +199,14 @@ def snapshot():
                 backup(source, os.path.join(staging, name))
                 staged.append(name)
         sync_documents(os.path.join(LOCAL_DATA, "documents"), os.path.join(REMOTE_DATA, "documents"))
+        keep = active_documents(os.path.join(staging, "application.sqlite"))
+        left = keep - active_documents(os.path.join(LOCAL_DATA, "application.sqlite"))
+        if left:
+            raise IncompleteSnapshot(f"{len(left)} backed-up active document(s) were removed during the file copy")
         for name in staged:
             target = os.path.join(REMOTE_DATA, name)
             shutil.copyfile(os.path.join(staging, name), target + ".tmp")
             os.replace(target + ".tmp", target)
-        keep = active_documents(os.path.join(staging, "application.sqlite"))
     remove_missing(os.path.join(LOCAL_DATA, "documents"), os.path.join(REMOTE_DATA, "documents"), keep)
     for name in TRANSIENT:
         shutil.rmtree(os.path.join(REMOTE_DATA, name), ignore_errors=True)
@@ -213,7 +235,10 @@ class AmuseMe:
     def snapshots(self):
         watermark, due = None, time.monotonic() + SNAPSHOT_SECONDS
         while not self.stopping.wait(LEDGER_POLL_SECONDS):
-            if self.server.poll() is not None:
+            code = self.server.poll()
+            if code is not None:
+                if not self.stopping.is_set():
+                    self.replace_container(code)
                 return
             try:
                 current = ledger_watermark()
@@ -223,7 +248,16 @@ class AmuseMe:
                     snapshot()
                 watermark, due = current, time.monotonic() + SNAPSHOT_SECONDS
             except Exception as error:
-                print(f"AmuseMe snapshot failed: {type(error).__name__}")
+                print(f"AmuseMe snapshot failed: {describe(error)}", flush=True)
+
+    def replace_container(self, code):
+        print(f"AmuseMe server exited with code {code}; saving a last snapshot and exiting the container", flush=True)
+        with self.lock:
+            try:
+                snapshot()
+            except Exception as error:
+                print(f"AmuseMe snapshot failed: {describe(error)}", flush=True)
+            os._exit(1)
 
     @modal.web_server(PORT, startup_timeout=300, label=APP_NAME)
     def web(self):

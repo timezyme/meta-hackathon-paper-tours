@@ -4,223 +4,279 @@ Changes relative to the separately supplied mixed-origin foundation are listed b
 
 ## Changed files
 
-- `.env.example`
-- `.gitignore`
-- `README.md`
-- `cli/spark-extraction/README.md`
-- `docs/demo/presentation.md`
-- `docs/runbooks/application-operations.md`
-- `docs/runbooks/development-harness.md`
-- `docs/runbooks/mastra-upgrade.md`
-- `docs/step-rules/app-shell.md`
-- `docs/step-rules/application-ui.md`
-- `docs/step-rules/authentication.md`
-- `docs/step-rules/document-export.md`
-- `docs/step-rules/document-http.md`
-- `docs/step-rules/document-reader.md`
-- `docs/step-rules/document-storage.md`
-- `docs/step-rules/document-ui.md`
-- `docs/step-rules/domain-contracts.md`
-- `docs/step-rules/execution-guards.md`
-- `docs/step-rules/figures.md`
-- `docs/step-rules/headings.md`
-- `docs/step-rules/http-access.md`
-- `docs/step-rules/meta-provider.md`
-- `docs/step-rules/normalization-workflow.md`
-- `docs/step-rules/output-http.md`
-- `docs/step-rules/output-publication.md`
-- `docs/step-rules/page-check.md`
-- `docs/step-rules/page-rendering.md`
-- `docs/step-rules/run-recovery.md`
-- `docs/step-rules/spark-extraction.md`
-- `docs/step-rules/visual-verification.md`
-- `prototype/README.md`
-- `prototype/assets/brand/amuseme-logo-reversed.svg`
-- `prototype/assets/brand/amuseme-logo.svg`
+Each changed text file has its full event version under `changed/` and a unified diff against the foundation under `diffs/`. Both are for reading: `reconstruct.py` builds only from `changes.json` and `new/`, then checks that every view matches what it built. A changed `.gitignore` or `.gitattributes` has only a diff, because Git would apply a full copy to `changed/` itself.
+
+- `.env.example`: [full file](changed/.env.example), [diff](diffs/.env.example.diff)
+- `.github/workflows/check.yml`: [full file](changed/.github/workflows/check.yml), [diff](diffs/.github/workflows/check.yml.diff)
+- `.gitignore`: [diff](diffs/.gitignore.diff)
+- `README.md`: [full file](changed/README.md), [diff](diffs/README.md.diff)
+- `cli/spark-extraction/README.md`: [full file](changed/cli/spark-extraction/README.md), [diff](diffs/cli/spark-extraction/README.md.diff)
+- `docs/demo/presentation.md`: [full file](changed/docs/demo/presentation.md), [diff](diffs/docs/demo/presentation.md.diff)
+- `docs/runbooks/application-operations.md`: [full file](changed/docs/runbooks/application-operations.md), [diff](diffs/docs/runbooks/application-operations.md.diff)
+- `docs/runbooks/development-harness.md`: [full file](changed/docs/runbooks/development-harness.md), [diff](diffs/docs/runbooks/development-harness.md.diff)
+- `docs/runbooks/mastra-upgrade.md`: [full file](changed/docs/runbooks/mastra-upgrade.md), [diff](diffs/docs/runbooks/mastra-upgrade.md.diff)
+- `docs/step-rules/app-shell.md`: [full file](changed/docs/step-rules/app-shell.md), [diff](diffs/docs/step-rules/app-shell.md.diff)
+- `docs/step-rules/application-ui.md`: [full file](changed/docs/step-rules/application-ui.md), [diff](diffs/docs/step-rules/application-ui.md.diff)
+- `docs/step-rules/authentication.md`: [full file](changed/docs/step-rules/authentication.md), [diff](diffs/docs/step-rules/authentication.md.diff)
+- `docs/step-rules/document-export.md`: [full file](changed/docs/step-rules/document-export.md), [diff](diffs/docs/step-rules/document-export.md.diff)
+- `docs/step-rules/document-http.md`: [full file](changed/docs/step-rules/document-http.md), [diff](diffs/docs/step-rules/document-http.md.diff)
+- `docs/step-rules/document-reader.md`: [full file](changed/docs/step-rules/document-reader.md), [diff](diffs/docs/step-rules/document-reader.md.diff)
+- `docs/step-rules/document-storage.md`: [full file](changed/docs/step-rules/document-storage.md), [diff](diffs/docs/step-rules/document-storage.md.diff)
+- `docs/step-rules/document-ui.md`: [full file](changed/docs/step-rules/document-ui.md), [diff](diffs/docs/step-rules/document-ui.md.diff)
+- `docs/step-rules/domain-contracts.md`: [full file](changed/docs/step-rules/domain-contracts.md), [diff](diffs/docs/step-rules/domain-contracts.md.diff)
+- `docs/step-rules/execution-guards.md`: [full file](changed/docs/step-rules/execution-guards.md), [diff](diffs/docs/step-rules/execution-guards.md.diff)
+- `docs/step-rules/figures.md`: [full file](changed/docs/step-rules/figures.md), [diff](diffs/docs/step-rules/figures.md.diff)
+- `docs/step-rules/headings.md`: [full file](changed/docs/step-rules/headings.md), [diff](diffs/docs/step-rules/headings.md.diff)
+- `docs/step-rules/http-access.md`: [full file](changed/docs/step-rules/http-access.md), [diff](diffs/docs/step-rules/http-access.md.diff)
+- `docs/step-rules/meta-provider.md`: [full file](changed/docs/step-rules/meta-provider.md), [diff](diffs/docs/step-rules/meta-provider.md.diff)
+- `docs/step-rules/normalization-workflow.md`: [full file](changed/docs/step-rules/normalization-workflow.md), [diff](diffs/docs/step-rules/normalization-workflow.md.diff)
+- `docs/step-rules/output-http.md`: [full file](changed/docs/step-rules/output-http.md), [diff](diffs/docs/step-rules/output-http.md.diff)
+- `docs/step-rules/output-publication.md`: [full file](changed/docs/step-rules/output-publication.md), [diff](diffs/docs/step-rules/output-publication.md.diff)
+- `docs/step-rules/page-check.md`: [full file](changed/docs/step-rules/page-check.md), [diff](diffs/docs/step-rules/page-check.md.diff)
+- `docs/step-rules/page-rendering.md`: [full file](changed/docs/step-rules/page-rendering.md), [diff](diffs/docs/step-rules/page-rendering.md.diff)
+- `docs/step-rules/run-recovery.md`: [full file](changed/docs/step-rules/run-recovery.md), [diff](diffs/docs/step-rules/run-recovery.md.diff)
+- `docs/step-rules/spark-extraction.md`: [full file](changed/docs/step-rules/spark-extraction.md), [diff](diffs/docs/step-rules/spark-extraction.md.diff)
+- `docs/step-rules/visual-verification.md`: [full file](changed/docs/step-rules/visual-verification.md), [diff](diffs/docs/step-rules/visual-verification.md.diff)
+- `lefthook.yml`: [full file](changed/lefthook.yml), [diff](diffs/lefthook.yml.diff)
+- `prototype/README.md`: [full file](changed/prototype/README.md), [diff](diffs/prototype/README.md.diff)
+- `prototype/assets/brand/amuseme-logo-reversed.svg`: [full file](changed/prototype/assets/brand/amuseme-logo-reversed.svg), [diff](diffs/prototype/assets/brand/amuseme-logo-reversed.svg.diff)
+- `prototype/assets/brand/amuseme-logo.svg`: [full file](changed/prototype/assets/brand/amuseme-logo.svg), [diff](diffs/prototype/assets/brand/amuseme-logo.svg.diff)
+- `prototype/assets/brand/apple-touch-icon.png`: binary, no view
+- `prototype/assets/brand/favicon.ico`: binary, no view
+- `prototype/assets/brand/favicon.svg`: [full file](changed/prototype/assets/brand/favicon.svg), [diff](diffs/prototype/assets/brand/favicon.svg.diff)
+- `prototype/index.html`: [full file](changed/prototype/index.html), [diff](diffs/prototype/index.html.diff)
+- `python/README.md`: [full file](changed/python/README.md), [diff](diffs/python/README.md.diff)
+- `src/app/App.tsx`: [full file](changed/src/app/App.tsx), [diff](diffs/src/app/App.tsx.diff)
+- `src/app/DocumentWorkspace.tsx`: [full file](changed/src/app/DocumentWorkspace.tsx), [diff](diffs/src/app/DocumentWorkspace.tsx.diff)
+- `src/app/assets/amuseme-logo-reversed.svg`: [full file](changed/src/app/assets/amuseme-logo-reversed.svg), [diff](diffs/src/app/assets/amuseme-logo-reversed.svg.diff)
+- `src/app/assets/amuseme-logo.svg`: [full file](changed/src/app/assets/amuseme-logo.svg), [diff](diffs/src/app/assets/amuseme-logo.svg.diff)
+- `src/app/assets/favicon.svg`: [full file](changed/src/app/assets/favicon.svg), [diff](diffs/src/app/assets/favicon.svg.diff)
+- `src/app/client/auth.ts`: [full file](changed/src/app/client/auth.ts), [diff](diffs/src/app/client/auth.ts.diff)
+- `src/app/client/browser.ts`: [full file](changed/src/app/client/browser.ts), [diff](diffs/src/app/client/browser.ts.diff)
+- `src/app/client/documents.ts`: [full file](changed/src/app/client/documents.ts), [diff](diffs/src/app/client/documents.ts.diff)
+- `src/app/client/outputs.ts`: [full file](changed/src/app/client/outputs.ts), [diff](diffs/src/app/client/outputs.ts.diff)
+- `src/app/client/retries.ts`: [full file](changed/src/app/client/retries.ts), [diff](diffs/src/app/client/retries.ts.diff)
+- `src/app/documents.ts`: [full file](changed/src/app/documents.ts), [diff](diffs/src/app/documents.ts.diff)
+- `src/app/navigation.ts`: [full file](changed/src/app/navigation.ts), [diff](diffs/src/app/navigation.ts.diff)
+- `src/app/reader/Panels.tsx`: [full file](changed/src/app/reader/Panels.tsx), [diff](diffs/src/app/reader/Panels.tsx.diff)
+- `src/app/reader/ReaderBlock.tsx`: [full file](changed/src/app/reader/ReaderBlock.tsx), [diff](diffs/src/app/reader/ReaderBlock.tsx.diff)
+- `src/app/reader/ReaderWorkspace.tsx`: [full file](changed/src/app/reader/ReaderWorkspace.tsx), [diff](diffs/src/app/reader/ReaderWorkspace.tsx.diff)
+- `src/app/reader/RetryDocument.tsx`: [full file](changed/src/app/reader/RetryDocument.tsx), [diff](diffs/src/app/reader/RetryDocument.tsx.diff)
+- `src/app/reader/math.ts`: [full file](changed/src/app/reader/math.ts), [diff](diffs/src/app/reader/math.ts.diff)
+- `src/app/reader/presentation.ts`: [full file](changed/src/app/reader/presentation.ts), [diff](diffs/src/app/reader/presentation.ts.diff)
+- `src/app/reader/reader.css`: [full file](changed/src/app/reader/reader.css), [diff](diffs/src/app/reader/reader.css.diff)
+- `src/app/shell.css`: [full file](changed/src/app/shell.css), [diff](diffs/src/app/shell.css.diff)
+- `src/auth/index.ts`: [full file](changed/src/auth/index.ts), [diff](diffs/src/auth/index.ts.diff)
+- `src/auth/instance.ts`: [full file](changed/src/auth/instance.ts), [diff](diffs/src/auth/instance.ts.diff)
+- `src/auth/service.ts`: [full file](changed/src/auth/service.ts), [diff](diffs/src/auth/service.ts.diff)
+- `src/domain/api.ts`: [full file](changed/src/domain/api.ts), [diff](diffs/src/domain/api.ts.diff)
+- `src/domain/document.ts`: [full file](changed/src/domain/document.ts), [diff](diffs/src/domain/document.ts.diff)
+- `src/domain/index.ts`: [full file](changed/src/domain/index.ts), [diff](diffs/src/domain/index.ts.diff)
+- `src/domain/processing.ts`: [full file](changed/src/domain/processing.ts), [diff](diffs/src/domain/processing.ts.diff)
+- `src/domain/prompt-templates.ts`: [full file](changed/src/domain/prompt-templates.ts), [diff](diffs/src/domain/prompt-templates.ts.diff)
+- `src/domain/validation.ts`: [full file](changed/src/domain/validation.ts), [diff](diffs/src/domain/validation.ts.diff)
+- `src/mastra/document-routes.ts`: [full file](changed/src/mastra/document-routes.ts), [diff](diffs/src/mastra/document-routes.ts.diff)
+- `src/mastra/normalize-workflow.ts`: [full file](changed/src/mastra/normalize-workflow.ts), [diff](diffs/src/mastra/normalize-workflow.ts.diff)
+- `src/mastra/observability.ts`: [full file](changed/src/mastra/observability.ts), [diff](diffs/src/mastra/observability.ts.diff)
+- `src/paper/correction/index.ts`: [full file](changed/src/paper/correction/index.ts), [diff](diffs/src/paper/correction/index.ts.diff)
+- `src/paper/correction/page-check.ts`: [full file](changed/src/paper/correction/page-check.ts), [diff](diffs/src/paper/correction/page-check.ts.diff)
+- `src/paper/extraction/index.ts`: [full file](changed/src/paper/extraction/index.ts), [diff](diffs/src/paper/extraction/index.ts.diff)
+- `src/paper/figures/index.ts`: [full file](changed/src/paper/figures/index.ts), [diff](diffs/src/paper/figures/index.ts.diff)
+- `src/paper/headings/index.ts`: [full file](changed/src/paper/headings/index.ts), [diff](diffs/src/paper/headings/index.ts.diff)
+- `src/paper/pdf/render-script.ts`: [full file](changed/src/paper/pdf/render-script.ts), [diff](diffs/src/paper/pdf/render-script.ts.diff)
+- `src/paper/pdf/render.ts`: [full file](changed/src/paper/pdf/render.ts), [diff](diffs/src/paper/pdf/render.ts.diff)
+- `src/paper/providers/meta/agents.ts`: [full file](changed/src/paper/providers/meta/agents.ts), [diff](diffs/src/paper/providers/meta/agents.ts.diff)
+- `src/paper/providers/meta/contracts.ts`: [full file](changed/src/paper/providers/meta/contracts.ts), [diff](diffs/src/paper/providers/meta/contracts.ts.diff)
+- `src/paper/providers/meta/index.ts`: [full file](changed/src/paper/providers/meta/index.ts), [diff](diffs/src/paper/providers/meta/index.ts.diff)
+- `src/paper/providers/meta/transport.ts`: [full file](changed/src/paper/providers/meta/transport.ts), [diff](diffs/src/paper/providers/meta/transport.ts.diff)
+- `src/paper/reading/assembly.ts`: [full file](changed/src/paper/reading/assembly.ts), [diff](diffs/src/paper/reading/assembly.ts.diff)
+- `src/paper/reading/export.ts`: [full file](changed/src/paper/reading/export.ts), [diff](diffs/src/paper/reading/export.ts.diff)
+- `src/paper/reading/index.ts`: [full file](changed/src/paper/reading/index.ts), [diff](diffs/src/paper/reading/index.ts.diff)
+- `src/processing/config.ts`: [full file](changed/src/processing/config.ts), [diff](diffs/src/processing/config.ts.diff)
+- `src/processing/contracts.ts`: [full file](changed/src/processing/contracts.ts), [diff](diffs/src/processing/contracts.ts.diff)
+- `src/processing/dispatcher.ts`: [full file](changed/src/processing/dispatcher.ts), [diff](diffs/src/processing/dispatcher.ts.diff)
+- `src/processing/guard.ts`: [full file](changed/src/processing/guard.ts), [diff](diffs/src/processing/guard.ts.diff)
+- `src/processing/pipeline.ts`: [full file](changed/src/processing/pipeline.ts), [diff](diffs/src/processing/pipeline.ts.diff)
+- `src/processing/policy.ts`: [full file](changed/src/processing/policy.ts), [diff](diffs/src/processing/policy.ts.diff)
+- `src/processing/recovery.ts`: [full file](changed/src/processing/recovery.ts), [diff](diffs/src/processing/recovery.ts.diff)
+- `src/processing/validator-repair.ts`: [full file](changed/src/processing/validator-repair.ts), [diff](diffs/src/processing/validator-repair.ts.diff)
+- `src/server/access.ts`: [full file](changed/src/server/access.ts), [diff](diffs/src/server/access.ts.diff)
+- `src/server/config.ts`: [full file](changed/src/server/config.ts), [diff](diffs/src/server/config.ts.diff)
+- `src/server/documents.ts`: [full file](changed/src/server/documents.ts), [diff](diffs/src/server/documents.ts.diff)
+- `src/server/http.ts`: [full file](changed/src/server/http.ts), [diff](diffs/src/server/http.ts.diff)
+- `src/server/lifecycle.ts`: [full file](changed/src/server/lifecycle.ts), [diff](diffs/src/server/lifecycle.ts.diff)
+- `src/server/outputs.ts`: [full file](changed/src/server/outputs.ts), [diff](diffs/src/server/outputs.ts.diff)
+- `src/storage/database.ts`: [full file](changed/src/storage/database.ts), [diff](diffs/src/storage/database.ts.diff)
+- `src/storage/documents.ts`: [full file](changed/src/storage/documents.ts), [diff](diffs/src/storage/documents.ts.diff)
+- `src/storage/files.ts`: [full file](changed/src/storage/files.ts), [diff](diffs/src/storage/files.ts.diff)
+- `src/storage/outputs.ts`: [full file](changed/src/storage/outputs.ts), [diff](diffs/src/storage/outputs.ts.diff)
+- `src/storage/service.ts`: [full file](changed/src/storage/service.ts), [diff](diffs/src/storage/service.ts.diff)
+- `tests/app/client/reader.test.ts`: [full file](changed/tests/app/client/reader.test.ts), [diff](diffs/tests/app/client/reader.test.ts.diff)
+- `tests/app/documents.test.ts`: [full file](changed/tests/app/documents.test.ts), [diff](diffs/tests/app/documents.test.ts.diff)
+- `tests/app/navigation.test.ts`: [full file](changed/tests/app/navigation.test.ts), [diff](diffs/tests/app/navigation.test.ts.diff)
+- `tests/app/reader.test.ts`: [full file](changed/tests/app/reader.test.ts), [diff](diffs/tests/app/reader.test.ts.diff)
+- `tests/auth/auth.test.ts`: [full file](changed/tests/auth/auth.test.ts), [diff](diffs/tests/auth/auth.test.ts.diff)
+- `tests/foundation/app-shell.test.ts`: [full file](changed/tests/foundation/app-shell.test.ts), [diff](diffs/tests/foundation/app-shell.test.ts.diff)
+- `tests/manual/visual-server.test.ts`: [full file](changed/tests/manual/visual-server.test.ts), [diff](diffs/tests/manual/visual-server.test.ts.diff)
+- `tests/manual/visual-server.ts`: [full file](changed/tests/manual/visual-server.ts), [diff](diffs/tests/manual/visual-server.ts.diff)
+- `tests/paper/correction.test.ts`: [full file](changed/tests/paper/correction.test.ts), [diff](diffs/tests/paper/correction.test.ts.diff)
+- `tests/paper/headings.test.ts`: [full file](changed/tests/paper/headings.test.ts), [diff](diffs/tests/paper/headings.test.ts.diff)
+- `tests/paper/meta/fixtures.ts`: [full file](changed/tests/paper/meta/fixtures.ts), [diff](diffs/tests/paper/meta/fixtures.ts.diff)
+- `tests/paper/meta/permissions.test.ts`: [full file](changed/tests/paper/meta/permissions.test.ts), [diff](diffs/tests/paper/meta/permissions.test.ts.diff)
+- `tests/paper/meta/table-replay.test.ts`: [full file](changed/tests/paper/meta/table-replay.test.ts), [diff](diffs/tests/paper/meta/table-replay.test.ts.diff)
+- `tests/paper/mineru/archive.test.ts`: [full file](changed/tests/paper/mineru/archive.test.ts), [diff](diffs/tests/paper/mineru/archive.test.ts.diff)
+- `tests/paper/mineru/fixtures/ARCHIVE-ATTRIBUTION.md`: [full file](changed/tests/paper/mineru/fixtures/ARCHIVE-ATTRIBUTION.md), [diff](diffs/tests/paper/mineru/fixtures/ARCHIVE-ATTRIBUTION.md.diff)
+- `tests/paper/pdf-render.test.ts`: [full file](changed/tests/paper/pdf-render.test.ts), [diff](diffs/tests/paper/pdf-render.test.ts.diff)
+- `tests/paper/pdf/admission.test.ts`: [full file](changed/tests/paper/pdf/admission.test.ts), [diff](diffs/tests/paper/pdf/admission.test.ts.diff)
+- `tests/paper/pdf/generate-fixtures.py`: [full file](changed/tests/paper/pdf/generate-fixtures.py), [diff](diffs/tests/paper/pdf/generate-fixtures.py.diff)
+- `tests/paper/spark-extraction.test.ts`: [full file](changed/tests/paper/spark-extraction.test.ts), [diff](diffs/tests/paper/spark-extraction.test.ts.diff)
+- `tests/processing/guards.test.ts`: [full file](changed/tests/processing/guards.test.ts), [diff](diffs/tests/processing/guards.test.ts.diff)
+- `tests/processing/pipeline.test.ts`: [full file](changed/tests/processing/pipeline.test.ts), [diff](diffs/tests/processing/pipeline.test.ts.diff)
+- `tests/processing/preflight-failures.test.ts`: [full file](changed/tests/processing/preflight-failures.test.ts), [diff](diffs/tests/processing/preflight-failures.test.ts.diff)
+- `tests/processing/recovery.test.ts`: [full file](changed/tests/processing/recovery.test.ts), [diff](diffs/tests/processing/recovery.test.ts.diff)
+- `tests/processing/spark-trial.test.ts`: [full file](changed/tests/processing/spark-trial.test.ts), [diff](diffs/tests/processing/spark-trial.test.ts.diff)
+- `tests/processing/validator-repair.test.ts`: [full file](changed/tests/processing/validator-repair.test.ts), [diff](diffs/tests/processing/validator-repair.test.ts.diff)
+- `tests/processing/workflow.test.ts`: [full file](changed/tests/processing/workflow.test.ts), [diff](diffs/tests/processing/workflow.test.ts.diff)
+- `tests/server/access.test.ts`: [full file](changed/tests/server/access.test.ts), [diff](diffs/tests/server/access.test.ts.diff)
+- `tests/server/config.test.ts`: [full file](changed/tests/server/config.test.ts), [diff](diffs/tests/server/config.test.ts.diff)
+- `tests/server/documents.test.ts`: [full file](changed/tests/server/documents.test.ts), [diff](diffs/tests/server/documents.test.ts.diff)
+- `tests/server/lifecycle-cancellation.test.ts`: [full file](changed/tests/server/lifecycle-cancellation.test.ts), [diff](diffs/tests/server/lifecycle-cancellation.test.ts.diff)
+- `tests/server/observability.test.ts`: [full file](changed/tests/server/observability.test.ts), [diff](diffs/tests/server/observability.test.ts.diff)
+- `tests/server/outputs.test.ts`: [full file](changed/tests/server/outputs.test.ts), [diff](diffs/tests/server/outputs.test.ts.diff)
+- `tests/storage/documents.test.ts`: [full file](changed/tests/storage/documents.test.ts), [diff](diffs/tests/storage/documents.test.ts.diff)
+- `tests/storage/output-zip.test.ts`: [full file](changed/tests/storage/output-zip.test.ts), [diff](diffs/tests/storage/output-zip.test.ts.diff)
+- `vitest.config.ts`: [full file](changed/vitest.config.ts), [diff](diffs/vitest.config.ts.diff)
+
+## Changed binary files
+
+These have no readable view; `changes.json` carries each one whole as base64.
+
 - `prototype/assets/brand/apple-touch-icon.png`
 - `prototype/assets/brand/favicon.ico`
-- `prototype/assets/brand/favicon.svg`
-- `prototype/index.html`
-- `python/README.md`
-- `src/app/App.tsx`
-- `src/app/DocumentWorkspace.tsx`
-- `src/app/assets/amuseme-logo-reversed.svg`
-- `src/app/assets/amuseme-logo.svg`
-- `src/app/assets/favicon.svg`
-- `src/app/client/auth.ts`
-- `src/app/client/browser.ts`
-- `src/app/client/documents.ts`
-- `src/app/client/outputs.ts`
-- `src/app/client/retries.ts`
-- `src/app/documents.ts`
-- `src/app/navigation.ts`
-- `src/app/reader/Panels.tsx`
-- `src/app/reader/ReaderBlock.tsx`
-- `src/app/reader/ReaderWorkspace.tsx`
-- `src/app/reader/RetryDocument.tsx`
-- `src/app/reader/math.ts`
-- `src/app/reader/presentation.ts`
-- `src/app/reader/reader.css`
-- `src/app/shell.css`
-- `src/auth/index.ts`
-- `src/auth/instance.ts`
-- `src/auth/service.ts`
-- `src/domain/api.ts`
-- `src/domain/document.ts`
-- `src/domain/index.ts`
-- `src/domain/processing.ts`
-- `src/domain/prompt-templates.ts`
-- `src/domain/validation.ts`
-- `src/mastra/document-routes.ts`
-- `src/mastra/normalize-workflow.ts`
-- `src/mastra/observability.ts`
-- `src/paper/correction/index.ts`
-- `src/paper/correction/page-check.ts`
-- `src/paper/extraction/index.ts`
-- `src/paper/figures/index.ts`
-- `src/paper/headings/index.ts`
-- `src/paper/pdf/render-script.ts`
-- `src/paper/pdf/render.ts`
-- `src/paper/providers/meta/agents.ts`
-- `src/paper/providers/meta/contracts.ts`
-- `src/paper/providers/meta/index.ts`
-- `src/paper/providers/meta/transport.ts`
-- `src/paper/reading/assembly.ts`
-- `src/paper/reading/export.ts`
-- `src/paper/reading/index.ts`
-- `src/processing/config.ts`
-- `src/processing/contracts.ts`
-- `src/processing/guard.ts`
-- `src/processing/pipeline.ts`
-- `src/processing/policy.ts`
-- `src/processing/recovery.ts`
-- `src/processing/validator-repair.ts`
-- `src/server/access.ts`
-- `src/server/config.ts`
-- `src/server/documents.ts`
-- `src/server/http.ts`
-- `src/server/lifecycle.ts`
-- `src/server/outputs.ts`
-- `src/storage/database.ts`
-- `src/storage/documents.ts`
-- `src/storage/files.ts`
-- `src/storage/outputs.ts`
-- `src/storage/service.ts`
-- `tests/app/client/reader.test.ts`
-- `tests/app/documents.test.ts`
-- `tests/app/navigation.test.ts`
-- `tests/app/reader.test.ts`
-- `tests/auth/auth.test.ts`
-- `tests/foundation/app-shell.test.ts`
-- `tests/manual/visual-server.test.ts`
-- `tests/manual/visual-server.ts`
-- `tests/paper/correction.test.ts`
-- `tests/paper/headings.test.ts`
-- `tests/paper/meta/fixtures.ts`
-- `tests/paper/meta/permissions.test.ts`
-- `tests/paper/meta/table-replay.test.ts`
-- `tests/paper/pdf-render.test.ts`
-- `tests/paper/pdf/admission.test.ts`
-- `tests/paper/spark-extraction.test.ts`
-- `tests/processing/guards.test.ts`
-- `tests/processing/pipeline.test.ts`
-- `tests/processing/preflight-failures.test.ts`
-- `tests/processing/recovery.test.ts`
-- `tests/processing/spark-trial.test.ts`
-- `tests/processing/validator-repair.test.ts`
-- `tests/processing/workflow.test.ts`
-- `tests/server/access.test.ts`
-- `tests/server/config.test.ts`
-- `tests/server/documents.test.ts`
-- `tests/server/lifecycle-cancellation.test.ts`
-- `tests/server/observability.test.ts`
-- `tests/server/outputs.test.ts`
-- `tests/storage/documents.test.ts`
-- `tests/storage/output-zip.test.ts`
+
+## Deleted foundation files
+
+The event version no longer has these files; `changes.json` marks each one `"deleted": true`.
+
+- `tests/guards/lint.test.ts`
+- `tests/paper/mineru/archive-fixtures.py`
 
 ## New files
 
-- `cli/muse/README.md`
-- `cli/muse/muse`
-- `cli/muse/muse.py`
-- `cli/muse/test_muse.py`
-- `deploy/modal/app.py`
-- `deploy/modal/seed_examples.py`
-- `docs/demo/meta-only-script.md`
-- `docs/runbooks/modal-deploy.md`
-- `docs/step-rules/muse-review.md`
-- `docs/step-rules/paper-map.md`
-- `docs/step-rules/reading-guide.md`
-- `docs/step-rules/submission-preparation.md`
-- `scripts/repair-code-blocks.ts`
-- `scripts/submission/prepare.py`
-- `src/app/DocumentReadError.tsx`
-- `src/app/assets/paper-frontispiece.svg`
-- `src/app/client/http.ts`
-- `src/app/guide/GoalChoices.tsx`
-- `src/app/guide/GuidePath.tsx`
-- `src/app/guide/GuideSources.tsx`
-- `src/app/guide/GuideWorkspace.tsx`
-- `src/app/guide/PaperStatus.tsx`
-- `src/app/guide/ProcessingProgress.tsx`
-- `src/app/guide/QuoteText.tsx`
-- `src/app/guide/guide.css`
-- `src/app/guide/navigation.ts`
-- `src/app/guide/presentation.ts`
-- `src/app/library/PaperLibrary.tsx`
-- `src/app/library/library.css`
-- `src/app/library/presentation.ts`
-- `src/app/library/usePaperPreview.ts`
-- `src/app/links.tsx`
-- `src/app/map/LICENSE`
-- `src/app/map/MapGraph.tsx`
-- `src/app/map/MapPanel.tsx`
-- `src/app/map/NOTICE.md`
-- `src/app/map/PaperMapView.tsx`
-- `src/app/map/graph.ts`
-- `src/app/map/layout.ts`
-- `src/app/map/map.css`
-- `src/app/map/presentation.ts`
-- `src/app/reader/OriginalPreview.tsx`
-- `src/app/text.ts`
-- `src/app/useRoutePresentation.ts`
-- `src/auth/judge.ts`
-- `src/domain/furniture.ts`
-- `src/domain/guide.ts`
-- `src/paper/extraction/page.ts`
-- `src/paper/figures/crop.ts`
-- `src/paper/guide/evidence.ts`
-- `src/paper/guide/index.ts`
-- `src/paper/guide/prompt.ts`
-- `src/paper/pdf/crop-script.ts`
-- `src/paper/pdf/script-preamble.ts`
-- `src/paper/reading/code-repair.ts`
-- `src/processing/code-repair.ts`
-- `tests/app/client/browser.test.ts`
-- `tests/app/guide-fixture.ts`
-- `tests/app/guide.test.ts`
-- `tests/app/library.test.ts`
-- `tests/app/map-fixture.ts`
-- `tests/app/map.test.ts`
-- `tests/app/sign-in.test.ts`
-- `tests/app/text.test.ts`
-- `tests/auth/judge.test.ts`
-- `tests/deploy/test_modal_deploy.py`
-- `tests/fixtures/code-repair.ts`
-- `tests/fixtures/guide.ts`
-- `tests/fixtures/read-lock-holder.mjs`
-- `tests/fixtures/read-lock.ts`
-- `tests/paper/code-repair.test.ts`
-- `tests/paper/figure-crop.test.ts`
-- `tests/paper/furniture.test.ts`
-- `tests/paper/guide.test.ts`
-- `tests/paper/meta-document-extraction.test.ts`
-- `tests/processing/cost-model.test.ts`
-- `tests/processing/figure-concurrency.test.ts`
-- `tests/processing/meta-document.test.ts`
-- `tests/server/shared-examples.test.ts`
-- `tests/storage/code-repair.test.ts`
-- `tests/storage/database.test.ts`
-- `tests/submission/test_prepare.py`
+- [`cli/muse/README.md`](new/cli/muse/README.md)
+- [`cli/muse/muse`](new/cli/muse/muse)
+- [`cli/muse/muse.py`](new/cli/muse/muse.py)
+- [`cli/muse/test_muse.py`](new/cli/muse/test_muse.py)
+- [`deploy/modal/app.py`](new/deploy/modal/app.py)
+- [`deploy/modal/seed_examples.py`](new/deploy/modal/seed_examples.py)
+- [`docs/demo/meta-only-script.md`](new/docs/demo/meta-only-script.md)
+- [`docs/runbooks/modal-deploy.md`](new/docs/runbooks/modal-deploy.md)
+- [`docs/step-rules/muse-review.md`](new/docs/step-rules/muse-review.md)
+- [`docs/step-rules/paper-map.md`](new/docs/step-rules/paper-map.md)
+- [`docs/step-rules/reading-guide.md`](new/docs/step-rules/reading-guide.md)
+- [`docs/step-rules/submission-preparation.md`](new/docs/step-rules/submission-preparation.md)
+- [`scripts/repair-code-blocks.ts`](new/scripts/repair-code-blocks.ts)
+- [`scripts/submission/prepare.py`](new/scripts/submission/prepare.py)
+- [`scripts/submission/reconstruct.py`](new/scripts/submission/reconstruct.py)
+- [`src/app/DocumentReadError.tsx`](new/src/app/DocumentReadError.tsx)
+- [`src/app/GlyphText.tsx`](new/src/app/GlyphText.tsx)
+- [`src/app/Location.tsx`](new/src/app/Location.tsx)
+- [`src/app/assets/paper-frontispiece.svg`](new/src/app/assets/paper-frontispiece.svg)
+- [`src/app/client/http.ts`](new/src/app/client/http.ts)
+- [`src/app/guide/GoalChoices.tsx`](new/src/app/guide/GoalChoices.tsx)
+- [`src/app/guide/GuidePath.tsx`](new/src/app/guide/GuidePath.tsx)
+- [`src/app/guide/GuideSources.tsx`](new/src/app/guide/GuideSources.tsx)
+- [`src/app/guide/GuideWorkspace.tsx`](new/src/app/guide/GuideWorkspace.tsx)
+- [`src/app/guide/PaperStatus.tsx`](new/src/app/guide/PaperStatus.tsx)
+- [`src/app/guide/ProcessingProgress.tsx`](new/src/app/guide/ProcessingProgress.tsx)
+- [`src/app/guide/QuoteText.tsx`](new/src/app/guide/QuoteText.tsx)
+- [`src/app/guide/goalChoicesModel.ts`](new/src/app/guide/goalChoicesModel.ts)
+- [`src/app/guide/guide.css`](new/src/app/guide/guide.css)
+- [`src/app/guide/navigation.ts`](new/src/app/guide/navigation.ts)
+- [`src/app/guide/presentation.ts`](new/src/app/guide/presentation.ts)
+- [`src/app/library/PaperLibrary.tsx`](new/src/app/library/PaperLibrary.tsx)
+- [`src/app/library/library.css`](new/src/app/library/library.css)
+- [`src/app/library/presentation.ts`](new/src/app/library/presentation.ts)
+- [`src/app/library/usePaperPreview.ts`](new/src/app/library/usePaperPreview.ts)
+- [`src/app/links.tsx`](new/src/app/links.tsx)
+- [`src/app/map/LICENSE`](new/src/app/map/LICENSE)
+- [`src/app/map/MapGraph.tsx`](new/src/app/map/MapGraph.tsx)
+- [`src/app/map/MapPanel.tsx`](new/src/app/map/MapPanel.tsx)
+- [`src/app/map/NOTICE.md`](new/src/app/map/NOTICE.md)
+- [`src/app/map/PaperMapView.tsx`](new/src/app/map/PaperMapView.tsx)
+- [`src/app/map/graph.ts`](new/src/app/map/graph.ts)
+- [`src/app/map/layout.ts`](new/src/app/map/layout.ts)
+- [`src/app/map/map.css`](new/src/app/map/map.css)
+- [`src/app/map/presentation.ts`](new/src/app/map/presentation.ts)
+- [`src/app/reader/OriginalPreview.tsx`](new/src/app/reader/OriginalPreview.tsx)
+- [`src/app/reader/ReaderContent.tsx`](new/src/app/reader/ReaderContent.tsx)
+- [`src/app/reader/useReaderActions.ts`](new/src/app/reader/useReaderActions.ts)
+- [`src/app/reader/useReaderOutput.ts`](new/src/app/reader/useReaderOutput.ts)
+- [`src/app/session.ts`](new/src/app/session.ts)
+- [`src/app/text.ts`](new/src/app/text.ts)
+- [`src/app/useFocusOnChange.ts`](new/src/app/useFocusOnChange.ts)
+- [`src/app/useRoutePresentation.ts`](new/src/app/useRoutePresentation.ts)
+- [`src/auth/judge.ts`](new/src/auth/judge.ts)
+- [`src/auth/routes.ts`](new/src/auth/routes.ts)
+- [`src/domain/furniture.ts`](new/src/domain/furniture.ts)
+- [`src/domain/guide.ts`](new/src/domain/guide.ts)
+- [`src/domain/meta-policy.ts`](new/src/domain/meta-policy.ts)
+- [`src/paper/extraction/page.ts`](new/src/paper/extraction/page.ts)
+- [`src/paper/figures/crop.ts`](new/src/paper/figures/crop.ts)
+- [`src/paper/guide/evidence.ts`](new/src/paper/guide/evidence.ts)
+- [`src/paper/guide/index.ts`](new/src/paper/guide/index.ts)
+- [`src/paper/guide/prompt.ts`](new/src/paper/guide/prompt.ts)
+- [`src/paper/pdf/crop-script.ts`](new/src/paper/pdf/crop-script.ts)
+- [`src/paper/pdf/script-preamble.ts`](new/src/paper/pdf/script-preamble.ts)
+- [`src/paper/reading/code-repair.ts`](new/src/paper/reading/code-repair.ts)
+- [`src/processing/code-repair.ts`](new/src/processing/code-repair.ts)
+- [`src/processing/figure-crops.ts`](new/src/processing/figure-crops.ts)
+- [`src/processing/fingerprint.ts`](new/src/processing/fingerprint.ts)
+- [`src/processing/muse-review.ts`](new/src/processing/muse-review.ts)
+- [`src/processing/pipeline-shared.ts`](new/src/processing/pipeline-shared.ts)
+- [`src/processing/stage-context.ts`](new/src/processing/stage-context.ts)
+- [`src/processing/stages/assembly.ts`](new/src/processing/stages/assembly.ts)
+- [`src/processing/stages/export.ts`](new/src/processing/stages/export.ts)
+- [`src/processing/stages/extraction.ts`](new/src/processing/stages/extraction.ts)
+- [`src/processing/stages/figures.ts`](new/src/processing/stages/figures.ts)
+- [`src/processing/stages/guide.ts`](new/src/processing/stages/guide.ts)
+- [`src/processing/stages/headings.ts`](new/src/processing/stages/headings.ts)
+- [`src/processing/stages/page-check.ts`](new/src/processing/stages/page-check.ts)
+- [`src/server/document-previews.ts`](new/src/server/document-previews.ts)
+- [`src/server/document-read-policy.ts`](new/src/server/document-read-policy.ts)
+- [`tests/app/accessibility.test.ts`](new/tests/app/accessibility.test.ts)
+- [`tests/app/client/browser.test.ts`](new/tests/app/client/browser.test.ts)
+- [`tests/app/guide-fixture.ts`](new/tests/app/guide-fixture.ts)
+- [`tests/app/guide.test.ts`](new/tests/app/guide.test.ts)
+- [`tests/app/library.test.ts`](new/tests/app/library.test.ts)
+- [`tests/app/map-fixture.ts`](new/tests/app/map-fixture.ts)
+- [`tests/app/map.test.ts`](new/tests/app/map.test.ts)
+- [`tests/app/session.test.ts`](new/tests/app/session.test.ts)
+- [`tests/app/sign-in.test.ts`](new/tests/app/sign-in.test.ts)
+- [`tests/app/text.test.ts`](new/tests/app/text.test.ts)
+- [`tests/auth/judge.test.ts`](new/tests/auth/judge.test.ts)
+- [`tests/deploy/test_modal_deploy.py`](new/tests/deploy/test_modal_deploy.py)
+- [`tests/fixtures/code-repair.ts`](new/tests/fixtures/code-repair.ts)
+- [`tests/fixtures/guide.ts`](new/tests/fixtures/guide.ts)
+- [`tests/fixtures/read-lock-holder.mjs`](new/tests/fixtures/read-lock-holder.mjs)
+- [`tests/fixtures/read-lock.ts`](new/tests/fixtures/read-lock.ts)
+- [`tests/fixtures/speed.ts`](new/tests/fixtures/speed.ts)
+- [`tests/paper/code-repair.test.ts`](new/tests/paper/code-repair.test.ts)
+- [`tests/paper/figure-crop.test.ts`](new/tests/paper/figure-crop.test.ts)
+- [`tests/paper/furniture.test.ts`](new/tests/paper/furniture.test.ts)
+- [`tests/paper/guide.test.ts`](new/tests/paper/guide.test.ts)
+- [`tests/paper/meta-document-extraction.test.ts`](new/tests/paper/meta-document-extraction.test.ts)
+- [`tests/processing/cost-model.test.ts`](new/tests/processing/cost-model.test.ts)
+- [`tests/processing/fingerprint.test.ts`](new/tests/processing/fingerprint.test.ts)
+- [`tests/processing/guard-wait.test.ts`](new/tests/processing/guard-wait.test.ts)
+- [`tests/processing/page-concurrency.test.ts`](new/tests/processing/page-concurrency.test.ts)
+- [`tests/processing/page-limit.test.ts`](new/tests/processing/page-limit.test.ts)
+- [`tests/processing/stage-failures.test.ts`](new/tests/processing/stage-failures.test.ts)
+- [`tests/server/previews.test.ts`](new/tests/server/previews.test.ts)
+- [`tests/server/shared-examples.test.ts`](new/tests/server/shared-examples.test.ts)
+- [`tests/storage/claim-concurrency.test.ts`](new/tests/storage/claim-concurrency.test.ts)
+- [`tests/storage/code-repair.test.ts`](new/tests/storage/code-repair.test.ts)
+- [`tests/storage/database.test.ts`](new/tests/storage/database.test.ts)
+- [`tests/submission/test_prepare.py`](new/tests/submission/test_prepare.py)
 
-Read `changes.json` for the added text and copy/skip operations, and for changed binary files carried whole as base64. Deleted foundation lines and unchanged context are not included.
+`changes.json` is what reconstruction applies: the added text and copy/skip operations on foundation lines, and changed binary files whole as base64. Unlike the diffs, it holds no deleted foundation lines or unchanged context.

@@ -1,0 +1,27 @@
+diff --git a/src/server/http.ts b/src/server/http.ts
+--- a/src/server/http.ts
++++ b/src/server/http.ts
+@@ -63,6 +63,14 @@
+   Effect.catchDefect((cause) => Effect.logError("Unexpected server failure", cause).pipe(Effect.as(failureResponse(500, "internal-error", "Request failed")))),
+ ))
+ 
++export const proxiedRequest = (request: Request, origin: string): Request => {
++  const url = new URL(request.url)
++  const configured = new URL(origin)
++  if (configured.protocol !== "https:" || url.protocol !== "http:" || url.host !== configured.host) return request
++  const body = request.method === "GET" || request.method === "HEAD" ? null : request.body
++  return new Request(`${configured.origin}${url.pathname}${url.search}`, { method: request.method, headers: request.headers, body, signal: request.signal, ...(body === null ? {} : { duplex: "half" }) } as RequestInit)
++}
++
+ export const createGuardedApp = Effect.fnUntraced(function* <R, E>(
+   mastra: Mastra,
+   runtime: ManagedRuntime.ManagedRuntime<AuthService | R, E>,
+@@ -75,7 +83,7 @@
+   })
+   const app = new Hono()
+   app.all("*", (context) => runtime.runPromise(
+-    dispatchRequest(context.req.raw, inner, origin, state).pipe(
++    dispatchRequest(proxiedRequest(context.req.raw, origin), inner, origin, state).pipe(
+       Effect.map((response) => secureResponse(response, new URL(context.req.url).pathname, origin)),
+     ),
+     { signal: context.req.raw.signal },

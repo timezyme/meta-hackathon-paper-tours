@@ -1,5 +1,5 @@
 foundation.zip
-.env*
+/.env*
 build/
 data/
 node_modules/

@@ -1,0 +1,66 @@
+diff --git a/tests/auth/auth.test.ts b/tests/auth/auth.test.ts
+--- a/tests/auth/auth.test.ts
++++ b/tests/auth/auth.test.ts
+@@ -1,10 +1,10 @@
+ import { NodeServices } from "@effect/platform-node"
+ import { describe, expect, it } from "@effect/vitest"
+ import { createClient } from "@libsql/client"
+-import { Effect, Fiber, FileSystem, Path, Redacted, Result, Stream } from "effect"
+-import { ChildProcess, ChildProcessSpawner } from "effect/process"
++import { Clock, Effect, Fiber, FileSystem, Path, Redacted, Result } from "effect"
+ import { TestClock } from "effect/testing"
+ import { AuthService, makeAuthLayer, provisionUser, type AuthOptions } from "../../src/auth/index.ts"
++import { holdReadLock } from "../fixtures/read-lock.ts"
+ import { authOperation, makeAuth } from "../../src/auth/instance.ts"
+ 
+ const password = "invited-fixture-password-2026"
+@@ -315,34 +315,20 @@
+     }).pipe(Effect.provide(makeAuthLayer(options)))
+   }).pipe(Effect.provide(NodeServices.layer)))
+ 
+-  it.effect("provisions through the real CLI and reports duplicate or invalid invitations without exposing credentials", () => Effect.gen(function* () {
+-    const options = yield* fixture()
+-    const path = yield* Path.Path
+-    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+-    const env = {
+-      AMUSEME_ORIGIN: options.origin,
+-      AMUSEME_DATA_DIR: path.dirname(options.databasePath),
+-      BETTER_AUTH_SECRET: Redacted.value(secret),
+-      AMUSEME_INVITE_EMAIL: "cli-reader@example.test",
+-      AMUSEME_INVITE_NAME: "CLI reader",
+-      AMUSEME_INVITE_PASSWORD: password,
+-      AMUSEME_INVITE_ROLE: "user",
+-    }
+-    for (const [index, values] of [env, env, { ...env, AMUSEME_INVITE_EMAIL: "invalid@example.test", AMUSEME_INVITE_PASSWORD: "too-short" }].entries()) {
+-      const child = yield* spawner.spawn(ChildProcess.make(process.execPath, ["scripts/provision-user.ts"], { env: values }))
+-      const output = yield* child.all.pipe(Stream.decodeText(), Stream.runFold(() => "", (all, chunk) => all + chunk))
+-      const exitCode = yield* child.exitCode
+-      expect(exitCode === 0).toBe(index === 0)
+-      expect(output).toContain(index === 0 ? "Invited user created." : "Could not create the invited user.")
+-      expect(output).not.toContain(password)
+-      expect(output).not.toContain(Redacted.value(secret))
+-      expect(output).not.toContain("too-short")
+-    }
+-    yield* Effect.gen(function* () {
+-      const auth = yield* AuthService
+-      const response = yield* signIn(auth, options, "cli-reader@example.test")
++  it.live("waits for another process's read lock on auth.sqlite instead of failing sign-in", () => Effect.gen(function* () {
++    const options = yield* fixture()
++    yield* invite(options)
++    yield* Effect.gen(function* () {
++      const auth = yield* AuthService
++      expect((yield* signIn(auth, options)).status).toBe(200)
++      const lock = yield* holdReadLock(options.databasePath, "user", 300)
++      yield* lock.arm
++      const response = yield* signIn(auth, options)
++      const finished = yield* Clock.currentTimeMillis
++      // A sign-in that finished before the release never met the lock, so it proves nothing.
++      expect(finished).toBeGreaterThanOrEqual(yield* lock.released)
+       expect(response.status).toBe(200)
+-      expect((yield* auth.getSession(sessionHeaders(response)))?.user.email).toBe("cli-reader@example.test")
+-    }).pipe(Effect.provide(makeAuthLayer(options)))
+-  }).pipe(Effect.provide(NodeServices.layer)))
++      expect((yield* auth.getSession(sessionHeaders(response)))?.user.email).toBe("reader@example.test")
++    }).pipe(Effect.scoped, Effect.provide(makeAuthLayer(options)))
++  }).pipe(Effect.provide(NodeServices.layer)), 15000)
+ })

@@ -1,149 +1,111 @@
 #!/usr/bin/env python3
-"""Prepare and reconstruct a submission against an independently supplied foundation."""
+"""Prepare a submission against an independently supplied foundation."""
 import argparse
 import base64
+from collections.abc import Iterable
 import difflib
-import hashlib
 import json
-import os
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import shutil
 import stat
-import tempfile
+import sys
+from typing import Any
+from urllib.parse import quote
 import zipfile
 
-MAX_TOTAL = 64 * 1024 * 1024
-MAX_FILE = 8 * 1024 * 1024
-MAX_FILES = 5000
+# Isolated Python mode omits the script directory from the import path.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import reconstruct as reconstruction
+from reconstruct import (
+    DELETED, FileRecord, add_reconstruct_arguments, digest, entries, is_text, read_regular,
+    reconstruct, record, safe_path, source_views, verify, write_file,
+)
+
+# New files may not live in, or be, any of these: private, generated or dependency data.
+FORBIDDEN_PARTS = frozenset({'qa', 'data', 'node_modules', 'skills', 'secrets', 'credentials', '__pycache__'})
+ALLOWED_DOTFILES = frozenset({'.env.example'})
 
 
-def digest(data):
-    return hashlib.sha256(data).hexdigest()
-
-
-def safe_path(name):
-    p = PurePosixPath(name)
-    if not name or name.startswith('/') or '\\' in name or any(x in ('', '.', '..') for x in name.split('/')) or p.is_absolute():
-        raise ValueError(f'unsafe path: {name!r}')
-    return p
-
-
-def read_regular(root, name):
-    parts = safe_path(name).parts
-    path = root
-    for part in parts:
-        path = path / part
-        if path.is_symlink():
-            raise ValueError(f'symlink forbidden: {name}')
-    if not path.is_file() or path.stat().st_size > MAX_FILE:
-        raise ValueError(f'missing or oversized file: {name}')
-    data = path.read_bytes()
-    return data, bool(path.stat().st_mode & 0o111)
-
-
-def record(path, data, executable):
-    return {'path': path, 'sha256': digest(data), 'bytes': len(data), 'executable': executable}
-
-
-def entries(manifest):
-    files = manifest['files']
-    if not isinstance(files, list) or len(files) > MAX_FILES:
-        raise ValueError('invalid file inventory')
-    result = {}
-    total = 0
-    for item in files:
-        name = item['path']
-        safe_path(name)
-        if name in result or not isinstance(item['bytes'], int) or not 0 <= item['bytes'] <= MAX_FILE or type(item['executable']) is not bool:
-            raise ValueError('invalid inventory entry')
-        if len(item['sha256']) != 64 or any(c not in '0123456789abcdef' for c in item['sha256']):
-            raise ValueError('invalid hash')
-        total += item['bytes']
-        result[name] = item
-    if total > MAX_TOTAL:
-        raise ValueError('inventory too large')
-    return result
-
-
-def verify(data, executable, item):
-    if record(item['path'], data, executable) != {k: item[k] for k in ('path', 'sha256', 'bytes', 'executable')}:
-        raise ValueError(f"hash, size or mode mismatch: {item['path']}")
-
-
-def write_file(root, name, data, executable):
-    path = root.joinpath(*safe_path(name).parts)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('xb') as f:
-        f.write(data)
-    path.chmod(0o755 if executable else 0o644)
-
-
-def is_text(data):
-    try:
-        data.decode('utf-8')
-        return True
-    except UnicodeDecodeError:
-        return False
-
-
-def change(old, new, executable):
-    # Text changes are line patches, so old lines never enter the submission.
-    # A changed binary file (an icon) is carried whole; it holds no foundation text.
+def change(old: bytes, new: bytes, executable: bool) -> dict[str, Any]:
+    # Text files become line operations; any other changed file is stored whole as base64.
     if is_text(old) and is_text(new):
         return {'operations': patch(old, new), 'executable': executable}
     return {'bytes': base64.b64encode(new).decode('ascii'), 'executable': executable}
 
 
-def changed_bytes(old, item):
-    if set(item) == {'operations', 'executable'}:
-        return apply_patch(old, item['operations'])
-    if set(item) == {'bytes', 'executable'} and isinstance(item['bytes'], str):
-        return base64.b64decode(item['bytes'], validate=True)
-    raise ValueError('invalid change entry')
-
-
-def patch(old, new):
-    # Changed text files must be UTF-8; old lines never enter the submission.
-    old.decode('utf-8')
-    new.decode('utf-8')
+def patch(old: bytes, new: bytes) -> list[list[str | int]]:
+    """Describe new as copy and skip runs over old's lines plus added text; old's lines never appear."""
     a, b = old.splitlines(keepends=True), new.splitlines(keepends=True)
-    ops = []
-    for tag, i, j, k, l in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
+    operations = []
+    for tag, a_start, a_end, b_start, b_end in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
         if tag == 'equal':
-            ops.append(['copy', j - i])
+            operations.append(['copy', a_end - a_start])
+            continue
+        if a_end > a_start:
+            operations.append(['skip', a_end - a_start])
+        if b_end > b_start:
+            operations.append(['add', b''.join(b[b_start:b_end]).decode('utf-8')])
+    return operations
+
+
+def changes_json(changes: dict[str, dict[str, Any]]) -> str:
+    """Write one operation per line, so changes.json reads as a list of edits. Any JSON reader accepts it."""
+    def dump(value: Any) -> str:
+        return json.dumps(value, ensure_ascii=False)
+
+    entries = []
+    for name, item in sorted(changes.items()):
+        if item == DELETED:
+            body = '"deleted": true'
+        elif 'operations' in item:
+            operations = ','.join(f'\n      {dump(operation)}' for operation in item['operations'])
+            body = f'"executable": {dump(item["executable"])},\n    "operations": [{operations}\n    ]'
         else:
-            if j > i:
-                ops.append(['skip', j - i])
-            if l > k:
-                ops.append(['add', b''.join(b[k:l]).decode('utf-8')])
-    return ops
+            body = f'"bytes": {dump(item["bytes"])},\n    "executable": {dump(item["executable"])}'
+        entries.append(f'  {dump(name)}: {{\n    {body}\n  }}')
+    return '{\n' + ',\n'.join(entries) + '\n}\n' if entries else '{}\n'
 
 
-def apply_patch(old, ops):
-    lines = old.splitlines(keepends=True)
-    pos = 0
-    output = bytearray()
-    for op, value in ops:
-        if op in ('copy', 'skip'):
-            if type(value) is not int or value < 0 or pos + value > len(lines):
-                raise ValueError('invalid patch span')
-            if op == 'copy':
-                output.extend(b''.join(lines[pos:pos + value]))
-            pos += value
-        elif op == 'add':
-            if not isinstance(value, str):
-                raise ValueError('invalid patch addition')
-            output.extend(value.encode('utf-8'))
-        else:
-            raise ValueError('invalid patch operation')
-        if len(output) > MAX_FILE:
-            raise ValueError('patched file too large')
-    if pos != len(lines):
-        raise ValueError('incomplete patch')
-    return bytes(output)
+def bullets(lines: Iterable[str]) -> str:
+    return ''.join(f'- {line}\n' for line in lines) or '- None\n'
 
 
-def zip_baseline(root, items, out):
+def new_work(changes: dict[str, dict[str, Any]], new_names: list[str], views: dict[str, bytes]) -> str:
+    changed, binary, deleted = [], [], []
+    for name in sorted(changes):
+        if changes[name] == DELETED:
+            deleted.append(f'`{name}`')
+            continue
+        links = [f'[{label}]({quote(view)})' for label, view in (('full file', f'changed/{name}'),
+                                                                 ('diff', f'diffs/{name}.diff')) if view in views]
+        changed.append(f'`{name}`: {", ".join(links) or "binary, no view"}')
+        binary += [] if links else [f'`{name}`']
+    work = ('# New work for review\n\nChanges relative to the separately supplied mixed-origin foundation are listed '
+            'below. This inventory records byte differences; it does not establish authorship or eligibility.\n\n'
+            '## Changed files\n\nEach changed text file has its full event version under `changed/` and a unified '
+            'diff against the foundation under `diffs/`. Both are for reading: `reconstruct.py` builds only from '
+            '`changes.json` and `new/`, then checks that every view matches what it built. A changed `.gitignore` '
+            'or `.gitattributes` has only a diff, because Git would apply a full copy to `changed/` itself.\n\n')
+    work += bullets(changed)
+    if binary:
+        work += ('\n## Changed binary files\n\nThese have no readable view; `changes.json` carries each one whole '
+                 'as base64.\n\n' + bullets(binary))
+    if deleted:
+        work += ('\n## Deleted foundation files\n\nThe event version no longer has these files; `changes.json` '
+                 'marks each one `"deleted": true`.\n\n' + bullets(deleted))
+    work += '\n## New files\n\n' + bullets(f'[`{name}`]({quote("new/" + name)})' for name in new_names)
+    work += ('\n`changes.json` is what reconstruction applies: the added text and copy/skip operations on foundation '
+             'lines, and changed binary files whole as base64. Unlike the diffs, it holds no deleted foundation lines '
+             'or unchanged context.\n')
+    return work
+
+
+def is_forbidden(name: str) -> bool:
+    parts = safe_path(name).parts
+    return any((part.startswith('.') and part not in ALLOWED_DOTFILES) or part in FORBIDDEN_PARTS for part in parts)
+
+
+def zip_baseline(root: Path, items: dict[str, FileRecord], out: Path) -> None:
     with zipfile.ZipFile(out, 'x', compression=zipfile.ZIP_DEFLATED) as z:
         for name, item in sorted(items.items()):
             data, executable = read_regular(root, name)
@@ -155,140 +117,90 @@ def zip_baseline(root, items, out):
             z.writestr(info, data)
 
 
-def extract_baseline(archive, root, expected):
-    with zipfile.ZipFile(archive) as z:
-        infos = z.infolist()
-        if len(infos) != len(expected) or len(infos) > MAX_FILES:
-            raise ValueError('archive member count mismatch')
-        seen = set()
-        total = 0
-        for info in infos:
-            name = info.filename
-            safe_path(name)
-            mode = info.external_attr >> 16
-            if name in seen or name not in expected or not stat.S_ISREG(mode) or info.is_dir() or info.flag_bits & 1:
-                raise ValueError('invalid archive member')
-            seen.add(name)
-            total += info.file_size
-            if info.file_size > MAX_FILE or total > MAX_TOTAL or info.file_size != expected[name]['bytes']:
-                raise ValueError('archive size mismatch')
-            data = z.read(info)
-            executable = bool(mode & 0o111)
-            verify(data, executable, expected[name])
-            write_file(root, name, data, executable)
-        if seen != set(expected):
-            raise ValueError('archive inventory mismatch')
-
-
-def prepare(args):
-    baseline, tree, out = map(lambda x: Path(x).resolve(), (args.baseline, args.tree, args.output))
+def prepare(args: argparse.Namespace) -> None:
+    baseline, tree, out = Path(args.baseline).resolve(), Path(args.tree).resolve(), Path(args.output).resolve()
     manifest_bytes = Path(args.manifest).read_bytes()
     if digest(manifest_bytes) != args.manifest_sha256:
         raise ValueError('foundation manifest hash mismatch')
     manifest = json.loads(manifest_bytes)
-    original = entries(manifest)
+    original = entries(manifest['files'], reconstruction.FILE_LIMITS)
     new_names = sorted(set(args.new_file))
     if len(new_names) != len(args.new_file):
         raise ValueError('duplicate new file')
     for name in new_names:
-        safe_path(name)
-        parts = safe_path(name).parts
-        if name in original or any(part.startswith('.') and part != '.env.example' for part in parts) or any(part in ('qa', 'data', 'node_modules', 'skills', 'secrets', 'credentials', '__pycache__') for part in parts):
+        if name in original or is_forbidden(name):
             raise ValueError(f'forbidden new file: {name}')
+    deleted_names = set(args.deleted_file)
+    if len(deleted_names) != len(args.deleted_file):
+        raise ValueError('duplicate deleted file')
+    if not deleted_names <= set(original):
+        raise ValueError('deleted file is not a foundation file')
     if out.exists():
         raise ValueError('output already exists')
     out.mkdir(parents=True)
     try:
         candidate = out / 'candidate'
         candidate.mkdir()
-        (candidate / '.gitignore').write_text('foundation.zip\n.env*\nbuild/\ndata/\nnode_modules/\n')
         zip_baseline(baseline, original, out / 'foundation.zip')
         changes = {}
+        views = {}
         target = []
-        for name, item in sorted(original.items()):
+        for name in sorted(original):
             before, old_mode = read_regular(baseline, name)
+            if name in deleted_names:
+                path = tree.joinpath(*safe_path(name).parts)
+                if path.exists() or path.is_symlink():
+                    raise ValueError(f'deleted file still exists: {name}')
+                changes[name] = dict(DELETED)
+                continue
             after, mode = read_regular(tree, name)
             target.append(record(name, after, mode))
             if before != after or old_mode != mode:
                 changes[name] = change(before, after, mode)
+                views.update(source_views(name, before, old_mode, after, mode))
         for name in new_names:
             data, mode = read_regular(tree, name)
             write_file(candidate / 'new', name, data, mode)
             target.append(record(name, data, mode))
-        shutil.copyfile(Path(__file__), candidate / 'reconstruct.py')
+        view_records = [record(name, data, False) for name, data in sorted(views.items())]
+        # The limits reconstruct.py applies, so prepare never writes a candidate that it would refuse.
+        entries(target, reconstruction.FILE_LIMITS)
+        entries(view_records, reconstruction.VIEW_LIMITS)
+        for name, data in sorted(views.items()):
+            write_file(candidate, name, data, False)
+        shutil.copyfile(Path(__file__).with_name('reconstruct.py'), candidate / 'reconstruct.py')
         (candidate / 'foundation-manifest.json').write_bytes(manifest_bytes)
-        (candidate / 'changes.json').write_text(json.dumps(changes, sort_keys=True, indent=2, ensure_ascii=False) + '\n')
-        (candidate / 'submission.json').write_text(json.dumps({'foundationManifestSha256': digest(manifest_bytes), 'newFiles': new_names, 'files': sorted(target, key=lambda x: x['path'])}, sort_keys=True, indent=2) + '\n')
-        work = '# New work for review\n\nChanges relative to the separately supplied mixed-origin foundation are listed below. This inventory records byte differences; it does not establish authorship or eligibility.\n\n## Changed files\n\n'
-        work += ''.join(f'- `{name}`\n' for name in sorted(changes)) or '- None\n'
-        work += '\n## New files\n\n'
-        work += ''.join(f'- `{name}`\n' for name in new_names) or '- None\n'
-        work += '\nRead `changes.json` for the added text and copy/skip operations, and for changed binary files carried whole as base64. Deleted foundation lines and unchanged context are not included.\n'
-        (candidate / 'NEW-WORK.md').write_text(work)
-        (candidate / 'README.md').write_text('''# Submission reconstruction\n\nThe separately supplied foundation is a mixed-origin integration frozen October 28, 2026. It contains earlier source and event-era adaptations and is excluded from the new-work claim. It is not a pre-event revision. Only the changes and new files in this submission are candidates for event work; their provenance still requires review.\n\nObtain the foundation archive independently from its owner. Judge access is not verified. No public license grant for foundation source is implied. Reconstruct into a new directory with Python 3:\n\n```sh\npython3 reconstruct.py reconstruct --candidate . --archive /path/to/foundation.zip --output /path/to/new-build\n```\n\nInitialize Git inside the reconstructed build directory with `git init` before installing dependencies, so the normal preparation hook can be installed. Then follow the reconstructed application README for setup. Real processing requires separately configured services and can incur charges; the synthetic reader does not process uploads.\n''')
+        (candidate / 'changes.json').write_text(changes_json(changes), encoding='utf-8')
+        meta = {'foundationManifestSha256': digest(manifest_bytes), 'newFiles': new_names,
+                'files': sorted(target, key=lambda x: x['path']),
+                'views': view_records}
+        (candidate / 'submission.json').write_text(json.dumps(meta, sort_keys=True, indent=2) + '\n', encoding='utf-8')
+        (candidate / 'NEW-WORK.md').write_text(new_work(changes, new_names, views), encoding='utf-8')
     except Exception:
         shutil.rmtree(out)
         raise
 
 
-def reconstruct(args):
-    candidate, output = Path(args.candidate).resolve(), Path(args.output).absolute()
-    if output.exists() or output.is_symlink():
-        raise ValueError('output already exists')
-    meta = json.loads((candidate / 'submission.json').read_bytes())
-    manifest_bytes = (candidate / 'foundation-manifest.json').read_bytes()
-    if digest(manifest_bytes) != meta['foundationManifestSha256']:
-        raise ValueError('foundation manifest hash mismatch')
-    original = entries(json.loads(manifest_bytes))
-    target = entries(meta)
-    names = meta['newFiles']
-    if not isinstance(names, list) or len(set(names)) != len(names) or set(names) & set(original) or set(target) != set(original) | set(names):
-        raise ValueError('invalid target inventory')
-    changes = json.loads((candidate / 'changes.json').read_bytes())
-    if not set(changes) <= set(original):
-        raise ValueError('invalid change paths')
-    output.parent.mkdir(parents=True, exist_ok=True)
-    temp = Path(tempfile.mkdtemp(prefix='.submission-', dir=output.parent))
-    try:
-        extract_baseline(args.archive, temp, original)
-        for name, item in changes.items():
-            old, _ = read_regular(temp, name)
-            result = changed_bytes(old, item)
-            verify(result, item['executable'], target[name])
-            path = temp.joinpath(*safe_path(name).parts)
-            path.unlink()
-            write_file(temp, name, result, item['executable'])
-        for name in names:
-            data, mode = read_regular(candidate / 'new', name)
-            verify(data, mode, target[name])
-            write_file(temp, name, data, mode)
-        for name, item in target.items():
-            data, mode = read_regular(temp, name)
-            verify(data, mode, item)
-        output.mkdir()  # Exclusive creation prevents replacing an existing target.
-        try:
-            for child in temp.iterdir():
-                os.rename(child, output / child.name)
-        except Exception:
-            shutil.rmtree(output)
-            raise
-    finally:
-        if temp.exists():
-            shutil.rmtree(temp)
-
-
-def main():
-    parser = argparse.ArgumentParser()
+def main() -> None:
+    parser = argparse.ArgumentParser(description='Prepare or reconstruct a submission against its foundation.')
     sub = parser.add_subparsers(dest='command', required=True)
-    p = sub.add_parser('prepare')
-    for name in ('baseline', 'manifest', 'manifest-sha256', 'tree', 'output'):
-        p.add_argument('--' + name, required=True)
-    p.add_argument('--new-file', action='append', default=[])
-    r = sub.add_parser('reconstruct')
-    for name in ('candidate', 'archive', 'output'):
-        r.add_argument('--' + name, required=True)
+    p = sub.add_parser('prepare', help='Build a candidate and foundation archive')
+    p.add_argument('--baseline', type=Path, required=True, help='Immutable foundation tree')
+    p.add_argument('--manifest', type=Path, required=True, help='Foundation manifest JSON file')
+    p.add_argument('--manifest-sha256', required=True, help='Expected SHA-256 of the foundation manifest')
+    p.add_argument('--tree', type=Path, required=True, help='Current application tree')
+    p.add_argument('--output', type=Path, required=True, help='New directory for the archive and candidate')
+    p.add_argument('--new-file', action='append', default=[], help='New relative file path to include; repeat as needed')
+    p.add_argument('--deleted-file', action='append', default=[],
+                   help='Foundation file path the application removed; repeat as needed')
+    p.set_defaults(func=prepare)
+    r = sub.add_parser('reconstruct', help='Verify the candidate and rebuild its tree')
+    add_reconstruct_arguments(r)
     args = parser.parse_args()
-    (prepare if args.command == 'prepare' else reconstruct)(args)
+    try:
+        args.func(args)
+    except (ValueError, OSError, KeyError, TypeError) as error:
+        sys.exit(f'prepare: {error}')
 
 
 if __name__ == '__main__':

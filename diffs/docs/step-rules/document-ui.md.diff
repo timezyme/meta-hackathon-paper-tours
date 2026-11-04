@@ -1,0 +1,11 @@
+diff --git a/docs/step-rules/document-ui.md b/docs/step-rules/document-ui.md
+--- a/docs/step-rules/document-ui.md
++++ b/docs/step-rules/document-ui.md
+@@ -1,6 +1,6 @@
+ # Document UI
+ 
+-1. The dashboard decodes the shared document-list response, including server-owned PDF byte/page limits, admission availability, and live/fixture mode. Loading and failed reads never become an empty successful library. English-language scope is stated before upload; language detection is not claimed.
++1. The dashboard lists the reader's own documents, then a read-only **Examples** section from the list's optional `examples`. Example rows, readers and guides hide delete, retry and rating controls; downloads stay available. When the list carries `upload.allowance`, the upload box shows uploads left and disables choosing once none remain; the server's refusal message is shown as-is. The dashboard decodes the shared document-list response, including server-owned PDF byte/page limits, admission availability, and live/fixture mode. Loading and failed reads never become an empty successful library. English-language scope is stated before upload; language detection is not claimed.
+ 2. Choose/drop accepts exactly one nonempty file within the advertised byte limit. MIME and filename checks are hints; the server validates actual PDF contents and page count. One pending upload disables chooser/drop and duplicate submission. A multipart POST contains only `file` and an idempotency-key header. No upload or processing mutation retries automatically.
+ 3. One App-owned React state retains the File and Effect-Random 128-bit key across route changes, scoped to the authenticated user. Unmount interrupts HTTP and marks pending work uncertain. On uncertain completion, reload the library before permitting explicit retry with the same file/key or explicit discard. Full-page reload loses local file memory but reads the persisted library before enabling a new upload. Sign-out clears the attempt.
+ 4. List/detail/status/acceptance and safe API errors use shared Schema contracts. HTTP 401 triggers session revalidation. Other refusal, transport, timeout, malformed-response, missing/expired/foreign document errors remain visible. A failed upload never creates a successful card locally.

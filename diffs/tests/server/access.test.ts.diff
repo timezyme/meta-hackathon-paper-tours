@@ -1,0 +1,28 @@
+diff --git a/tests/server/access.test.ts b/tests/server/access.test.ts
+--- a/tests/server/access.test.ts
++++ b/tests/server/access.test.ts
+@@ -6,7 +6,7 @@
+ import { AuthError, AuthService } from "../../src/auth/index.ts"
+ import { Session } from "../../src/domain/api.ts"
+ import { makeAmuseMe } from "../../src/mastra/amuseme.ts"
+-import { createGuardedApp } from "../../src/server/http.ts"
++import { createGuardedApp, proxiedRequest } from "../../src/server/http.ts"
+ import { isStudioInspectionRequest } from "../../src/server/studio-access.ts"
+ 
+ const origin = "http://127.0.0.1:4183"
+@@ -176,4 +176,15 @@
+     expect((yield* request("/health/ready")).status).toBe(503)
+     expect((yield* request("/")).status).toBe(503)
+   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)))
++
++  it.effect("maps TLS-proxied requests for the configured HTTPS host only", () => Effect.gen(function* () {
++    const deployed = "https://amuseme--web.modal.run"
++    const mapped = proxiedRequest(new Request("http://amuseme--web.modal.run/auth/sign-in/judge?x=1", { method: "POST", headers: { origin: deployed }, body: '{"email":"judge@example.test"}' }), deployed)
++    expect(mapped.url).toBe(`${deployed}/auth/sign-in/judge?x=1`)
++    expect(mapped.headers.get("origin")).toBe(deployed)
++    expect(yield* Effect.promise(() => mapped.text())).toBe('{"email":"judge@example.test"}')
++    for (const url of ["http://elsewhere.modal.run/", "http://amuseme--web.modal.run:8000/"]) expect(proxiedRequest(new Request(url), deployed).url).toBe(url)
++    const local = new Request(`${origin}/`)
++    expect(proxiedRequest(local, origin)).toBe(local)
++  }))
+ })

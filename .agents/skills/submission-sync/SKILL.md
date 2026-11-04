@@ -1,6 +1,6 @@
 ---
 name: submission-sync
-description: Regenerate this submission's changes.json, NEW-WORK.md, submission.json and new/ from the amuseme-app checkout, then prove reconstruction matches. Use when application work must be reflected in the submission, when files were added or deleted in the app, or before updating VERIFICATION.md.
+description: Regenerate this submission's changes.json, NEW-WORK.md, submission.json, new/, changed/ and diffs/ from the amuseme-app checkout, then prove reconstruction matches. Use when application work must be reflected in the submission, when files were added or deleted in the app, or before updating VERIFICATION.md.
 ---
 
 # Sync the submission from amuseme-app
@@ -18,7 +18,7 @@ python3 $A/scripts/submission/prepare.py prepare --baseline $W/baseline \
   --tree $A --output $W/out $(sed 's/^/--new-file /' $W/new-files.txt)
 ```
 
-Every new file needs its own `--new-file`; untracked files are never swept in. A file deleted from the app must leave `new-files.txt`. Read every added line and new file in `$W/out/candidate` for credentials, private documents, runtime data, generated memory and non-event work before copying.
+Every new file needs its own `--new-file`; untracked files are never swept in. A file deleted from the app must leave `new-files.txt`. A foundation file deleted from the app needs its own `--deleted-file` (list them with `comm -13 <(git -C $A ls-files | sort) <(jq -r '.files[].path' foundation-manifest.json | sort)`). Read every added line, new file and `changed/` file in `$W/out/candidate` for credentials, private documents, runtime data, generated memory and non-event work before copying. `diffs/` also shows foundation context and deleted lines, which is fine for the public foundation.
 
 ## Copy into this repository
 
@@ -26,16 +26,22 @@ Every new file needs its own `--new-file`; untracked files are never swept in. A
 C=$W/out/candidate
 cp $C/changes.json $C/submission.json $C/NEW-WORK.md $C/reconstruct.py $C/foundation-manifest.json .
 rsync -a --delete $C/new/ new/
+rsync -a --delete $C/changed/ changed/
+rsync -a --delete $C/diffs/ diffs/
 ```
 
-Do not copy the candidate's generic `README.md` or `.gitignore`. Diff `NEW-WORK.md` before overwriting and keep any maintained notes.
+`changed/` holds the full event version of each changed text file, and `diffs/` its diff against the foundation. `reconstruct.py` verifies both, but never builds from them. Keep `--delete`, because stale views would not be flagged. Diff `NEW-WORK.md` before overwriting and keep any maintained notes.
 
 ## Prove it
 
+Commit locally first, then prove it from a fresh clone, so ignored or untracked files can't hide a gap:
+
 ```sh
-python3 reconstruct.py reconstruct --candidate . --archive $W/foundation.zip --output $W/rebuilt
+git clone -q . $W/clone
+diff <(git -C $W/clone ls-files changed diffs | sort) <(jq -r '.views[].path' submission.json | sort)
+python3 $W/clone/reconstruct.py reconstruct --candidate $W/clone --archive $W/foundation.zip --output $W/rebuilt
 ```
 
-Compare every path in `submission.json` between `$W/rebuilt` and `$A` by bytes and executable mode. In `$W/rebuilt`, `git init`, install pinned dependencies as its README says, then run `python3 -m unittest discover -s tests/submission -v`, `pnpm check`, `pnpm test` and `pnpm build`.
+Compare every path in `submission.json`'s `.files[].path` between `$W/rebuilt` and `$A` by bytes and executable mode. Views live under `.views` and are not part of the rebuilt tree. In `$W/rebuilt`, `git init`, install pinned dependencies as its README says, then run `python3 -m unittest discover -s tests/submission -v`, `pnpm check`, `pnpm test` and `pnpm build`.
 
 Update `VERIFICATION.md` with only what was actually run: file counts (changed, new, preserved), commands, results, and whether dependencies were a clean install or a linked existing installation. Do not commit or push unless the user asks.

@@ -1,0 +1,44 @@
+diff --git a/tests/paper/headings.test.ts b/tests/paper/headings.test.ts
+--- a/tests/paper/headings.test.ts
++++ b/tests/paper/headings.test.ts
+@@ -2,7 +2,7 @@
+ import { describe, expect, it } from "vitest"
+ import { CanonicalDocument, PageCheck, validateCanonicalDocument } from "../../src/domain/index.ts"
+ import { applyPageChecks, formatCorrectedText } from "../../src/paper/correction/index.ts"
+-import { applyHeadingDecisions, buildHeadingRequest, HeadingResponse, headingCandidates, validateHeadingResponse } from "../../src/paper/headings/index.ts"
++import { applyHeadingDecisions, buildHeadingRequest, extractorHeadingDecisions, HeadingResponse, headingCandidates, headingResponseProblems, validateHeadingResponse } from "../../src/paper/headings/index.ts"
+ import { contractFixture } from "../fixtures/contracts.ts"
+ import { correctedFixture, pageChecks, stageExtraction, stageLimits } from "./correction-fixtures.ts"
+ 
+@@ -69,6 +69,31 @@
+     expect(result.blocks[2]?.content).toBe("Preserved note")
+   })
+ 
++  it("keeps a multi-line source heading on one line and still rejects promoting a multi-line paragraph", () => {
++    const extraction = stageExtraction([["heading", "CRITICAL\nCONDITION", 1], ["paragraph", "Methods\nA paragraph follows", 1]])
++    const corrected = correctedFixture(extraction)
++    expect(Result.isFailure(validateHeadingResponse(extraction, corrected, { headings: [{ blockId: "block-1", level: 1 }, { blockId: "block-2", level: 2 }] }))).toBe(true)
++    const response = Schema.decodeUnknownSync(HeadingResponse)({ headings: [{ blockId: "block-1", level: 1 }, { blockId: "block-2", level: null }] })
++    const result = Result.getOrThrow(applyHeadingDecisions(extraction, corrected, response))
++    expect(result.blocks[0]).toMatchObject({ kind: "heading", content: "# CRITICAL CONDITION", headingLevel: 1 })
++    const canonical = Schema.decodeUnknownSync(CanonicalDocument)({ ...contractFixture("cross-page").canonical, pages: extraction.pages, sourceBlocks: extraction.sourceBlocks, blocks: result.blocks, headingDecisions: result.headingDecisions })
++    expect(validateCanonicalDocument(contractFixture("cross-page").document, extraction, canonical)).toEqual([])
++  })
++
++  it("names concrete heading problems and falls back to the extractor's classification with one title", () => {
++    const extraction = stageExtraction([["heading", "# Title", 1], ["paragraph", "Body\nmore", 1], ["heading", "# Second title", 1], ["heading", "### Part", 2], ["heading", "Unmarked", 2]])
++    const corrected = correctedFixture(extraction)
++    const problems = headingResponseProblems(corrected, { headings: [{ blockId: "block-1", level: 1 }, { blockId: "block-2", level: 2 }, { blockId: "block-3", level: 1 }] })
++    expect(Result.isFailure(problems) ? problems.failure : []).toEqual([
++      "Expected 5 decisions, one per candidate in order; got 3",
++      "Only one level-1 heading is allowed; blocks block-1, block-3 all have level 1",
++      "Block block-2 is a multi-line paragraph block and cannot become a heading; use null",
++    ])
++    const fallback = extractorHeadingDecisions(corrected)
++    expect(fallback.headings.map((decision) => decision.level)).toEqual([1, null, 2, 3, 2])
++    expect(Result.isSuccess(validateHeadingResponse(extraction, corrected, fallback))).toBe(true)
++  })
++
+   it("rejects stale corrected artifacts and excessive full context without truncation", () => {
+     const { extraction } = contractFixture()
+     const corrected = correctedFixture(extraction)

@@ -1,11 +1,27 @@
-import type { CanonicalDocument, UploadUnavailable } from "../../domain/index.ts"
-import type { DocumentRecord } from "../documents.ts"
+import type { CanonicalDocument, UploadPolicy, UploadUnavailable } from "../../domain/index.ts"
+import { formatBytes, type DocumentRecord } from "../documents.ts"
 import { paperHeading } from "../guide/presentation.ts"
 
 export const uploadUnavailableMessage = ({ code, reason }: UploadUnavailable, hasPapers: boolean): string => {
   if (code !== "processing-not-configured") return reason
   return hasPapers ? "You can still read and download your saved documents." : "This library isn’t accepting new PDFs yet."
 }
+
+export const uploadLimits = ({ maxBytes, maxPages }: Pick<UploadPolicy, "maxBytes" | "maxPages">): string =>
+  `Drop one English-language PDF here, up to ${formatBytes(maxBytes)} and ${maxPages} pages.`
+  + " Short documents work best and usually take several minutes."
+
+export type CoverLoad =
+  | { readonly _tag: "loading" | "retrying"; readonly attempt: number }
+  | { readonly _tag: "unavailable" }
+const coverAttempts = 2
+export const coverRetryDelay = "2 seconds"
+export const firstCoverLoad: CoverLoad = { _tag: "loading", attempt: 1 }
+export const coverFailed = (load: CoverLoad): CoverLoad => load._tag === "loading" && load.attempt < coverAttempts
+  ? { _tag: "retrying", attempt: load.attempt }
+  : { _tag: "unavailable" }
+export const coverRetried = (load: CoverLoad): CoverLoad =>
+  load._tag === "retrying" ? { _tag: "loading", attempt: load.attempt + 1 } : load
 
 export const featuredPaper = (records: ReadonlyArray<DocumentRecord>): DocumentRecord | undefined =>
   records.find((record) => {

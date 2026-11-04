@@ -1,0 +1,42 @@
+import { Schema } from "effect"
+import { DocumentId } from "../domain/index.ts"
+import { documentQuery, validDocumentQuery } from "./guide/navigation.ts"
+
+const ReturnPath = Schema.String.check(Schema.isPattern(/^(?:\/|\/documents\/[A-Za-z0-9][A-Za-z0-9_-]{0,127})$/))
+
+export const safeReturnPath = (value: string | null): string => {
+  if (value === null) return "/"
+  const [path, query] = value.split("?")
+  if (!Schema.is(ReturnPath)(path)) return "/"
+  if (query === undefined) return value
+  return path !== "/" && value.split("?").length === 2 && validDocumentQuery(query) ? value : "/"
+}
+
+export type AppRoute =
+  | { readonly kind: "dashboard" }
+  | { readonly kind: "sign-in"; readonly returnTo: string }
+  | { readonly kind: "document"; readonly documentId: DocumentId }
+  | { readonly kind: "admin-denied" }
+  | { readonly kind: "not-found" }
+
+const routeFromParts = (pathname: string, params: URLSearchParams): AppRoute => {
+  if (pathname === "/") return { kind: "dashboard" }
+  if (pathname === "/sign-in") return { kind: "sign-in", returnTo: safeReturnPath(params.get("returnTo")) }
+  if (pathname === "/admin" || pathname?.startsWith("/admin/")) return { kind: "admin-denied" }
+  const documentId = pathname?.startsWith("/documents/") ? pathname.slice("/documents/".length) : undefined
+  if (Schema.is(DocumentId)(documentId)) return { kind: "document", documentId }
+  return { kind: "not-found" }
+}
+
+export const parseLocation = (location: string) => {
+  const [pathname = "", search = ""] = location.split("?")
+  const params = new URLSearchParams(search)
+  return { location, pathname, route: routeFromParts(pathname, params), ...documentQuery(params) }
+}
+
+export const routeFromLocation = (location: string): AppRoute => parseLocation(location).route
+
+export const signInPath = (path: string): string => {
+  const returnTo = safeReturnPath(path)
+  return returnTo === "/" ? "/sign-in" : `/sign-in?returnTo=${encodeURIComponent(returnTo)}`
+}

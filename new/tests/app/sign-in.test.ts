@@ -4,9 +4,11 @@ import { describe, expect, it } from "vitest"
 import { SignInCard } from "../../src/app/App.tsx"
 
 const ignore = () => {}
-const render = (method: "email" | "password", passwordChosen: boolean) => renderToStaticMarkup(createElement(SignInCard, {
-  options: { method, accessCode: false }, passwordChosen, onChoosePassword: ignore, submission: { kind: "idle" }, onSubmit: ignore,
-}))
+const card = {
+  optionsError: null, onRetryOptions: ignore, onChoosePassword: ignore, submission: { kind: "idle" }, onSubmit: ignore,
+} as const
+const render = (method: "email" | "password", passwordChosen: boolean) =>
+  renderToStaticMarkup(createElement(SignInCard, { ...card, options: { method, accessCode: false }, passwordChosen }))
 
 describe("sign-in card", () => {
   it("keeps the password form reachable when judge email sign-in is on", () => {
@@ -19,6 +21,17 @@ describe("sign-in card", () => {
     expect(password).toContain('name="password"')
     expect(password).toContain(">Sign in</button>")
     expect(password).toContain(">Back to email sign-in</button>")
+  })
+
+  it("shows why sign-in cannot start and offers a retry instead of a password form", () => {
+    const message = "We couldn’t load the sign-in page. Please try again."
+    const html = renderToStaticMarkup(createElement(SignInCard, {
+      ...card, options: null, optionsError: message, passwordChosen: false,
+    }))
+    expect(html).toContain(`role="alert"><p>${message}</p>`)
+    expect(html).toContain(">Try again</button>")
+    expect(html).not.toContain("<form")
+    expect(html).not.toContain("Loading…")
   })
 
   it("shows only the password form when email sign-in is off", () => {
