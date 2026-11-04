@@ -1,0 +1,47 @@
+{
+  "normal": {
+    "sha256": "b488e4ee8271002faf1fb36875667c50658aaacca7a1a8a012a816258ee115db",
+    "byteCount": 639,
+    "pageCount": 1
+  },
+  "scan": {
+    "sha256": "684acfb016b58931de783a59413d69bc15206e1b17036320670a697ae46ced10",
+    "byteCount": 2806,
+    "pageCount": 1
+  },
+  "empty": {
+    "sha256": "4fe282b6501c4ba021dd4c40005af07054d66fbbe0a6470333f224e664eab516",
+    "byteCount": 576,
+    "pageCount": 1
+  },
+  "ambiguous-math": {
+    "sha256": "5f8187862b53e877d0c68c5e7a671e496f40cae0c201d3dec81c88f4423d4da5",
+    "byteCount": 623,
+    "pageCount": 1
+  },
+  "references": {
+    "sha256": "a81c49addb7548829dfc642dece182469be42b5d1ed2566c08dccd56596d44e8",
+    "byteCount": 652,
+    "pageCount": 1
+  },
+  "notes": {
+    "sha256": "312628ba82c62bfaeef432feebcaafc36116558011d5a86c3e6aa108c0d0bbd3",
+    "byteCount": 645,
+    "pageCount": 1
+  },
+  "cross-page": {
+    "sha256": "b33cc14c3b7ccd99715cee8e571642e6d5f53d03e7c4825e6fdc88c661ff81b3",
+    "byteCount": 883,
+    "pageCount": 2
+  },
+  "table": {
+    "sha256": "1e7bbad588394b7697c09fb6231d62178f86d2da90ad6e67d38ed576996e7eae",
+    "byteCount": 669,
+    "pageCount": 1
+  },
+  "missing-description": {
+    "sha256": "324c17161f1acd5bff198ca9cba6c0eee71300ca95b249ce9ae52135f7f67ebd",
+    "byteCount": 636,
+    "pageCount": 1
+  }
+}

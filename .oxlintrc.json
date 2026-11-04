@@ -1,0 +1,71 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "unicorn",
+    "typescript",
+    "oxc",
+    "react"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    "no-underscore-dangle": [
+      "error",
+      {
+        "allow": [
+          "_tag"
+        ]
+      }
+    ],
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/app/**",
+        "tests/app/**"
+      ],
+      "rules": {
+        "react/react-in-jsx-scope": "off"
+      }
+    },
+    {
+      "files": [
+        "src/**",
+        "scripts/**",
+        "cli/spark-extraction/**"
+      ],
+      "rules": {
+        "amuseme/comments": "error"
+      }
+    },
+    {
+      "files": [
+        "src/**",
+        "scripts/**",
+        "tests/**",
+        "cli/spark-extraction/**"
+      ],
+      "rules": {
+        "amuseme/boundaries": "error"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/**",
+    ".mastra/**",
+    "dist/**",
+    "src/mastra/public/**",
+    "prototype/**",
+    "skills/**",
+    ".agents/**",
+    ".claude/**",
+    "qa/**"
+  ],
+  "jsPlugins": [
+    "./scripts/guards/oxlint-plugin.ts"
+  ]
+}

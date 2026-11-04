@@ -1,9 +1,0 @@
-diff --git a/lefthook.yml b/lefthook.yml
---- a/lefthook.yml
-+++ b/lefthook.yml
-@@ -3,5 +3,3 @@
-   commands:
-     check:
-       run: pnpm check
--    test:
--      run: pnpm test

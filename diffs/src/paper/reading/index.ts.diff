@@ -1,9 +1,0 @@
-diff --git a/src/paper/reading/index.ts b/src/paper/reading/index.ts
---- a/src/paper/reading/index.ts
-+++ b/src/paper/reading/index.ts
-@@ -1,4 +1,4 @@
- export { assembleDocument, AssembledDocument } from "./assembly.ts"
- export type { AssembleDocumentInput } from "./assembly.ts"
- export { exportDocument, printNormalizedDocument } from "./export.ts"
--export type { ExportedDocument, ExportedFile, NativeImageBytes } from "./export.ts"
-+export type { ExportedDocument, ExportedFile, FigureImageBytes } from "./export.ts"

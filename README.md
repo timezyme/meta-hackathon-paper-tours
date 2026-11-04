@@ -1,47 +1,61 @@
 # AmuseMe
 
-**Today: humans and agents. Tomorrow: robots and humanoids.**
+AmuseMe turns PDFs into structured documents for people and AI. Upload a paper, read the normalized result, then copy the text or download it with its images and processing report.
 
-AmuseMe turns a PDF into a reading guide you can check. Choose a walkthrough, the document's claims and their limits, a document map, or the full text beside the original pages. Every explanation quotes the document exactly, and one click shows that passage on the original page.
+A paper can look perfectly readable while its extracted text loses an equation, scrambles a table, or leaves a chart behind. Those gaps matter when you ask an AI to explain the paper. AmuseMe brings the text, structure, and figure context together, with source locations available in the reader and exports.
 
-Each run also produces a JSON guide for agents, where every claim points to the exact words it rests on.
+## From PDF to usable document
 
-## Try it
+1. **Upload a PDF.** AmuseMe extracts its text, layout, and images, then checks the extraction against rendered source pages.
+2. **Read the result.** Browse headings, equations, tables, and figures alongside the original PDF. Generated image descriptions are labeled as AI-written.
+3. **Take it with you.** Copy the complete normalized text or download a ZIP. A processing report records changes and unresolved issues.
 
-Open **https://guided-tours--amuseme-judges.us-east.modal.run** and sign in with any email. There's no password, and anyone who types that address can open the account. Upload only documents you're happy for others to see. Ten example documents are ready, and you can upload 3 PDFs of your own.
+The application has invited accounts, private document libraries, saved processing progress, and downloads tied to a specific output revision. It supports both digital PDFs and scans.
 
-[Demo video](https://github.com/timezyme/meta-hackathon-paper-tours/releases/download/demo-2026-11-02/amuseme-demo.mp4)
+## Where Meta fits
 
-## Meta models
+**Meta Muse Spark 1.3 performs the document normalization.** MinerU 4.0.12, running in a separate Modal service, supplies the initial extraction.
 
-- **Muse Spark 1.3** (`muse-spark-1.3`, Meta Model API) does every model step in the app: reading each page image, checking figure crops, fixing transcription errors, restoring headings, describing figures and writing the guide. Each step is a Mastra agent. When an answer fails a check, a Muse reviewer agent corrects it. No other model is used.
-- **Muse Wonder 1.0** (`muse-wonder-1.0`) was used by our [Muse command-line tool](new/cli/muse/README.md) to review the demo video's audio and footage.
+| Stage | Muse Spark's role | Reasoning |
+|---|---|---|
+| Page checking | Compare extracted blocks with the source page image; repair text, equations, and tables; identify split paragraphs | High |
+| Document structure | Establish heading hierarchy and resolve paragraph joins using the corrected document | Medium |
+| Figure descriptions | Describe each figure using its image and document context | High |
 
-Before a guide is published, every quotation must match exactly one place in the document. This catches invented quotes. It doesn't prove the explanation is right, so the guide is labeled as AI-written.
+Mastra coordinates the workflow. Effect handles asynchronous work and resources. The final assembly and export are deterministic; model responses are saved for recovery and inspection. The interface uses React, with SQLite and local files holding private application state.
 
-## What was built during the hackathon
+## What the demo shows
 
-The starting point was our earlier PDF-to-text [foundation](https://github.com/timezyme/amuseme-foundation), frozen on October 28. It provides page rendering, the basic Muse Spark stages, the Mastra workflow, the clean-text reader, ZIP export and accounts.
+We processed all six pages of Guo et al.'s *MFGLib: A Library for Mean-Field Games* (JOSS, 2026; CC BY 4.0). Page 3 was rasterized to exercise extraction from a scanned equation and code page.
 
-Everything else is new: the reading guide, the quotation check, the document map, Muse reviewer agents, figure crop review, parallel processing, the spending guard, library page previews and the judges' site. `new/` holds new files. `changed/` holds edited foundation files, and `diffs/` shows each edit. [NEW-WORK.md](NEW-WORK.md) lists every file.
+Two separate text-only evaluations used the same model and question: one received raw extraction, the other AmuseMe's normalized text. Both answered the mathematical questions correctly. The normalized input also let the model explain how the curves behaved in each figure panel, using the labeled AI-written description. The raw input lacked that visual evidence.
 
-## Run it
+That is the benefit demonstrated on this paper: useful figure context reaches a reader that only receives text. It is one example, not a general accuracy benchmark. The output still contained imperfect code formatting and bibliography punctuation.
 
-You need Python 3.14.5, Node 24.19.0, pnpm 10.33.0 and uv. It was tested on macOS (Apple silicon) and on Linux (Modal).
+## What you download
+
+| File | Contents |
+|---|---|
+| `normalized.txt` | Text, equations, tables, page and source labels, and image descriptions |
+| `document.json` | Structured document with source locations |
+| `images.json` | Figure metadata, source mappings, and descriptions |
+| `processing-report.json` | Recorded changes, checks, and unresolved issues |
+| Image files | Available images from the extraction |
+
+The reader also provides the original PDF. Unavailable images are represented explicitly, and generated descriptions remain distinguishable from the author's captions.
+
+## Run locally
+
+Use **Node 24.19.0**, **pnpm 10.33.0**, and **uv** on macOS or Linux. PDF handling requires Python 3.14 and PyMuPDF 1.28.2; see the [PDF runtime prerequisites](python/README.md).
 
 ```sh
-curl -fL https://github.com/timezyme/amuseme-foundation/releases/download/foundation-2026-10-28/foundation.zip -o ../foundation.zip
-python3 reconstruct.py reconstruct --candidate . --archive ../foundation.zip --output ../amuseme-app
-cp LICENSE LICENSING.md ../amuseme-app/
-cd ../amuseme-app
-git init
 pnpm install --frozen-lockfile --strict-peer-dependencies
-uv venv --python 3.14.5 data/python/.venv
+uv venv --python 3.14 data/python/.venv
 uv pip install --python data/python/.venv/bin/python -r python/requirements.txt
 cp .env.example .env.local
 ```
 
-In `.env.local`, set `BETTER_AUTH_SECRET` (at least 32 characters) and the `AMUSEME_INVITE_*` account fields (password 12–128 characters). Then:
+Edit `.env.local` using [.env.example](.env.example). Set a random `BETTER_AUTH_SECRET` of at least 32 characters and the `AMUSEME_INVITE_*` fields for your account. The password must be 12–128 characters. Then build, create the account, and start the app:
 
 ```sh
 pnpm build
@@ -49,12 +63,40 @@ pnpm provision:user
 pnpm start
 ```
 
-Open [127.0.0.1:4180](http://127.0.0.1:4180/) and sign in. `pnpm check` and `pnpm test` need no credentials.
+Open [localhost:4180](http://127.0.0.1:4180/) and sign in with that account. Public signup is disabled.
 
-To process uploads, also set `META_API_KEY`, `AMUSEME_PROCESSING_BUDGET_USD`, `AMUSEME_BUDGET_ID` and `AMUSEME_PROCESSING_ENABLED=true`. Uploads are limited to English PDFs of up to 50 MiB and 48 pages, and each document is capped at $30. A 4-page paper costs about $0.45, billed to your key.
+New processing is disabled by default. To enable it, configure `META_API_KEY`, your separate MinerU service URL and token, a processing budget, and a stable budget ID in `.env.local`, then set `AMUSEME_PROCESSING_ENABLED=true`. Processing uses the configured external services and can incur charges. Keep the same budget ID and data directory across restarts so spending records remain intact. The [MinerU service source](modal/amuseme_mineru/) is included in this repository.
 
-## Testing and credits
+To explore the interface without provider access, run this after building:
 
-[VERIFICATION.md](VERIFICATION.md) records what was tested and what wasn't. [CREDITS.md](CREDITS.md) credits the example documents, which are all openly licensed or public domain.
+```sh
+pnpm exec node tests/manual/visual-server.ts
+```
 
-Code is licensed under [AGPL-3.0-only](LICENSING.md).
+Open [the sample controls](http://127.0.0.1:4187/qa) and choose **Open reader**. This serves the compiled interface with synthetic data; it does not process uploads or make model calls.
+
+## Development
+
+```sh
+pnpm check
+pnpm test
+pnpm build
+```
+
+These checks require no live provider credentials or inference. PDF integration tests need the Python environment above and access to `/bin/ps`. For development, `pnpm dev` watches the server; run `pnpm dev:app` in another terminal to rebuild the interface as you edit.
+
+Source is organized under `src/app/` (interface), `src/domain/` (shared schemas), `src/mastra/` (workflow and routes), and `src/paper/` (document processing). Tests live in `tests/`, maintenance tools in `scripts/`, and the standalone [Semantic Scholar utility](cli/semantic-scholar/README.md) in `cli/semantic-scholar/`.
+
+The [experimental Spark extraction command](cli/spark-extraction/README.md) runs a bounded, single-page trial through the existing normalization and export workflow. Its guide covers prerequisites, local inspection and explicitly authorized execution; normal uploads continue to use MinerU.
+
+## Current limits
+
+The current scope is English-language PDFs up to **50 MiB and 50 pages**, with additional document complexity and model context limits. The application runs locally on a single host and retains documents for seven days.
+
+Model corrections can be wrong, including changes to numbers or table structure. Processing reports count changes; they do not certify accuracy. Keep the original available when interpreting a result. Broader document coverage and reconstruction accuracy remain unmeasured.
+
+## Credits
+
+**Document extraction is powered by MinerU.** See the [MinerU and service dependency notices](modal/amuseme_mineru/NOTICE.md). PDF validation and page rendering use PyMuPDF; its [license notices](python/README.md#provenance-and-licenses) are included.
+
+AmuseMe adapts earlier normalization and extraction code into a document dashboard with Meta Muse Spark processing, a source-linked reader, and portable exports.

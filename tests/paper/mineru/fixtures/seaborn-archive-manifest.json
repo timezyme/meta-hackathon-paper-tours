@@ -1,0 +1,65 @@
+{
+  "compressedByteCount": 330659,
+  "middlePath": "document_middle.json",
+  "entries": [
+    {
+      "_tag": "file",
+      "path": "document.md",
+      "byteCount": 13203,
+      "hash": "a71390bdc2e0c6c8b82c6af0970f7b305eba649cc2e51ab0b3d0e2bd59e9b728"
+    },
+    {
+      "_tag": "file",
+      "path": "document_model.json",
+      "byteCount": 165913,
+      "hash": "95d130a149ce9f21bff6e5417da3554b6291adfbbede3bac44666373769dccc6"
+    },
+    {
+      "_tag": "file",
+      "path": "document_middle.json",
+      "byteCount": 36326,
+      "hash": "0bb02d4353a59db353cc86b8653d99bb5dacfe39d4daf8637e6d00e49aed2f5e"
+    },
+    {
+      "_tag": "file",
+      "path": "document_content_list.json",
+      "byteCount": 18088,
+      "hash": "85b3fb54cba8fee11bd99586b5fa74082e0f684fd6652ffbd55280992e891d42"
+    },
+    {
+      "_tag": "file",
+      "path": "document_content_list_v2.json",
+      "byteCount": 21181,
+      "hash": "0c8fe39ce671d7469da0be78e7cca0caa3fedb3c64f7bc97e19dd1c9179a1913"
+    },
+    {
+      "_tag": "file",
+      "path": "images/page_1_image_4.jpg",
+      "byteCount": 81839,
+      "hash": "0451d079b9e20cce6ffeb137dee6debef6ce6197e572165115998f674c8605ee"
+    },
+    {
+      "_tag": "file",
+      "path": "native/mineru.zip",
+      "byteCount": 161870,
+      "hash": "a5c0d8d336124c50378e195afd5fd4e7865f6266528ffa251b5c2278cd69d103"
+    },
+    {
+      "_tag": "file",
+      "path": "README.txt",
+      "byteCount": 577,
+      "hash": "72cbadb566d39d9e3f3c5d85192be20e9722701b14cd7f5b7a1e5ae9785d877d"
+    }
+  ],
+  "nativeAssets": [
+    {
+      "archivePath": "images/page_1_image_4.jpg",
+      "artifact": {
+        "path": "images/seaborn-figure-1.jpeg",
+        "mediaType": "image/jpeg",
+        "byteCount": 81839,
+        "hash": "0451d079b9e20cce6ffeb137dee6debef6ce6197e572165115998f674c8605ee"
+      }
+    }
+  ]
+}
