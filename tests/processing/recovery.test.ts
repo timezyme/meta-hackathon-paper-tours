@@ -42,6 +42,24 @@ const acceptReviewed: ProviderAdapter["Service"]["validate"] = (value) => JSON.s
 const adapter = (invoke: ProviderAdapter["Service"]["invoke"] = () => Effect.succeed(response), validate: ProviderAdapter["Service"]["validate"] = () => Effect.void) => Layer.succeed(ProviderAdapter, { invoke, validate })
 
 describe("durable recovery and retry authorization", () => {
+  it.effect("dispatches under a higher call limit while retaining the bound budget", () => Effect.gen(function* () {
+    const settings = yield* options
+    yield* Effect.gen(function* () {
+      const first = yield* admitted()
+      const original = yield* makeProviderGuard({ ...policy, maxConcurrentCalls: 4 })
+      yield* original.execute(first, yield* input())
+      const upgraded = yield* makeProviderGuard({ ...policy, maxConcurrentCalls: 16 })
+      expect((yield* upgraded.execute(first, yield* input("page-2"))).delivery).toBe("performed")
+      const differentBudget = yield* makeProviderGuard({ ...policy, maxConcurrentCalls: 16, budgetId: "different-budget" })
+      expect(yield* differentBudget.execute(first, yield* input("page-1", "headings")).pipe(Effect.result)).toMatchObject({ _tag: "Failure", failure: { code: "conflict" } })
+      const { db, query } = yield* StorageDatabase
+      const saved = yield* query("bound-policy", () => db.selectFrom("document_policies").selectAll().executeTakeFirstOrThrow())
+      expect(JSON.parse(saved.policy_json).maxConcurrentCalls).toBe(4)
+      expect(saved.budget_id).toBe(policy.budgetId)
+      expect(yield* attempts).toHaveLength(2)
+    }).pipe(Effect.provide(Layer.merge(layer(settings), adapter())))
+  }).pipe(Effect.provide(NodeServices.layer)))
+
   it.effect("continues and retries historical no-guide runs under the exact old policy after guide support is configured", () => Effect.gen(function* () {
     const settings = yield* options
     let calls = 0

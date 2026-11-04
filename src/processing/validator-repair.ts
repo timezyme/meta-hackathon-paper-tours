@@ -3,7 +3,7 @@ import { AcceptedRun, ArtifactHash, Document, DocumentId, ProviderAttemptId, Run
 import { StorageDatabase } from "../storage/database.ts"
 import { AttemptIntent, GuardPolicy, executionFailure, type ExecutionFailure } from "./contracts.ts"
 import { requestFingerprint } from "./fingerprint.ts"
-import { providerJson as json, providerUnitKey } from "./recovery.ts"
+import { bindDocumentPolicy, providerJson as json, providerUnitKey } from "./recovery.ts"
 import { runGuardPolicy, stageReservation } from "./policy.ts"
 
 export const ValidatorRepairRequest = Schema.Struct({
@@ -61,7 +61,7 @@ export const makeValidatorRepair = Effect.fn("makeValidatorRepair")(function* (c
       if (binding === undefined) return yield* conflict("Historical processing policy must be reconciled before validator repair")
       const originalPolicy = yield* decode(Schema.fromJsonString(GuardPolicy), binding.policy_json)
       const effectivePolicy = runGuardPolicy(policy, run.configuration)
-      if (binding.budget_id !== policy.budgetId || json(originalPolicy) !== json(effectivePolicy)) return yield* conflict("Validator repair must retain the original processing policy and budget")
+      yield* bindDocumentPolicy(db, database.query, document.id, effectivePolicy)
       const expectedConfiguration = stageConfiguration(run.configuration, receipt.stage)
       if (expectedConfiguration === undefined || stageReservation(policy, receipt.stage, receipt.task) === undefined) return yield* invalid()
       const maxOutputTokens = expectedConfiguration._tag === "model" ? expectedConfiguration.maxOutputTokens : expectedConfiguration.model?.maxOutputTokens ?? null
@@ -76,7 +76,7 @@ export const makeValidatorRepair = Effect.fn("makeValidatorRepair")(function* (c
       if (charge === undefined || charge.budget_id !== policy.budgetId || charge.actual_microusd !== row.actual_microusd || charge.reserved_microusd !== row.reserved_microusd) return yield* invalid()
       const audit = yield* database.query("repair-existing", () => db.selectFrom("validator_repairs").selectAll().where("attempt_id", "=", row.id).executeTakeFirst())
       if (audit !== undefined) {
-        if (audit.owner_id !== request.ownerId || audit.document_id !== request.documentId || audit.previous_run_id !== request.previousRunId || audit.response_hash !== request.responseHash || audit.request_fingerprint !== fingerprint || audit.validator_fix_id !== request.validatorFixId || audit.validator_fix_hash !== request.validatorFixHash || audit.new_receipt_json !== row.receipt_json || json(yield* decode(Schema.fromJsonString(GuardPolicy), audit.policy_json)) !== json(effectivePolicy) || row.validation_state !== "accepted" || receipt.state.validation._tag !== "accepted") return yield* conflict("This response already has a different validator repair")
+        if (audit.owner_id !== request.ownerId || audit.document_id !== request.documentId || audit.previous_run_id !== request.previousRunId || audit.response_hash !== request.responseHash || audit.request_fingerprint !== fingerprint || audit.validator_fix_id !== request.validatorFixId || audit.validator_fix_hash !== request.validatorFixHash || audit.new_receipt_json !== row.receipt_json || json(yield* decode(Schema.fromJsonString(GuardPolicy), audit.policy_json)) !== json(originalPolicy) || row.validation_state !== "accepted" || receipt.state.validation._tag !== "accepted") return yield* conflict("This response already has a different validator repair")
         const old = yield* decode(Schema.fromJsonString(StageReceipt), audit.old_receipt_json)
         if (old.state._tag !== "completed" || old.state.validation._tag !== "rejected" || json({ ...old, state: { ...old.state, validation: { _tag: "accepted" } } }) !== json(receipt)) return yield* invalid()
         const lineage = yield* database.query("repair-lineage", () => db.selectFrom("retry_requests").selectAll().where("run_id", "=", audit.run_id).where("previous_run_id", "=", run.id).where("document_id", "=", document.id).where("owner_id", "=", run.ownerId).where("budget_id", "=", policy.budgetId).executeTakeFirst())

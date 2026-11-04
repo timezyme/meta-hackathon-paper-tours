@@ -1,4 +1,4 @@
-import { Context, Effect, Exit, FileSystem, Layer, Path, Schema, Stream } from "effect"
+import { Context, Effect, Exit, FileSystem, Layer, Path, Schema, Semaphore, Stream } from "effect"
 import type { PlatformError } from "effect/PlatformError"
 import { ChildProcess, ChildProcessSpawner } from "effect/process"
 import { ArtifactHash, Page, PixelBox, SourceHash } from "../../domain/index.ts"
@@ -69,6 +69,7 @@ export const PdfCropInput = Schema.Struct({
 })
 const CropOutput = Schema.Struct({ width: Schema.Int, height: Schema.Int, byteCount: Schema.Int, hash: ArtifactHash })
 const CropAnswer = Schema.Union([Schema.TaggedStruct("Cropped", CropOutput.fields), Rejected])
+const cropProcessLimit = 4
 
 export class PdfRenderer extends Context.Service<PdfRenderer, {
   readonly crop: (input: typeof PdfCropInput.Type) => Effect.Effect<typeof CropOutput.Type, PdfRenderError>
@@ -78,8 +79,9 @@ export class PdfRenderer extends Context.Service<PdfRenderer, {
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
     const path = yield* Path.Path
     const fs = yield* FileSystem.FileSystem
+    const cropProcesses = yield* Semaphore.make(cropProcessLimit)
 
-    const render = Effect.fn("PdfRenderer.render")(function* (input: PdfRenderInput) {
+    const render =Effect.fn("PdfRenderer.render")(function* (input: PdfRenderInput) {
       const request = yield* Schema.decodeUnknownEffect(PdfRenderInput)(input, { onExcessProperty: "error" }).pipe(Effect.mapError(() => failure("invalid-input")))
       if (request.pageNumber !== undefined && request.pageNumber > request.pageCount) return yield* failure("invalid-input")
       if (![request.privatePath, request.outputDirectory].every((value) => path.isAbsolute(value) && !value.includes("\0"))) return yield* failure("invalid-input")
@@ -129,7 +131,7 @@ export class PdfRenderer extends Context.Service<PdfRenderer, {
           return yield* failure("invalid-input")
         }
         return output
-      })).pipe(Effect.timeoutOrElse({ duration: "20 seconds", orElse: () => Effect.fail(failure("limit-exceeded")) }))
+      })).pipe(Effect.timeoutOrElse({ duration: "20 seconds", orElse: () => Effect.fail(failure("limit-exceeded")) }), cropProcesses.withPermit)
     })
     return PdfRenderer.of({ render, crop })
   }))

@@ -16,7 +16,7 @@ import { admission, options, policy } from "../fixtures/speed.ts"
 const model = (stage: keyof typeof stageSpecs) => ({ provider: "meta", model: "muse-spark-1.3", reasoning: "high", promptName: stageSpecs[stage].promptName, promptVersion: stageSpecs[stage].promptVersion, maxOutputTokens: 1000 })
 const contextSchema = Schema.Union([Schema.Struct({ pageNumber: Schema.Number }), Schema.Struct({ figureCropReview: Schema.Struct({ page: Schema.Struct({ pageNumber: Schema.Number }) }) })])
 
-it.live("overlaps extraction without changing serial receipts, retries, crop decisions or reservations", () => Effect.gen(function* () {
+for (const tight of [false, true]) it.live(tight ? "keeps mandatory pages and ordered receipts within a tight parallel cap" : "overlaps extraction without changing serial receipts, retries, crop decisions or reservations", () => Effect.gen(function* () {
   const settings = yield* options
   const fs = yield* FileSystem.FileSystem
   const path = yield* Path.Path
@@ -24,10 +24,10 @@ it.live("overlaps extraction without changing serial receipts, retries, crop dec
   yield* Effect.gen(function* () {
     const store = yield* DocumentStore
     const original = yield* admission()
-    const configuration = yield* Schema.decodeUnknownEffect(RunConfiguration)({ ...original.configuration, spendingCapUsd: 0.000009, extractionProvider: "meta", extractionVersion: "muse-spark-1.3", extractionModel: model("extraction"), pageCheck: model("page-check"), headings: model("headings"), figures: model("figures") })
+    const configuration = yield* Schema.decodeUnknownEffect(RunConfiguration)({ ...original.configuration, spendingCapUsd: tight ? 0.000009 : 0.00002, extractionProvider: "meta", extractionVersion: "muse-spark-1.3", extractionModel: model("extraction"), pageCheck: model("page-check"), headings: model("headings"), figures: model("figures") })
     yield* store.admit({ ...original, pageCount: 3, configuration })
   }).pipe(Effect.provide(makeDocumentStoreLayer({ ...settings, dataDirectory: seed })))
-  const outcomes = yield* Effect.forEach([1, 4], (maxConcurrentCalls) => Effect.gen(function* () {
+  const outcomes = yield* Effect.forEach(tight ? [16] : [1, 16], (maxConcurrentCalls) => Effect.gen(function* () {
     const dataDirectory = path.join(settings.dataDirectory, String(maxConcurrentCalls))
     yield* fs.copy(seed, dataDirectory)
     return yield* Effect.gen(function* () {
@@ -103,15 +103,21 @@ it.live("overlaps extraction without changing serial receipts, retries, crop dec
       const stable = (value: unknown) => JSON.stringify(value, (key, field: unknown) => ["preparedAt", "finishedAt", "durationMilliseconds", "deadlineAt"].includes(key) ? undefined : typeof field === "string" ? ids.get(field) ?? field : field)
       expect(peak).toBe(maxConcurrentCalls === 1 ? 1 : 3)
       expect(finished.at(-1)).toBe(maxConcurrentCalls === 1 ? 3 : 1)
-      expect(data.cropReviews?.map((review) => review.outcome)).toEqual(["confirmed", "not-reviewed", "confirmed"])
+      if (!tight) expect(data.cropReviews?.map((review) => review.outcome)).toEqual(["confirmed", "confirmed", "confirmed"])
       expect(data.reviews?.map((review) => review.outcome)).toEqual(["corrected"])
       expect(data.receipts.map((receipt) => receipt.pageIds)).toEqual([["page-1"], ["page-2"], ["page-3"]])
-      expect(attempts).toHaveLength(6)
+      if (!tight) expect(attempts).toHaveLength(7)
       expect(attempts.every((row) => row.reserved_microusd === 1)).toBe(true)
-      expect(attempts.reduce((sum, row) => sum + (row.actual_microusd ?? row.reserved_microusd), 0)).toBe(5)
+      const charged = attempts.reduce((sum, row) => sum + (row.actual_microusd ?? row.reserved_microusd), 0)
+      if (!tight) expect(charged).toBe(6)
+      expect(charged + 4).toBeLessThanOrEqual(Math.floor(claim.run.configuration.spendingCapUsd * 1_000_000))
+      expect(attempts.every((row) => row.status === "completed")).toBe(true)
+      const charges = yield* query("charges", () => db.selectFrom("provider_charges").selectAll().execute())
+      expect(charges).toHaveLength(attempts.length)
+      expect(charges.reduce((sum, row) => sum + (row.actual_microusd ?? row.reserved_microusd), 0)).toBe(charged)
       expect(yield* stages.execute(claim, "extraction", input)).toEqual(checkpoint)
       return { data: stable(data), counts, attempts: attempts.map((row) => stable({ fingerprint: row.fingerprint, intent: JSON.parse(row.intent_json), reserved: row.reserved_microusd, actual: row.actual_microusd })).toSorted() }
     }).pipe(Effect.provide(makeDocumentStoreLayer({ ...settings, dataDirectory })))
   }))
-  expect(outcomes[1]).toEqual(outcomes[0])
+  if (!tight) expect(outcomes[1]).toEqual(outcomes[0])
 }).pipe(Effect.provide(NodeServices.layer)))

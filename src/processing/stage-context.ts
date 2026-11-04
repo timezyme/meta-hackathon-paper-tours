@@ -1,4 +1,4 @@
-import { Crypto, Effect, FileSystem, Path, Result, Schema } from "effect"
+import { Crypto, Deferred, Effect, Exit, Fiber, FileSystem, Path, Result, Schema, Semaphore } from "effect"
 import { ArtifactHash, validateExtraction, type Stage } from "../domain/index.ts"
 import { HttpClient } from "effect/http"
 import { boundRequest, type StageRequestLimits } from "../paper/correction/index.ts"
@@ -20,7 +20,6 @@ import {
   privateRef,
   unsupported,
   imageTokenUpperBound,
-  figureChainLimit,
   receiptsCoverPagesInOrder,
   type MetaCall,
   type Checked,
@@ -40,31 +39,29 @@ export const makeStageContext = Effect.fnUntraced(function* (meta: ReturnType<ty
   const http = yield* HttpClient.HttpClient
   const crypto = yield* Crypto.Crypto
   yield* fs.makeDirectory(options.temporaryDirectory, { recursive: true, mode: 0o700 })
-  const figureConcurrency = Math.min(figureChainLimit, options.policy.maxConcurrentCalls)
-  const settleInOrder = Effect.fnUntraced(function* <A, B, E, R>(items: ReadonlyArray<A>, work: (item: A) => Effect.Effect<B, E, R>) {
+  const settleInOrder = Effect.fnUntraced(function* <A, B, E, R>(items: ReadonlyArray<A>, work: (item: A, index: number) => Effect.Effect<B, E, R>, concurrency: number) {
     let stopped = false
     const settled = yield* Effect.forEach(
       items,
-      (item) =>
+      (item, index) =>
         Effect.suspend(() =>
           stopped
             ? Effect.succeed(null)
-            : work(item).pipe(
-                Effect.result,
+            : work(item, index).pipe(
+                Effect.exit,
                 Effect.tap((result) =>
                   Effect.sync(() => {
-                    stopped ||= Result.isFailure(result)
+                    stopped ||= Exit.isFailure(result)
                   }),
                 ),
               ),
         ),
-      { concurrency: figureConcurrency },
+      { concurrency },
     )
     const values: Array<B> = []
     for (const result of settled) {
-      if (result === null) return yield* Effect.die("A skipped figure chain must follow a failed one")
-      if (Result.isFailure(result)) return yield* Effect.fail(result.failure)
-      values.push(result.success)
+      if (result === null) return yield* Effect.die("Skipped work must follow a failure")
+      values.push(yield* result)
     }
     return values
   })
@@ -80,6 +77,15 @@ export const makeStageContext = Effect.fnUntraced(function* (meta: ReturnType<ty
     claim.run.state._tag !== "running"
       ? Effect.fail(executionFailure("conflict", "The document claim is not running"))
       : documents.updateRun(claim, { ...claim.run.state, progress: { stage, completedUnits, totalUnits } }).pipe(Effect.asVoid)
+  const progressCounter = Effect.fnUntraced(function* (claim: DispatchClaim, stage: typeof Stage.Type, total: number) {
+    let finished = 0
+    const counter = yield* Semaphore.make(1)
+    const advance = counter.withPermit(Effect.gen(function* () {
+      finished += 1
+      yield* progress(claim, stage, finished, total)
+    }))
+    return { advance }
+  })
   const limits = (claim: DispatchClaim, stage: "pageCheck" | "headings" | "figures"): StageRequestLimits => ({
     maxOutputTokens: claim.run.configuration[stage].maxOutputTokens,
     maxRequestBytes: options.policy.maxRequestBytes,
@@ -152,6 +158,65 @@ export const makeStageContext = Effect.fnUntraced(function* (meta: ReturnType<ty
         ),
       ),
     )
+
+  const startFirstAttempt = Effect.fnUntraced(function* (claim: DispatchClaim, call: MetaCall) {
+    const preflight = yield* measure(call.request)
+    const { attempt, adapter } = yield* prepareMetaCall(claim, call, preflight)
+    const saved = yield* guard.prepare(claim, attempt).pipe(Effect.result)
+    if (Result.isFailure(saved) && (saved.failure._tag !== "ExecutionFailure" || saved.failure.code !== "invalid-provider-response"))
+      return yield* saved.failure
+    const work = Result.isFailure(saved)
+      ? Effect.fail(saved.failure)
+      : saved.success._tag === "prepared" ? guard.dispatch(saved.success.ticket, call.validationTurn ?? Effect.void) : Effect.gen(function* () {
+          if (call.validationTurn !== undefined) yield* call.validationTurn
+          return yield* guard.execute(claim, attempt)
+        })
+    return yield* work.pipe(
+      Effect.provideService(ProviderAdapter, adapter),
+      Effect.result,
+      Effect.map((result) => ({ attempt, result })),
+      Effect.forkChild,
+    )
+  })
+  const settleFirstAttemptsInOrder = Effect.fnUntraced(function* <A, B, E, R>(
+    items: ReadonlyArray<A>,
+    window: number,
+    start: (item: A, index: number, turn: Effect.Effect<void, ExecutionFailure>) => Effect.Effect<Effect.Success<ReturnType<typeof startFirstAttempt>>, E, R>,
+    settle: (first: ReturnType<typeof attemptCall>, item: A, index: number) => Effect.Effect<B, E, R>,
+  ) {
+    const turns = yield* Effect.forEach(items, () => Deferred.make<void, ExecutionFailure>())
+    const pending: Array<Effect.Success<ReturnType<typeof startFirstAttempt>>> = []
+    return yield* Effect.gen(function* () {
+      let next = 0
+      const startNext = Effect.gen(function* () {
+        for (const fiber of pending) {
+          const completed = yield* Effect.sync(() => fiber.pollUnsafe())
+          if (completed === undefined) continue
+          const { result } = yield* completed
+          if (Result.isFailure(result) && (result.failure._tag !== "ExecutionFailure" || result.failure.code !== "invalid-provider-response"))
+            return yield* result.failure
+        }
+        pending.push(yield* start(items[next]!, next, Deferred.await(turns[next]!)))
+        next += 1
+      })
+      while (next < Math.min(items.length, window)) {
+        yield* startNext
+      }
+      const values: Array<B> = []
+      for (let index = 0; index < items.length; index += 1) {
+        yield* Deferred.succeed(turns[index]!, undefined)
+        const first = Effect.succeed(yield* Fiber.join(pending[index]!))
+        values.push(yield* settle(first, items[index]!, index))
+        if (next < items.length) {
+          yield* startNext
+        }
+      }
+      return values
+    }).pipe(Effect.onExit((exit) => Exit.isFailure(exit) ? Effect.gen(function* () {
+      yield* Effect.forEach(turns, (turn) => Deferred.fail(turn, executionFailure("provider-failed", "Processing stopped before this answer was validated")), { discard: true })
+      yield* Effect.forEach(pending, Fiber.await, { discard: true })
+    }) : Effect.void))
+  })
 
   const judgedAttempt = Effect.fnUntraced(function* <A>(
     claim: DispatchClaim,
@@ -256,7 +321,9 @@ export const makeStageContext = Effect.fnUntraced(function* (meta: ReturnType<ty
     guardedMetaCall,
     attemptCall,
     reviewAttempt,
-    figureConcurrency,
+    startFirstAttempt,
+    settleFirstAttemptsInOrder,
+    progressCounter,
     settleInOrder,
     loadExtracted,
     loadCorrected,

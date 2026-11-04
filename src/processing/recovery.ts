@@ -38,7 +38,9 @@ const transientMeta = (value: Schema.Json): boolean => {
 export const bindDocumentPolicy = Effect.fnUntraced(function* (db: Kysely<ApplicationDatabase>, query: typeof storageQuery, documentId: string, policy: GuardPolicy) {
   const saved = yield* query("retry-policy", () => db.selectFrom("document_policies").selectAll().where("document_id", "=", documentId).executeTakeFirst())
   if (saved !== undefined) {
-    if (saved.budget_id !== policy.budgetId || providerJson(yield* decode(Schema.fromJsonString(GuardPolicy), saved.policy_json)) !== providerJson(policy)) return yield* executionFailure("conflict", "This document must retain its original processing policy and budget")
+    const { maxConcurrentCalls: _savedConcurrency, ...savedPolicy } = yield* decode(Schema.fromJsonString(GuardPolicy), saved.policy_json)
+    const { maxConcurrentCalls: _maxConcurrentCalls, ...currentPolicy } = policy
+    if (saved.budget_id !== policy.budgetId || providerJson(savedPolicy) !== providerJson(currentPolicy)) return yield* executionFailure("conflict", "This document must retain its original processing policy and budget")
     return
   }
   const prior = yield* query("retry-policy", () => db.selectFrom("provider_attempts").select("id").where("document_id", "=", documentId).executeTakeFirst())

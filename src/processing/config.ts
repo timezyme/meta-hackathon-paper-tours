@@ -56,7 +56,7 @@ export const processingConfig = Effect.fnUntraced(function* (dataDirectory: stri
     authorizedBudgetMicrousd: Math.floor(budget.value * 1_000_000),
     maximumCostMicrousd: stageReservations,
     metaRates: museSparkRates,
-    maxConcurrentCalls: 4,
+    maxConcurrentCalls: 16,
     maxOutputTokens: maximumOutputTokens,
     maxRequestBytes: maximumRequestBytes,
     maxResponseBytes: maximumResponseBytes,

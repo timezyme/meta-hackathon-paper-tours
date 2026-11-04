@@ -134,6 +134,7 @@ export interface MetaCall {
   readonly headroomMicrousd?: number
   readonly request: MetaRequest
   readonly limits: StageRequestLimits
+  readonly validationTurn?: Effect.Effect<void, ExecutionFailure>
   readonly validate: (value: Schema.Json) => Result.Result<unknown, ExecutionFailure>
   readonly pageIds: ReadonlyArray<PageId>
   readonly figureId: FigureId | null

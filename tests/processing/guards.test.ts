@@ -5,7 +5,7 @@ import { TestClock } from "effect/testing"
 import { describe, expect } from "vitest"
 import { Admission, DocumentStore, StorageDatabase, makeDocumentStoreLayer, type DispatchClaim, type StorageOptions } from "../../src/storage/index.ts"
 import { AttemptInput, ProviderAdapter, ProviderFailure, ProviderGuard, RunDispatcher, RunStarter, executionFailure, makeProviderGuard, makeProviderGuardLayer, makeRunRecovery, makeRunDispatcherLayer, processingAvailability, type GuardPolicy } from "../../src/processing/index.ts"
-import { IdempotencyKey, RunConfiguration, StageReceipt, type RunState } from "../../src/domain/index.ts"
+import { IdempotencyKey, PageId, RunConfiguration, StageReceipt, type RunState } from "../../src/domain/index.ts"
 
 export const policy: GuardPolicy = {
   mode: "fixture", enabled: true, metaCredentialConfigured: false, mineruCredentialConfigured: false, mineruEndpoint: null,
@@ -48,6 +48,30 @@ const failedState = Effect.gen(function* () {
 })
 
 describe("durable provider guards", () => {
+  it.effect("counts later reserved page checks once when reviewing at the exact cap", () => Effect.gen(function* () {
+    const settings = yield* options
+    yield* Effect.gen(function* () {
+      const store = yield* DocumentStore
+      yield* store.admit({ ...(yield* admission("reader-one", 0.8)), pageCount: 2 })
+      const owned = yield* store.claimNext({ workerId: "headroom", leaseMilliseconds: 100_000 })
+      if (owned === null) return yield* Effect.die("Expected claim")
+      const guard = yield* ProviderGuard
+      const request = yield* input()
+      const first = yield* guard.execute(owned, { ...request, headroomMicrousd: 400_000 })
+      const later = yield* guard.prepare(owned, { ...request, pageIds: [PageId.make("page-2")], headroomMicrousd: 200_000 })
+      expect(later._tag).toBe("prepared")
+      const review = { ...request, request: { text: "review" }, retry: { _tag: "review" as const, round: 1 as const, previousAttemptId: first.receipt.id, headroomMicrousd: 400_000 } }
+      expect((yield* guard.execute(owned, review)).delivery).toBe("performed")
+      expect(yield* guard.prepare(owned, { ...review, request: { text: "one too many" } }).pipe(Effect.result)).toMatchObject({ _tag: "Failure", failure: { code: "limit-exceeded" } })
+      if (later._tag !== "prepared") return yield* Effect.die("Expected prepared page")
+      yield* guard.dispatch(later.ticket)
+      yield* guard.execute(owned, yield* input("headings"))
+      const database = yield* StorageDatabase
+      const charges = yield* database.query("page-check-charges", () => database.db.selectFrom("provider_charges").selectAll().execute())
+      expect(charges.reduce((sum, charge) => sum + (charge.actual_microusd ?? charge.reserved_microusd), 0)).toBe(800_000)
+    }).pipe(Effect.provide(Layer.merge(fixtureLayer(settings, { ...policy, maxConcurrentCalls: 4, authorizedBudgetMicrousd: 800_000 }), adapter())))
+  }).pipe(Effect.provide(NodeServices.layer)))
+
   for (const [name, configureGuide, configureReservation, budget] of [["missing model", false, true, 1_000_000], ["missing reservation", true, false, 1_000_000], ["exhausted shared allowance", true, true, 199_999]] as const) {
     it.effect(`refuses guide dispatch with ${name} before saving a charge or sending`, () => Effect.gen(function* () {
       const settings = yield* options

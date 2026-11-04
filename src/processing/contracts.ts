@@ -96,7 +96,7 @@ export class ProviderAdapter extends Context.Service<ProviderAdapter, {
 export class ProviderGuard extends Context.Service<ProviderGuard, {
   readonly retryInput: (claim: DispatchClaim, input: AttemptInput) => Effect.Effect<AttemptInput, GuardError>
   readonly prepare: (claim: DispatchClaim, input: AttemptInput) => Effect.Effect<PreparedAttempt, GuardError>
-  readonly dispatch: (ticket: AttemptTicket) => Effect.Effect<GuardedResponse, GuardError, ProviderAdapter>
+  readonly dispatch: (ticket: AttemptTicket, beforeValidation?: Effect.Effect<void, ExecutionFailure>) => Effect.Effect<GuardedResponse, GuardError, ProviderAdapter>
   readonly execute: (claim: DispatchClaim, input: AttemptInput) => Effect.Effect<GuardedResponse, GuardError, ProviderAdapter>
   readonly rejected: (claim: DispatchClaim, input: AttemptInput) => Effect.Effect<GuardedResponse | null, GuardError>
   readonly reconcile: () => Effect.Effect<number, GuardError>

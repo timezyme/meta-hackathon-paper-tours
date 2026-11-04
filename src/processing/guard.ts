@@ -460,14 +460,15 @@ export const makeProviderGuard = Effect.fn("makeProviderGuard")(function* (confi
             return yield* executionFailure("limit-exceeded", "The request's worst-case provider charge exceeds its stage reservation")
           let headroom = retryHeadroom
           const pageNumber = input.pageIds.length === 1 ? Number(/^page-([1-9]\d*)$/u.exec(input.pageIds[0] ?? "")?.[1]) : NaN
-          if (headroom > 0 && (input.stage === "extraction" || input.task === "figure-crop") && pageNumber <= document.pageCount) {
+          if (headroom > 0 && (input.stage === "extraction" || input.stage === "page-check" || input.task === "figure-crop") && pageNumber <= document.pageCount) {
+            const stage = input.stage === "page-check" ? "page-check" : "extraction"
             const chargedAhead: Array<number> = []
             for (let later = pageNumber + 1; later <= document.pageCount; later += 1) {
-              const key = providerUnitKey({ stage: "extraction", pageIds: [`page-${later}`], figureId: null })
+              const key = providerUnitKey({ stage, pageIds: [`page-${later}`], figureId: null })
               for (const ahead of previous.filter((row) => row.run_id === run.id && row.stage_key === key)) {
                 if ((yield* decodeIntent(ahead)).retry._tag === "review") continue
-                // SAFETY: Later initial extractions already occupy their serial headroom; their refunds must not fund earlier optional calls.
-                chargedAhead.push(Math.min(ahead.actual_microusd ?? ahead.reserved_microusd, policy.maximumCostMicrousd.extraction))
+                // SAFETY: Later initial extractions or page checks already occupy their serial headroom; their refunds must not fund earlier optional calls.
+                chargedAhead.push(Math.min(ahead.actual_microusd ?? ahead.reserved_microusd, policy.maximumCostMicrousd[stage]))
                 break
               }
             }
@@ -694,7 +695,7 @@ export const makeProviderGuard = Effect.fn("makeProviderGuard")(function* (confi
     if (validation._tag === "Failure") return yield* validation.failure
     return { ...result, receipt: accepted, response: saved.response }
   })
-  const complete = Effect.fn("ProviderGuard.complete")(function* (
+  const persist = Effect.fn("ProviderGuard.persist")(function* (
     ticket: AttemptTicket,
     response: ProviderResponse,
     allowed: ReadonlyArray<string>,
@@ -731,14 +732,11 @@ export const makeProviderGuard = Effect.fn("makeProviderGuard")(function* (confi
       false,
     )
     const receipt = yield* decodeReceipt(raw)
-    return yield* validateSaved(
-      ticket.claim,
-      { delivery: receipt.scope.runId === ticket.claim.run.id ? "performed" : "reused", receipt, response: response.response },
-      ticket.receipt,
-    )
+    return { delivery: receipt.scope.runId === ticket.claim.run.id ? "performed" as const : "reused" as const, receipt, response: response.response }
   })
   const dispatch = Effect.fn("ProviderGuard.dispatch")(function* (
     ticket: AttemptTicket,
+    beforeValidation: Effect.Effect<void, ExecutionFailure> = Effect.void,
   ): Effect.fn.Return<GuardedResponse, GuardError, ProviderAdapter> {
     yield* available()
     const adapter = yield* ProviderAdapter
@@ -823,10 +821,10 @@ export const makeProviderGuard = Effect.fn("makeProviderGuard")(function* (confi
             : error,
         ),
       )
-      return yield* complete(ticket, response, ["dispatching", "submitted"])
+      return yield* persist(ticket, response, ["dispatching", "submitted"])
     })
     const now = yield* Clock.currentTimeMillis
-    return yield* invoke.pipe(
+    const saved = yield* invoke.pipe(
       Effect.timeoutOrElse({
         duration: Math.max(0, intent.deadlineAt - now),
         orElse: () =>
@@ -836,6 +834,8 @@ export const makeProviderGuard = Effect.fn("makeProviderGuard")(function* (confi
         Exit.isFailure(exit) ? unknown(ticket, "Execution ended without a durable accepted response") : Effect.void,
       ),
     )
+    yield* beforeValidation
+    return yield* validateSaved(ticket.claim, saved, ticket.receipt)
   })
   const retrieve = Effect.fn("ProviderGuard.retrieve")(function* (ticket: AttemptTicket) {
     if (policy.mode === "live")
@@ -854,7 +854,8 @@ export const makeProviderGuard = Effect.fn("makeProviderGuard")(function* (confi
         Effect.flatMap(Schema.decodeUnknownEffect(ProviderResponse)),
         Effect.mapError((error) => (error._tag === "SchemaError" ? invalidStored() : error)),
       )
-      return yield* complete(ticket, response, ["submitted", "unknown"])
+      const saved = yield* persist(ticket, response, ["submitted", "unknown"])
+      return yield* validateSaved(ticket.claim, saved, ticket.receipt)
     }).pipe(
       Effect.timeoutOrElse({
         duration: Math.max(0, ticket.intent.deadlineAt - now),

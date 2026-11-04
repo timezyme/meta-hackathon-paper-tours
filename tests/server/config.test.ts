@@ -51,7 +51,7 @@ describe("server startup configuration", () => {
     const policy = parsed.processing?.pipeline.policy
     expect(policy?.maximumCostMicrousd).toEqual({ extraction: 300_000, "page-check": 300_000, headings: 500_000, figures: 500_000, guide: 500_000, "figure-crop": 200_000 })
     expect(policy?.metaRates).toEqual({ inputMicrousdPerMillionTokens: 1_250_000, outputMicrousdPerMillionTokens: 4_250_000 })
-    expect(policy?.maxConcurrentCalls).toBe(4)
+    expect(policy?.maxConcurrentCalls).toBe(16)
     const reserved = policy?.maximumCostMicrousd
     const mandatory = (pages: number) => reserved === undefined || reserved.guide === undefined ? Infinity : pages * (reserved.extraction + reserved["page-check"]) + reserved.headings + reserved.guide
     const perFigure = reserved === undefined ? Infinity : 2 * (reserved["figure-crop"] ?? reserved.figures) + reserved.figures
