@@ -10,11 +10,11 @@ Meta **Muse Spark 1.3** (`muse-spark-1.3`, Meta Model API) does every model step
 
 ## Built during the hackathon
 
-Everything after the October 28 foundation, [`fa40c24`](https://github.com/timezyme/meta-hackathon-paper-tours/commit/fa40c24e14e59c31a6abd86fdab8997f44bb515f), was built during the hackathon. See [NEW-WORK.md](NEW-WORK.md) and the [full diff](https://github.com/timezyme/meta-hackathon-paper-tours/compare/fa40c24e14e59c31a6abd86fdab8997f44bb515f...main).
+Everything after the October 28 foundation, [`fa40c24`](https://github.com/timezyme/meta-hackathon-paper-tours/commit/fa40c24e14e59c31a6abd86fdab8997f44bb515f), was built during the hackathon. See the [full diff](https://github.com/timezyme/meta-hackathon-paper-tours/compare/fa40c24e14e59c31a6abd86fdab8997f44bb515f...main).
 
 ## Run it
 
-You need Python 3.14.5, Node 24.19.0, pnpm 10.33.0 and uv.
+You need Python 3.14.5, Node 24.19.0, pnpm 10.33.0 and uv. It's tested on macOS and Linux.
 
 ```sh
 pnpm install --frozen-lockfile
