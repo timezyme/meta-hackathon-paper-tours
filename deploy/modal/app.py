@@ -81,7 +81,7 @@ image = (
         f"tar -xJf node-v{NODE_VERSION}-linux-x64.tar.xz -C /usr/local --strip-components=1 && rm node-v{NODE_VERSION}-linux-x64.tar.xz",
         f"npm install -g pnpm@{PNPM_VERSION}",
     )
-    .add_local_file(REPO / "python/requirements.txt", "/opt/amuseme-requirements.txt", copy=True)
+    .add_local_file(REPO / "requirements.txt", "/opt/amuseme-requirements.txt", copy=True)
     .run_commands(
         f"python -m venv {PYTHON_ENV}",
         f"{PYTHON_ENV}/bin/pip install --no-cache-dir -r /opt/amuseme-requirements.txt",

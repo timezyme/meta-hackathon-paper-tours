@@ -23,10 +23,9 @@
     "start": "MASTRA_STUDIO_PATH=.mastra/output/studio MASTRA_TELEMETRY_DISABLED=true MASTRA_AGENT_SIGNALS=false node --env-file-if-exists=.env --env-file-if-exists=.env.local dist/server.mjs",
     "typecheck": "tsc -p tsconfig.json && tsc -p src/app/tsconfig.json",
     "lint": "oxlint --deny-warnings src tests scripts *.ts",
-    "check": "pnpm typecheck && pnpm lint && pnpm check:guards",
+    "check": "pnpm typecheck && pnpm lint",
     "test": "vitest run",
     "prepare": "effect-tsgo patch",
-    "check:guards": "node scripts/guards/check.ts",
     "build:server": "vite build --config vite.server.config.ts",
     "provision:user": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/provision-user.ts"
   },

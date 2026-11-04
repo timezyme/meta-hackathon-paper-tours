@@ -17,7 +17,7 @@ const fixture = Effect.fnUntraced(function* () {
   const root = yield* fs.makeTempDirectoryScoped({ prefix: "amuseme-pdf-" })
   const pythonBin = path.resolve("data/python/.venv/bin/python")
   const generation = yield* command(pythonBin, ["-I", path.resolve("tests/paper/pdf/generate-fixtures.py"), root])
-  expect(generation, "Install the pinned Python environment from python/requirements.txt").toEqual({ code: 0, output: "" })
+  expect(generation, "Install the pinned Python environment from requirements.txt").toEqual({ code: 0, output: "" })
   const inspect = Effect.fnUntraced(function* (name: string, byteCount?: number) {
     const privatePath = path.join(root, name + ".pdf")
     const info = yield* fs.stat(privatePath)

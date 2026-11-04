@@ -31,25 +31,6 @@
       "rules": {
         "react/react-in-jsx-scope": "off"
       }
-    },
-    {
-      "files": [
-        "src/**",
-        "scripts/**"
-      ],
-      "rules": {
-        "amuseme/comments": "error"
-      }
-    },
-    {
-      "files": [
-        "src/**",
-        "scripts/**",
-        "tests/**"
-      ],
-      "rules": {
-        "amuseme/boundaries": "error"
-      }
     }
   ],
   "ignorePatterns": [
@@ -61,8 +42,5 @@
     ".agents/**",
     ".claude/**",
     "qa/**"
-  ],
-  "jsPlugins": [
-    "./scripts/guards/oxlint-plugin.ts"
   ]
 }

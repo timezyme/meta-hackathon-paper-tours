@@ -2,7 +2,7 @@
 
 ## Code
 
-`pnpm check` (types, lint and package pins), `pnpm test` (731 tests in 80 files) and `pnpm build` pass.
+`pnpm check` (types and lint), `pnpm test` (710 tests in 78 files) and `pnpm build` pass.
 
 ## Ten example documents
 
@@ -30,7 +30,7 @@ A tenth candidate, an OSHA safety sheet, was left out. Six figure crops on its s
 ## Judges' copy on Modal
 
 - **Interface:** two QA judge accounts were tested in Chrome and WebKit at widths from 320 to 1440 px. Sign-in, the examples, every reading mode, the downloads, keyboard focus and access checks all passed. Signed-out requests get 401, and another judge's documents get 404. The test found four faults, all fixed: table HTML in citations, bold markers in the reader, SQLite lock errors and duplicate ZIP names.
-- **Upload:** a 4-page paper (faer, JOSS, CC BY 4.0) was processed twice. The first run took 12 min 49 s and cost $0.47. After parallel processing was added, the second took 7 min 14 s and cost $0.43. A review of its guide found all 30 quotes exact, and three medium faults in how it reads the benchmark charts. A fake PDF, a 51-page PDF and a file over 50 MiB were each refused.
+- **Upload:** a 4-page paper (faer, JOSS, CC BY 4.0) was processed twice. The first run took 12 min 49 s and cost $0.47. After parallel processing was added, the second took 7 min 14 s and cost $0.43. A review of the first run's guide found all 30 quotes exact, and three medium faults in how it reads the benchmark charts. A fake PDF, a 51-page PDF and a file over 50 MiB were each refused.
 - **Returning to the tab:** the page stays where it was. If the session has ended, it goes to sign-in and comes back after sign-in.
 - **Not tested on the hosted copy:** native downloads to disk and offline behavior.
 
@@ -43,4 +43,4 @@ Before each Meta call is sent, it reserves its worst-case price. It is then char
 - The quotation check catches invented or misplaced quotes. It doesn't prove an explanation is right, so guides are labeled AI-written.
 - The foundation still contains an older MinerU extraction path, which is not a Meta model. Live runs refuse to use it, and its service is stopped.
 - Windows is untested.
-- The full record of every check is in [the earlier version of this file](https://github.com/timezyme/meta-hackathon-paper-tours/blob/13ad3b0dc279f63c8790df3c404510ad8714da73/VERIFICATION.md).
+- The full record of every check is in [the earlier version of this file](https://github.com/timezyme/meta-hackathon-paper-tours/blob/a9191cb700b6eac2bbd04230365a2d738649a0d5/VERIFICATION.md).
