@@ -69,6 +69,7 @@ def deploy_settings():
         "AMUSEME_UPLOADS_PER_USER": os.environ.get("AMUSEME_UPLOADS_PER_USER", "3"),
         "AMUSEME_BUDGET_ID": os.environ.get("AMUSEME_BUDGET_ID", "amuseme-modal-judges-2026-11"),
         "AMUSEME_PROCESSING_BUDGET_USD": os.environ.get("AMUSEME_PROCESSING_BUDGET_USD", "30"),
+        "AMUSEME_DOCUMENT_BUDGET_USD": os.environ.get("AMUSEME_DOCUMENT_BUDGET_USD", "15"),
     }
 
 

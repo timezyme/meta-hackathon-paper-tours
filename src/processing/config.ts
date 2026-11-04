@@ -44,6 +44,10 @@ export const processingConfig = Effect.fnUntraced(function* (dataDirectory: stri
     Schema.Number.check(Schema.isGreaterThan(0), Schema.isLessThanOrEqualTo(maximumAuthorizedBudgetUsd)),
     "AMUSEME_PROCESSING_BUDGET_USD",
   ).pipe(Config.option)
+  const documentBudget = yield* Config.schema(
+    Schema.Number.check(Schema.isGreaterThan(0), Schema.isLessThanOrEqualTo(30)),
+    "AMUSEME_DOCUMENT_BUDGET_USD",
+  ).pipe(Config.withDefault(30))
   const budgetId = yield* Config.schema(Schema.String.check(Schema.isNonEmpty()), "AMUSEME_BUDGET_ID").pipe(Config.option)
   if (Option.isNone(meta) || Option.isNone(budget) || Option.isNone(budgetId)) return null
   const policy = yield* Schema.decodeUnknownEffect(GuardPolicy)({
@@ -81,7 +85,7 @@ export const processingConfig = Effect.fnUntraced(function* (dataDirectory: stri
     guide: model("guide"),
     maxProviderAttempts: 100,
     deadlineMilliseconds: 3_600_000,
-    spendingCapUsd: Math.min(30, budget.value),
+    spendingCapUsd: Math.min(documentBudget, budget.value),
   })
   const pipeline: PipelineOptions = {
     temporaryDirectory: path.join(dataDirectory, "processing"),

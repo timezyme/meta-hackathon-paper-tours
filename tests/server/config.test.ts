@@ -81,6 +81,10 @@ describe("server startup configuration", () => {
     expect(moreTypesAllowance.processing?.pipeline.policy.authorizedBudgetMicrousd).toBe(480_564_373)
     expect(moreTypesAllowance.processing?.configuration.spendingCapUsd).toBe(30)
     for (const allowance of ["0", "480.564374", "481", "-1", "NaN", "Infinity"]) expect((yield* config({ ...values, AMUSEME_PROCESSING_BUDGET_USD: allowance }).pipe(Effect.result))._tag).toBe("Failure")
+    const documentBudget = yield* config({ ...values, AMUSEME_PROCESSING_BUDGET_USD: "30", AMUSEME_DOCUMENT_BUDGET_USD: "15" })
+    expect(documentBudget.processing?.configuration.spendingCapUsd).toBe(15)
+    expect(documentBudget.admissionConfiguration._tag === "live" && documentBudget.admissionConfiguration.maxPages).toBe(23)
+    for (const cap of ["0", "30.000001", "-1", "NaN"]) expect((yield* config({ ...values, AMUSEME_DOCUMENT_BUDGET_USD: cap }).pipe(Effect.result))._tag).toBe("Failure")
   }))
 
   it.effect("rejects malformed, noncanonical, and nonlocal HTTP origins", () => Effect.gen(function* () {
