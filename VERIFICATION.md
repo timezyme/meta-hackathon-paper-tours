@@ -39,12 +39,17 @@ The same QA judge account then signed in and uploaded the same 4-page faer PDF a
 - the run went from upload, at 03:25:47Z, to `succeeded` in **7 min 14 s**, against 12 min 49 s before the speed fix. Extraction took about 2 minutes and page checking about 4;
 - the account's upload count went from 1 to 2 of 3.
 
-This run's cost was not read from the ledger, and the guide was not reviewed again.
+A copy of the judges' database, read on November 4, shows the run's 17 Meta calls all completed and settled. They reserved $5.70 at worst case and were charged **$0.43** at reported tokens. The judges' budget has now been charged $0.90 in all, for both test uploads, with nothing left reserved. The guide was not reviewed again.
 
 Because a short paper took 7 minutes, `16cfdbe` changes the duration note from "usually takes a few minutes" to "usually takes several minutes", in both the processing status and the upload area. It was deployed the same night as app `ap-40AfaAllnvgDi19NkcZ80Q`, replacing `ap-nVVkraRzZEC1pT4dyMdh00`, again without re-seeding:
 - `/health/ready`, the page, the 401 and the 403 checks gave the same results;
 - the logs showed no errors;
 - the served page script contains the new wording.
+
+On November 4, returning to the tab was checked on that deploy in the cmux browser (WebKit), as the second QA judge, on step 3 of the 3-2-1 POP! walkthrough:
+- switching to another tab and back re-checked the session, and the page stayed on step 3 without reloading;
+- after the session was ended, switching back went to sign-in with the step kept as the return address, and signing in again opened step 3;
+- the browser reported no errors.
 
 ## Submission syncs to application commits `38fd2f8` and `76f7d43` — November 3, 2026
 
