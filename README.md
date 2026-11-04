@@ -6,7 +6,7 @@ Turn a PDF into a reading guide you can check. Every explanation quotes the docu
 
 ## How it works
 
-Meta **Muse Spark 1.3** (`muse-spark-1.3`, Meta Model API) does every model step. It reads each page image, checks its own transcription and figure crops, restores headings, describes figures and writes the guide. Each step is a Mastra agent, and an answer that fails a check goes to a Muse reviewer agent for correction. A guide is published only if every quotation matches its cited passage exactly. No other model is used. The app is TypeScript (React, Mastra, Effect) and is hosted on Modal.
+Meta **Muse Spark 1.3** (`muse-spark-1.3`, Meta Model API) does every model step. It reads each page image, checks its own transcription and figure crops, restores headings, describes figures and writes the guide. Each step is a Mastra agent, and an answer that fails a check goes to a Muse reviewer agent for correction. A guide is published only if every quotation matches its cited passage exactly. No other model is used. The app is TypeScript (React, Mastra, Effect) and is hosted on Modal. `deploy/modal/` runs the judges' site there and loads the ten examples.
 
 ## Built during the hackathon
 
