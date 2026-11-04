@@ -13,32 +13,23 @@ export class ServerError extends Schema.TaggedError<ServerError>()("ServerError"
 
 export type ServerState = { phase: "starting" | "ready" | "draining" }
 
-const isStudioPage = (path: string): boolean => (path === "/admin" || path.startsWith("/admin/"))
-  && !["/admin/api", "/admin/assets", "/admin/refresh-events", "/admin/__refresh", "/admin/__hot-reload-status"]
-    .some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
+type InnerServer = Awaited<ReturnType<typeof createHonoServer>>
 
-const dispatchRequest = Effect.fnUntraced(function* (
-  request: Request,
-  inner: Awaited<ReturnType<typeof createHonoServer>>,
-  origin: string,
-  state: ServerState,
-) {
+const nonPagePaths = ["/api", "/auth", "/app/assets", "/health", "/admin/api", "/admin/assets", "/admin/refresh-events", "/admin/__refresh", "/admin/__hot-reload-status"]
+
+const servesPageShell = (request: Request, response: Response, origin: string): boolean => {
+  const url = new URL(request.url)
+  return [401, 403, 404].includes(response.status)
+    && url.origin === origin
+    && (request.method === "GET" || request.method === "HEAD")
+    && request.headers.get("accept")?.includes("text/html") === true
+    && !nonPagePaths.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))
+}
+
+const routeRequest = Effect.fnUntraced(function* (request: Request, inner: InnerServer, origin: string, state: ServerState) {
   const path = new URL(request.url).pathname
   const decision = yield* accessDecision(request, origin)
-  if (decision !== null) {
-    if ((decision.status === 401 || decision.status === 403)
-      && new URL(request.url).origin === origin
-      && (request.method === "GET" || request.method === "HEAD")
-      && request.headers.get("accept")?.includes("text/html")
-      && isStudioPage(path)) {
-      const shell = yield* Effect.tryPromise({
-        try: () => Promise.resolve(inner.fetch(new Request(`${origin}/`, { signal: request.signal }))),
-        catch: (cause) => new ServerError({ operation: "serve access page", cause }),
-      })
-      if (shell.status === 200) return new Response(request.method === "HEAD" ? null : shell.body, { status: decision.status, headers: shell.headers })
-    }
-    return decision
-  }
+  if (decision !== null) return decision
   if (request.method === "GET" && path === "/health") return Response.json({ status: "alive" })
   if (request.method === "GET" && path === "/health/ready") {
     return Response.json({ status: state.phase }, { status: state.phase === "ready" ? 200 : 503 })
@@ -56,6 +47,16 @@ const dispatchRequest = Effect.fnUntraced(function* (
     })
   }
   return failureResponse(404, "not-found", "Not found")
+})
+
+const dispatchRequest = Effect.fnUntraced(function* (request: Request, inner: InnerServer, origin: string, state: ServerState) {
+  const response = yield* routeRequest(request, inner, origin, state)
+  if (!servesPageShell(request, response, origin)) return response
+  const shell = yield* Effect.tryPromise({
+    try: () => Promise.resolve(inner.fetch(new Request(`${origin}/`, { signal: request.signal }))),
+    catch: (cause) => new ServerError({ operation: "serve page shell", cause }),
+  })
+  return shell.status === 200 ? new Response(request.method === "HEAD" ? null : shell.body, { status: response.status, headers: shell.headers }) : response
 }, (effect) => effect.pipe(
   Effect.catchTag("AuthError", () => Effect.succeed(failureResponse(503, "processing-unavailable", "Sign-in service unavailable"))),
   Effect.catchTag("SchemaError", (error) => Effect.logError("Invalid session response", error).pipe(Effect.as(failureResponse(500, "internal-error", "Request failed")))),

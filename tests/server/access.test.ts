@@ -139,11 +139,14 @@ describe("guarded Mastra HTTP surface", () => {
     expect((yield* request("/admin/__refresh", { method: "POST", headers: { cookie: "session=admin", origin } })).status).toBe(200)
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)))
 
-  it.effect("serves the public product shell for denied Studio navigations while preserving HTTP status and API JSON", () => Effect.gen(function* () {
+  it.effect("serves the public product shell for denied and unknown page navigations while preserving HTTP status and API JSON", () => Effect.gen(function* () {
     const { request } = yield* makeFixture
+    const missing = yield* request("/does-not-exist", { headers: { cookie: "session=admin", accept: "text/html" } })
+    expect(missing.status).toBe(404)
+    expect(yield* Effect.promise(() => missing.text())).toContain("<title>AmuseMe</title>")
     for (const role of ["anonymous", "user"] as const) {
       const headers = { cookie: `session=${role}`, accept: "text/html" }
-      for (const path of ["/admin", "/admin/", "/admin/agents"]) {
+      for (const path of ["/admin", "/admin/", "/admin/agents", "/nope", "/library"]) {
         const response = yield* request(path, { headers })
         expect(response.status).toBe(role === "anonymous" ? 401 : 403)
         expect(response.headers.get("content-type")).toBe("text/html; charset=utf-8")
@@ -152,7 +155,7 @@ describe("guarded Mastra HTTP surface", () => {
       const head = yield* request("/admin/", { method: "HEAD", headers })
       expect(head.status).toBe(role === "anonymous" ? 401 : 403)
       expect(yield* Effect.promise(() => head.text())).toBe("")
-      for (const path of ["/admin/api/agents", "/admin/assets/index.js", "/admin/refresh-events", "/admin/__hot-reload-status"]) {
+      for (const path of ["/admin/api/agents", "/admin/assets/index.js", "/admin/refresh-events", "/admin/__hot-reload-status", "/api/agents"]) {
         const response = yield* request(path, { headers })
         expect(response.status).toBe(role === "anonymous" ? 401 : 403)
         expect(response.headers.get("content-type")).toContain("application/json")
